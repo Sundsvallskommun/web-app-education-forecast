@@ -192,7 +192,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
                             <Link
                               title={`${t?.givenname} ${t?.lastname}`}
                               href={`mailto:${t?.email}`}
-                            >{`${t?.email} (${abbreviation})`}</Link>
+                            >{t?.email}</Link>
                           ) : (
                             `${t?.givenname} ${t?.lastname} (${abbreviation})`
                           )}
