@@ -61,3 +61,24 @@ export type MyMentorClassPupil = {
   totalSubjects: number;
   teachers?: ForecastMyGroupTeacher[] | null;
 };
+
+export type GridForecast = {
+  groupId: string;
+  courseName: string;
+  courseId: string;
+  forecast: number;
+  previousForecast: number;
+  schoolYear: number;
+  forecastPeriod: string;
+  forecastTeacher: string;
+};
+
+export type MyMentorClassPupilGrid = {
+  pupil: string;
+  givenname?: string | null;
+  lastname?: string | null;
+  className?: string | null;
+  presence?: number | null;
+  typeOfSchool?: string | null;
+  forecasts: GridForecast[];
+};

@@ -1,6 +1,7 @@
 import {
   CopyPreviousForecastDto,
   MentorClassPupil,
+  MentorClassPupilGrid,
   MyGroup,
   Pupil,
   SetForecastDto,
@@ -101,6 +102,18 @@ export const handleGetMentorClassPupil: (res: ApiResponse<MentorClassPupil>) => 
   totalSubjects: res.data.totalSubjects,
 });
 
+export const handleGetMentorClassPupilGrid: (res: ApiResponse<MentorClassPupilGrid>) => MentorClassPupilGrid = (
+  res
+) => ({
+  pupil: res.data.pupil,
+  givenname: res.data.givenname,
+  lastname: res.data.lastname,
+  className: res.data.className,
+  presence: res.data.presence,
+  typeOfSchool: res.data.typeOfSchool,
+  forecasts: res.data.forecasts,
+});
+
 export const handleGetMentorClass: (res: ApiResponse<MentorClassPupil[]>) => MentorClassPupil[] = (res) => {
   return res.data.map((data) => ({
     pupil: data.pupil,
@@ -116,6 +129,18 @@ export const handleGetMentorClass: (res: ApiResponse<MentorClassPupil[]>) => Men
     className: data.className,
     totalSubjects: data.totalSubjects,
     teachers: data.teachers,
+  }));
+};
+
+export const handleGetMentorClassGrid: (res: ApiResponse<MentorClassPupilGrid[]>) => MentorClassPupilGrid[] = (res) => {
+  return res.data.map((data) => ({
+    pupil: data.pupil,
+    givenname: data.givenname,
+    lastname: data.lastname,
+    className: data.className,
+    presence: data.presence,
+    typeOfSchool: data.typeOfSchool,
+    forecasts: data.forecasts,
   }));
 };
 

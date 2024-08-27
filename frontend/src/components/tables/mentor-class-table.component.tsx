@@ -10,34 +10,49 @@ import { searchFilter } from '@utils/search';
 export const MentorClassTable = (user: User, searchQuery?: string) => {
   const [pageSize] = useState<number>(10);
   const mentorClass = useForecastStore((s) => s.mentorClass);
+  const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
-  const { headmaster } = hasRolePermission(user);
+  const { headmaster, mentor } = hasRolePermission(user);
   const [mentorClassData, setMentorClassData] = useState([]);
 
   useEffect(() => {
     const tableArr = [];
-    if (mentorClass.length !== 0) {
-      mentorClass.map((p) => {
-        const numberNotFilledIn = p.totalSubjects - p.approved - p.warnings - p.unapproved;
-        tableArr.push({
-          id: p.pupil,
-          pupil: `${p.givenname} ${p.lastname}`,
-          className: p.className,
-          presence: p.presence,
-          approved: p.approved,
-          warnings: p.warnings,
-          unapproved: p.unapproved,
-          schoolYear: p.schoolYear,
-          notFilledIn: numberNotFilledIn,
-          totalSubjects: p.totalSubjects,
-          image: p.image,
+    if (mentor) {
+      if (mentorClassGrid.length !== 0) {
+        mentorClassGrid.map((p) => {
+          //const numberNotFilledIn = p.forecasts.length - p.approved - p.warnings - p.unapproved;
+          tableArr.push({
+            id: p.pupil,
+            pupil: `${p.givenname} ${p.lastname}`,
+            className: p.className,
+            presence: p.presence,
+          });
         });
-      });
+      }
+    } else {
+      if (mentorClass.length !== 0) {
+        mentorClass.map((p) => {
+          const numberNotFilledIn = p.totalSubjects - p.approved - p.warnings - p.unapproved;
+          tableArr.push({
+            id: p.pupil,
+            pupil: `${p.givenname} ${p.lastname}`,
+            className: p.className,
+            presence: p.presence,
+            approved: p.approved,
+            warnings: p.warnings,
+            unapproved: p.unapproved,
+            schoolYear: p.schoolYear,
+            notFilledIn: numberNotFilledIn,
+            totalSubjects: p.totalSubjects,
+            image: p.image,
+          });
+        });
+      }
     }
 
     setMentorClassData(tableArr);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mentorClass]);
+  }, [mentorClass, mentorClassGrid]);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
   const [sortColumn, setSortColumn] = useState<string>('pupil');
@@ -62,7 +77,11 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
   ];
 
-  const mentorClassHeaders = mentorclassHeaderLabels.map((h, idx) => {
+  const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }];
+
+  const classHeaderLabels = mentor ? mentorclassGridHeaderLabels : mentorclassHeaderLabels;
+
+  const mentorClassHeaders = classHeaderLabels.map((h, idx) => {
     return (
       <Table.HeaderColumn key={`headercol-${idx}`} aria-sort={sortColumn === h.property ? sortOrder : 'none'}>
         <Table.SortButton
@@ -96,7 +115,25 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
-      return (
+      return mentor ? (
+        <Table.Row
+          key={`row-${idx}`}
+          className={`${
+            p.forecast === 1 && 'border-b-1 border-gray-300 bg-success-background-200 hover:bg-success-background-100'
+          } ${
+            p.forecast === 2 && 'border-b-1 border-gray-300 bg-warning-background-200 hover:bg-warning-background-100'
+          } ${p.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
+        >
+          <Table.HeaderColumn scope="row">
+            <div className="flex flex-col py-16 gap-6">
+              <span>
+                <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
+              </span>
+              <span>Närvaro: {p.presence}</span>
+            </div>
+          </Table.HeaderColumn>
+        </Table.Row>
+      ) : (
         <Table.Row
           key={`row-${idx}`}
           className={`${
@@ -259,6 +296,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     mentorclassTable,
     mentorClassData,
     mentorClass,
+    mentorClassGrid,
     mentorClassIsLoading,
     mentorClassListRendered,
   };

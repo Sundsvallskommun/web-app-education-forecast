@@ -193,6 +193,8 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     }
   }, []);
 
+  console.log(mentorClassData);
+
   return numberOfNotFilledIn !== 0 ? (
     <div className="flex gap-10">
       {!isLoading ? (
