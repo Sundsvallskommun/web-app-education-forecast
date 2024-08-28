@@ -20,13 +20,23 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     if (mentor) {
       if (mentorClassGrid.length !== 0) {
         mentorClassGrid.map((p) => {
-          //const numberNotFilledIn = p.forecasts.length - p.approved - p.warnings - p.unapproved;
-          tableArr.push({
+          const numberNotFilledIn = p.forecasts.filter((x) => x.forecast === null).length;
+          const object = {
             id: p.pupil,
             pupil: `${p.givenname} ${p.lastname}`,
             className: p.className,
             presence: p.presence,
+            notFilledIn: numberNotFilledIn,
+          };
+
+          p.forecasts.map((f) => {
+            const forecastObj = {
+              [f.courseId]: f.forecast,
+            };
+            Object.assign(object, forecastObj);
           });
+
+          tableArr.push(object);
         });
       }
     } else {
@@ -53,6 +63,8 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     setMentorClassData(tableArr);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mentorClass, mentorClassGrid]);
+
+  console.log(mentorClassData);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
   const [sortColumn, setSortColumn] = useState<string>('pupil');
@@ -291,6 +303,8 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
       {footer}
     </Table>
   );
+
+  console.log(mentorClassData);
 
   return {
     mentorclassTable,
