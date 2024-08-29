@@ -1,6 +1,6 @@
 import { User } from '@interfaces/user';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { Avatar, Badge, Link, SortMode, Table, Select, Pagination, Input } from '@sk-web-gui/react';
+import { Avatar, Badge, Link, SortMode, Table, Select, Pagination, Input, Icon } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
@@ -8,18 +8,32 @@ import { Pupil } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 
 export const MentorClassTable = (user: User, searchQuery?: string) => {
-  const [pageSize] = useState<number>(10);
+  const { headmaster, mentor } = hasRolePermission(user);
+  const [pageSize] = useState<number>(mentor ? 8 : 10);
   const mentorClass = useForecastStore((s) => s.mentorClass);
   const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
-  const { headmaster, mentor } = hasRolePermission(user);
   const [mentorClassData, setMentorClassData] = useState([]);
+  const [subjectHeaders, setSubjectHeaders] = useState([]);
 
   useEffect(() => {
     const tableArr = [];
+    const subjectArr = [];
     if (mentor) {
       if (mentorClassGrid.length !== 0) {
         mentorClassGrid.map((p) => {
+          const allSubjects = p.forecasts.reduce((accumulator, current) => {
+            if (!accumulator.find((item) => item.courseId === current.courseId)) {
+              accumulator.push(current);
+            }
+            return accumulator;
+          }, []);
+
+          allSubjects.forEach((s) => {
+            if (!subjectArr.find((x) => x.label === s.courseId))
+              subjectArr.push({ label: s.courseId, property: s.courseId, isColumnSortable: true });
+          });
+
           const numberNotFilledIn = p.forecasts.filter((x) => x.forecast === null).length;
           const object = {
             id: p.pupil,
@@ -60,11 +74,12 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
       }
     }
 
+    setSubjectHeaders(subjectArr);
     setMentorClassData(tableArr);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mentorClass, mentorClassGrid]);
 
-  console.log(mentorClassData);
+  console.log(subjectHeaders);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
   const [sortColumn, setSortColumn] = useState<string>('pupil');
@@ -89,21 +104,29 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
   ];
 
-  const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }];
+  const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }, ...subjectHeaders];
 
   const classHeaderLabels = mentor ? mentorclassGridHeaderLabels : mentorclassHeaderLabels;
 
+  console.log('headers', classHeaderLabels);
+
   const mentorClassHeaders = classHeaderLabels.map((h, idx) => {
     return (
-      <Table.HeaderColumn key={`headercol-${idx}`} aria-sort={sortColumn === h.property ? sortOrder : 'none'}>
-        <Table.SortButton
-          isActive={sortColumn === h.property}
-          aria-description={sortColumn === h.property ? undefined : 'sortera'}
-          sortOrder={sortOrder}
-          onClick={() => handleSort(h.property)}
-        >
-          {h.label}
-        </Table.SortButton>
+      <Table.HeaderColumn
+        className={`${mentor && 'border-r-1 !border-gray-200 !pr-0 py-0 pl-8'}`}
+        key={`headercol-${idx}`}
+        aria-sort={sortColumn === h.property ? sortOrder : 'none'}
+      >
+        <div className={`${idx === 0 && mentor && 'min-w-[174px]'}`}>
+          <Table.SortButton
+            isActive={sortColumn === h.property}
+            aria-description={sortColumn === h.property ? undefined : 'sortera'}
+            sortOrder={sortOrder}
+            onClick={() => handleSort(h.property)}
+          >
+            {h.label}
+          </Table.SortButton>
+        </div>
       </Table.HeaderColumn>
     );
   });
@@ -119,6 +142,21 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorClassListSearchFiltered = mentorClassData.filter(searchFilter(searchQuery, mentorclassSearchFilter));
 
   const mentorClassListRendered = mentorClassListSearchFiltered;
+
+  const iconType = (prop) => {
+    let type;
+    prop === 1 && type === 'check';
+    prop === 2 && type === 'list-minus';
+    prop === 2 && type === 'cross';
+
+    return type;
+  };
+
+  console.log(
+    subjectHeaders.map((s) => {
+      return s.label in mentorClassListRendered[0];
+    })
+  );
 
   const mentorclassRows = mentorClassListRendered
     .sort((a, b) => {
@@ -136,14 +174,31 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
             p.forecast === 2 && 'border-b-1 border-gray-300 bg-warning-background-200 hover:bg-warning-background-100'
           } ${p.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
         >
-          <Table.HeaderColumn scope="row">
-            <div className="flex flex-col py-16 gap-6">
+          <Table.HeaderColumn scope="row" className={`border-r-1`}>
+            <div className="flex flex-col py-16 gap-6 min-w-[178px]">
               <span>
                 <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
               </span>
               <span>Närvaro: {p.presence}</span>
             </div>
           </Table.HeaderColumn>
+          {subjectHeaders.map((s, index) => {
+            return (
+              <Table.Column key={index} className="border-r-1">
+                <div className="w-full flex justify-center items-center">
+                  {s.label in p ? (
+                    p[s.label] !== null ? (
+                      <Icon.Padded rounded name={iconType(p[s.label])} />
+                    ) : (
+                      <Icon size={14} name="minus" />
+                    )
+                  ) : (
+                    ''
+                  )}
+                </div>
+              </Table.Column>
+            );
+          })}
         </Table.Row>
       ) : (
         <Table.Row
@@ -247,7 +302,9 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     });
 
   const footer = (
-    <Table.Footer className={mentorclassRows.length > 10 && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}>
+    <Table.Footer
+      className={mentorclassRows.length > pageSize && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}
+    >
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
           Rader per sida:
@@ -294,7 +351,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     <Table
       dense={rowHeight === 'dense'}
       background={true}
-      className={`${mentorclassRows.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-28'}`}
+      className={`${mentorclassRows.length > pageSize && 'h-[689px] rounded-b-0 border-b-0 mb-28'}`}
     >
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
         {mentorClassHeaders}
@@ -304,7 +361,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     </Table>
   );
 
-  console.log(mentorClassData);
+  console.log(mentorClassGrid);
 
   return {
     mentorclassTable,
