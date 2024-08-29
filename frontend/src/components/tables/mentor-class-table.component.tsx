@@ -144,12 +144,23 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorClassListRendered = mentorClassListSearchFiltered;
 
   const iconType = (prop) => {
-    let type;
-    prop === 1 && type === 'check';
-    prop === 2 && type === 'list-minus';
-    prop === 2 && type === 'cross';
+    if (prop === 1) {
+      return 'check';
+    } else if (prop === 2) {
+      return 'minus';
+    } else if (prop === 3) {
+      return 'x';
+    }
+  };
 
-    return type;
+  const iconColor = (prop) => {
+    if (prop === 1) {
+      return 'gronsta';
+    } else if (prop === 2) {
+      return 'warning';
+    } else if (prop === 3) {
+      return 'error';
+    }
   };
 
   console.log(
@@ -175,7 +186,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           } ${p.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
         >
           <Table.HeaderColumn scope="row" className={`border-r-1`}>
-            <div className="flex flex-col py-16 gap-6 min-w-[178px]">
+            <div className="flex flex-col py-16 gap-6 min-w-[177px]">
               <span>
                 <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
               </span>
@@ -188,7 +199,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                 <div className="w-full flex justify-center items-center">
                   {s.label in p ? (
                     p[s.label] !== null ? (
-                      <Icon.Padded rounded name={iconType(p[s.label])} />
+                      <Icon.Padded inverted color={iconColor(p[s.label])} rounded name={iconType(p[s.label])} />
                     ) : (
                       <Icon size={14} name="minus" />
                     )
