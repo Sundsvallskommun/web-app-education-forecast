@@ -106,6 +106,7 @@ export interface CopyPreviousForecastDto {
   period: string;
   previusPeriod: string;
   schoolYear: number;
+  previousSchoolYear: number;
 }
 
 export interface clearGroupForecastsDto {

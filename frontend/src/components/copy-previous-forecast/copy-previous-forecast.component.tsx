@@ -63,7 +63,8 @@ export const CopyPreviousForecast: React.FC = () => {
       groupId: selectedId,
       period: selectedPeriod,
       previusPeriod: previousPeriod,
-      schoolYear: previousSchoolYear,
+      schoolYear: selectedSchoolYear,
+      previousSchoolYear: previousSchoolYear,
     }).then((res) => {
       if (!res.error) {
         message({

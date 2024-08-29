@@ -23,7 +23,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
   const [focusedForecast, setFocusedForecast] = useState(false);
   const message = useSnackbar();
 
-  const onSetForecastHandler = (e) => {
+  const onSetForecastHandler = async (e) => {
     const forecast = e.target.value;
     sessionStorage.setItem('scrollposition', `${document.querySelectorAll('.sk-table-wrapper-inside')[0].scrollTop}`);
     const setForecastBody: SetForecastDto = {
@@ -35,7 +35,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
     };
 
     if (pupil.pupilId && forecast) {
-      setForecast(setForecastBody).then((res) => {
+      await setForecast(setForecastBody).then((res) => {
         if (res.data) {
           message({
             message: `Prognosen sparades`,
