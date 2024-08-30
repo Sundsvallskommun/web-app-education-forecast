@@ -157,4 +157,5 @@ export const handleCopyForecast: (res: CopyPreviousForecastDto) => CopyPreviousF
   period: res.period,
   previusPeriod: res.previusPeriod,
   schoolYear: res.schoolYear,
+  previusSchoolYear: res.previusSchoolYear,
 });

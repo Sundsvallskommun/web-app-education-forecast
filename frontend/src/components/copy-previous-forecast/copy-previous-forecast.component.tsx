@@ -59,13 +59,14 @@ export const CopyPreviousForecast: React.FC = () => {
   };
 
   const onCopyHandler = async () => {
-    await copyPreviousForecast({
+    const body = {
       groupId: selectedId,
       period: selectedPeriod,
       previusPeriod: previousPeriod,
       schoolYear: selectedSchoolYear,
-      previousSchoolYear: previousSchoolYear,
-    }).then((res) => {
+      previusSchoolYear: previousSchoolYear,
+    };
+    await copyPreviousForecast(body).then((res) => {
       if (!res.error) {
         message({
           message: `Prognosen sparades`,

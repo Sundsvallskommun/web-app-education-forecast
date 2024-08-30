@@ -564,7 +564,7 @@ export const useForecastStore = createWithEqualityFn<
               schoolYear: get().selectedSchoolYear,
             });
           }
-          return { data: res.data };
+          return { data: res.data, message: res.message };
         },
         clearGroupForecasts: async (forecast: clearGroupForecastsDto) => {
           const res = await clearGroupForecasts(forecast.groupId, forecast.period, forecast.schoolYear);

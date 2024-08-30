@@ -50,8 +50,6 @@ export const Index: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query, router.isReady]);
 
-  console.log(mentorClass);
-
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - Klass ${mentorClass[0]?.className}`}>
       <Main>

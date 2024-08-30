@@ -79,8 +79,6 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mentorClass, mentorClassGrid]);
 
-  console.log(subjectHeaders);
-
   const [_pageSize, setPageSize] = useState<number>(pageSize);
   const [sortColumn, setSortColumn] = useState<string>('pupil');
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
@@ -107,8 +105,6 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }, ...subjectHeaders];
 
   const classHeaderLabels = mentor ? mentorclassGridHeaderLabels : mentorclassHeaderLabels;
-
-  console.log('headers', classHeaderLabels);
 
   const mentorClassHeaders = classHeaderLabels.map((h, idx) => {
     return (
@@ -162,12 +158,6 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
       return 'error';
     }
   };
-
-  console.log(
-    subjectHeaders.map((s) => {
-      return s.label in mentorClassListRendered[0];
-    })
-  );
 
   const mentorclassRows = mentorClassListRendered
     .sort((a, b) => {
@@ -371,8 +361,6 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
       {footer}
     </Table>
   );
-
-  console.log(mentorClassGrid);
 
   return {
     mentorclassTable,
