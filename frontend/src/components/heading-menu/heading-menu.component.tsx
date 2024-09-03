@@ -46,6 +46,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   const subject = useForecastStore((s) => s.groupWithPupils);
   const subjectIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
   const singlePupilIsLoading = useForecastStore((s) => s.singlePupilIsLoading);
+  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const previousGroup = useForecastStore((s) => s.previousPeriodGroup);
   const placeHolder = searchPlaceholder ? searchPlaceholder : 'Sök i listan...';
 
@@ -69,7 +70,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
       <div className="flex flex-wrap max-medium-device-max:gap-24 w-full justify-between items-center mb-20">
         <div className="large-device-min:w-[33%]">
           <h1 className={GeneralInformation ? 'mb-xs' : 'mb-0'}>{pageTitle}</h1>
-          {GeneralInformation}
+          <>{GeneralInformation}</>
         </div>
         <div className="large-device-min:w-[33%]">
           <PeriodPicker callback={callback} />
@@ -136,7 +137,11 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
       <Divider />
 
       <div className="flex flex-wrap justify-between items-center mt-20 gap-24">
-        <GeneralForecastInfo callback={callback} />
+        {selectedPeriod.includes('Juni') || selectedPeriod.includes('Juli') || selectedPeriod.includes('Augusti') ? (
+          <span className="bold text-error"> Inga prognoser att fylla i under sommaren</span>
+        ) : (
+          <GeneralForecastInfo callback={callback} />
+        )}
         {SUBJECT && teacher ? (
           <>
             {subject.find((x) => x.forecast !== null) ? (

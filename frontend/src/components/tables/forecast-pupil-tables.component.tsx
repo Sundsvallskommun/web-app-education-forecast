@@ -469,7 +469,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
     <Table
       dense={rowHeight === 'dense'}
       background={true}
-      className={`${rowdata.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-28'}`}
+      className={`${rowdata.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-48'}`}
     >
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
         {isSinglePupil ? pupilHeaders : groupHeaders}

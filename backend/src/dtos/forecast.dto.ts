@@ -29,4 +29,7 @@ export class copyPreviousForecastDto {
   @IsNumber()
   /** @format int32 */
   schoolYear: number;
+  @IsNumber()
+  /** @format int32 */
+  previusSchoolYear: number;
 }

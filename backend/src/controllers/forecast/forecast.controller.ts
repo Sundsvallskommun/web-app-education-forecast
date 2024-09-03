@@ -6,8 +6,14 @@ import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import ApiResponse from '@/interfaces/api-service.interface';
 import { API_URL, API_PREFIX } from './config';
-import { MyGroupsApiResponse, PupilsApiResponse, PupilApiResponse, MyMentorClassPupilsApiResponse } from '@/responses/forecast.response';
-import { ForecastMyGroup, MyMentorClassPupil, Pupil } from '@/interfaces/forecast.interface';
+import {
+  MyGroupsApiResponse,
+  PupilsApiResponse,
+  PupilApiResponse,
+  MyMentorClassPupilsApiResponse,
+  MentorClassPupilGridApiResponse,
+} from '@/responses/forecast.response';
+import { ForecastMyGroup, MyMentorClassPupil, MyMentorClassPupilGrid, Pupil } from '@/interfaces/forecast.interface';
 import { copyPreviousForecastDto, setForecastDto } from '@/dtos/forecast.dto';
 
 @Controller()
@@ -104,6 +110,25 @@ export class ForecastController {
     const { personId } = req.user;
     const url = `${API_URL}/forecast/class/${groupId}`;
     return await this.apiService.get<MyMentorClassPupil[]>({
+      url,
+      params: { teacherId: personId, period: period, schoolYear: schoolYear },
+    });
+  }
+
+  @Get(`${API_PREFIX}/mentorclass/:groupId/grid`)
+  @OpenAPI({ summary: 'Returns all pupils by group' })
+  @UseBefore(authMiddleware)
+  @ResponseSchema(MentorClassPupilGridApiResponse)
+  async getMyMentorClassGrid(
+    @Param('groupId') groupId: string,
+    @QueryParam('period') period: string,
+    @QueryParam('schoolYear') schoolYear: number,
+    @Req() req: RequestWithUser,
+  ): Promise<ApiResponse<MyMentorClassPupilGrid[]>> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { personId } = req.user;
+    const url = `${API_URL}/forecast/class/${groupId}/grid`;
+    return await this.apiService.get<MyMentorClassPupilGrid[]>({
       url,
       params: { teacherId: personId, period: period, schoolYear: schoolYear },
     });
