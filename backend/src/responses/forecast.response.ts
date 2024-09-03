@@ -1,5 +1,12 @@
 import { IsNumber, IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
-import { ForecastMyGroupTeacher, ForecastMyGroup, Pupil as _Pupil, MyMentorClassPupil as _MyMentorClassPupil } from '@/interfaces/forecast.interface';
+import {
+  ForecastMyGroupTeacher,
+  ForecastMyGroup,
+  Pupil as _Pupil,
+  MyMentorClassPupil as _MyMentorClassPupil,
+  MyMentorClassPupilGrid,
+  GridForecast,
+} from '@/interfaces/forecast.interface';
 import { IsNullable } from '@/utils/custom-validation-classes';
 import ApiResponse from '@/interfaces/api-service.interface';
 import { Type } from 'class-transformer';
@@ -216,6 +223,45 @@ export class MyMentorClassPupilsApiResponse implements ApiResponse<MyMentorClass
   @ValidateNested({ each: true })
   @Type(() => MyMentorClassPupil)
   data: MyMentorClassPupil[];
+  @IsString()
+  message: string;
+}
+
+export class MentorClassPupilGrid implements MyMentorClassPupilGrid {
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  pupil: string;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  givenname?: string | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  lastname?: string | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  className?: string | null;
+  @IsNumber()
+  @IsOptional()
+  @IsNullable()
+  presence?: number | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  typeOfSchool?: string | null;
+  @IsArray()
+  @IsOptional()
+  @IsNullable()
+  forecasts: GridForecast[];
+}
+
+export class MentorClassPupilGridApiResponse implements ApiResponse<MentorClassPupilGrid[]> {
+  @ValidateNested({ each: true })
+  @Type(() => MentorClassPupilGrid)
+  data: MentorClassPupilGrid[];
   @IsString()
   message: string;
 }

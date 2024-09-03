@@ -13,15 +13,21 @@ export const ClassWithPupils: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
   const { mentor } = hasRolePermission(user);
-  const { mentorclassTable, mentorClass, mentorClassIsLoading, mentorClassListRendered, mentorClassData } =
-    MentorClassTable(user, searchQuery);
+  const {
+    mentorclassTable,
+    mentorClass,
+    mentorClassGrid,
+    mentorClassIsLoading,
+    mentorClassListRendered,
+    mentorClassData,
+  } = MentorClassTable(user, searchQuery);
 
-  const fullTitle = !mentorClassIsLoading ? `Klass ${mentorClass[0]?.className}` : 'Klass';
+  const fullTitle = !mentorClassIsLoading ? `Klass ${mentorClassGrid[0]?.className}` : 'Klass';
 
   const generalInformation =
-    mentorClass.length !== 0 ? (
+    mentorClass.length !== 0 || (mentor && mentorClassGrid.length !== 0) ? (
       <span>
-        <strong>{mentorClass.length}</strong> elever
+        <strong>{mentor ? mentorClassGrid.length : mentorClass.length}</strong> elever
       </span>
     ) : (
       <Spinner size={2} />
@@ -32,7 +38,7 @@ export const ClassWithPupils: React.FC = () => {
         pageTitle={fullTitle}
         GeneralInformation={generalInformation}
         teachers={
-          mentor && mentorClass[0]?.teachers.find((x) => x.personId === user.personId)
+          mentor
             ? [
                 {
                   givenname: user.name.split(' ')[0],

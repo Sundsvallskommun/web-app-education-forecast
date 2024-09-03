@@ -12,10 +12,10 @@ import { useUserStore } from '@services/user-service/user-service';
 export const Index: React.FC = () => {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
-  const { GR } = hasRolePermission(user);
+  const { GR, mentor } = hasRolePermission(user);
   const routerclassId = router.query['groupId'];
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;
-  const mentorClass = useForecastStore((s) => s.mentorClass);
+  const mentorClass = useForecastStore((s) => (mentor ? s.mentorClassGrid : s.mentorClass));
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
@@ -31,7 +31,7 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (classId) {
         if (router.pathname.includes(classId)) return;
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'mentorclass', classId);
+        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'mentorclass', classId, user);
       } else {
         if (!classId) {
           router.push('/mina-amnen-grupper');

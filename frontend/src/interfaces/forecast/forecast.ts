@@ -66,6 +66,27 @@ export interface MentorClassPupil {
   image?: string | null;
 }
 
+export type GridForecast = {
+  groupId: string;
+  courseName: string;
+  courseId: string;
+  forecast: number;
+  previousForecast: number;
+  schoolYear: number;
+  forecastPeriod: string;
+  forecastTeacher: string;
+};
+
+export type MentorClassPupilGrid = {
+  pupil: string;
+  givenname?: string | null;
+  lastname?: string | null;
+  className?: string | null;
+  presence?: number | null;
+  typeOfSchool?: string | null;
+  forecasts: GridForecast[];
+};
+
 export interface Riffle {
   id: string;
   link: string;
@@ -85,6 +106,7 @@ export interface CopyPreviousForecastDto {
   period: string;
   previusPeriod: string;
   schoolYear: number;
+  previusSchoolYear: number;
 }
 
 export interface clearGroupForecastsDto {
