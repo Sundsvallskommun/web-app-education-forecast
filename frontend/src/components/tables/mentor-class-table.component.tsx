@@ -9,7 +9,7 @@ import { searchFilter } from '@utils/search';
 
 export const MentorClassTable = (user: User, searchQuery?: string) => {
   const { headmaster, mentor } = hasRolePermission(user);
-  const [pageSize] = useState<number>(mentor ? 8 : 10);
+  const [pageSize] = useState<number>(mentor || headmaster ? 8 : 10);
   const mentorClass = useForecastStore((s) => s.mentorClass);
   const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
