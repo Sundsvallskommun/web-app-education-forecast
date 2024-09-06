@@ -465,7 +465,7 @@ export const useForecastStore = createWithEqualityFn<
 
           let res;
           let data;
-          if (user && hasRolePermission(user).mentor) {
+          if ((user && hasRolePermission(user).mentor) || (user && hasRolePermission(user).headmaster)) {
             const res = await getMentorClassGrid(groupId, fPeriod, fSchoolYear, signal);
             data = (res.data && res.data) || initialState.mentorClass;
             await set(() => ({

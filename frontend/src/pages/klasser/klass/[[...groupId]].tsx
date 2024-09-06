@@ -16,7 +16,7 @@ export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const { GR } = hasRolePermission(user);
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;
-  const mentorClass = useForecastStore((s) => s.mentorClass);
+  const mentorClass = useForecastStore((s) => s.mentorClassGrid);
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
@@ -37,7 +37,7 @@ export const Index: React.FC = () => {
       if (classId) {
         if (router.pathname.includes(classId)) return;
         await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'classes');
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'mentorclass', classId);
+        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'mentorclass', classId, user);
       } else {
         if (!classId) {
           router.push('/klasser');
@@ -70,9 +70,15 @@ export const Index: React.FC = () => {
     setRiffleClasses(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
   }, [classes]);
 
+  console.log(mentorClass);
+
   const breadcrumbLinks = [
     { link: '/klasser', title: 'Klasser', currentPage: false },
-    { link: '', title: mentorClass[0]?.className, currentPage: true },
+    {
+      link: '',
+      title: `${mentorClass[0]?.className ? `Klass ${mentorClass[0]?.className}` : '...'}`,
+      currentPage: true,
+    },
   ];
 
   return (
