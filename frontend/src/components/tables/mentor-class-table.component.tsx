@@ -19,7 +19,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   useEffect(() => {
     const tableArr = [];
     const subjectArr = [];
-    if (mentor) {
+    if (mentor || headmaster) {
       if (mentorClassGrid.length !== 0) {
         mentorClassGrid.map((p) => {
           const allSubjects = p.forecasts.reduce((accumulator, current) => {
@@ -104,7 +104,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
 
   const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }, ...subjectHeaders];
 
-  const classHeaderLabels = mentor ? mentorclassGridHeaderLabels : mentorclassHeaderLabels;
+  const classHeaderLabels = mentor || headmaster ? mentorclassGridHeaderLabels : mentorclassHeaderLabels;
 
   const mentorClassHeaders = classHeaderLabels.map((h, idx) => {
     return (
@@ -166,7 +166,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
-      return mentor ? (
+      return mentor || headmaster ? (
         <Table.Row
           key={`row-${idx}`}
           className={`${
@@ -178,9 +178,13 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           <Table.HeaderColumn scope="row" className={`border-r-1`}>
             <div className="flex flex-col py-16 gap-6 min-w-[177px]">
               <span>
-                <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
+                {headmaster ? (
+                  <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
+                ) : (
+                  <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
+                )}
               </span>
-              <span>Närvaro: {p.presence}</span>
+              <span>Närvaro: {p.presence}%</span>
             </div>
           </Table.HeaderColumn>
           {subjectHeaders.map((s, index) => {
