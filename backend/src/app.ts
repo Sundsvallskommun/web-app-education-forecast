@@ -269,10 +269,14 @@ class App {
         successRedirect = req.body.RelayState;
       }
 
-      if (req.session.messages?.length > 0) {
-        failureRedirect = successRedirect + `?failMessage=${req.session.messages[0]}`;
+      if (!req.body.unitId || req.body.unitId === undefined) {
+        failureRedirect = successRedirect + `?failMessage=Permission not granted. User is not authorized as teacher, is missing unitId`;
       } else {
-        failureRedirect = successRedirect + `?failMessage='SAML_UNKNOWN_ERROR'`;
+        if (req.session.messages?.length > 0) {
+          failureRedirect = successRedirect + `?failMessage=${req.session.messages[0]}`;
+        } else {
+          failureRedirect = successRedirect + `?failMessage='SAML_UNKNOWN_ERROR'`;
+        }
       }
 
       passport.authenticate('saml', {
