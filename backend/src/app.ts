@@ -105,15 +105,20 @@ const samlStrategy = new Strategy(
         url: 'education/1.0/forecast/userroles',
         params: { teacherId: personId },
       });
-      unitid = userRole.data[0].unitId;
-      const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
-      unitName = employeeSchool.data.unitCode;
 
       if (!userRole) {
         return done({
           name: 'user roles failed',
           message: 'Failed to fetch user roles from education API',
         });
+      }
+
+      if (Array.isArray(userRole.data) && userRole.data.length > 0) {
+        unitid = userRole.data[0].unitId;
+        const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
+        unitName = employeeSchool.data.unitCode;
+      } else {
+        throw new HttpException(400, 'Missing unitId, cannot fetch school unitName');
       }
 
       const findUser: User = {
