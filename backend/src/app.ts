@@ -28,6 +28,7 @@ import {
   SAML_CALLBACK_URL,
   SAML_ENTRY_SSO,
   SAML_FAILURE_REDIRECT,
+  SAML_FAILURE_REDIRECT_MESSAGE,
   SAML_IDP_PUBLIC_CERT,
   SAML_ISSUER,
   SAML_LOGOUT_CALLBACK_URL,
@@ -118,7 +119,10 @@ const samlStrategy = new Strategy(
         const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
         unitName = employeeSchool.data.unitCode;
       } else {
-        throw new HttpException(400, 'Missing unitId, cannot fetch school unitName');
+        return done({
+          name: 'user unitId failed',
+          message: 'User is not authorized, is missing unitId, cannot fetch school unitName',
+        });
       }
 
       const findUser: User = {
@@ -256,9 +260,9 @@ class App {
         }
 
         if (req.session.messages?.length > 0) {
-          failureRedirect = successRedirect + `?failMessage=${req.session.messages[0]}`;
+          failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage=${req.session.messages[0]}`;
         } else {
-          failureRedirect = successRedirect + `?failMessage='SAML_UNKNOWN_ERROR'`;
+          failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage='SAML_UNKNOWN_ERROR'`;
         }
         if (failureRedirect) {
           res.redirect(failureRedirect);
@@ -274,14 +278,10 @@ class App {
         successRedirect = req.body.RelayState;
       }
 
-      if (!req.body.unitId || req.body.unitId === undefined) {
-        failureRedirect = successRedirect + `?failMessage=Permission not granted. User is not authorized as teacher, is missing unitId`;
+      if (req.session.messages?.length > 0) {
+        failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage=${req.session.messages[0]}`;
       } else {
-        if (req.session.messages?.length > 0) {
-          failureRedirect = successRedirect + `?failMessage=${req.session.messages[0]}`;
-        } else {
-          failureRedirect = successRedirect + `?failMessage='SAML_UNKNOWN_ERROR'`;
-        }
+        failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage='SAML_UNKNOWN_ERROR'`;
       }
 
       passport.authenticate('saml', {
