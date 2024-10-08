@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 
 export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuery?: string) => {
   const { headmaster } = hasRolePermission(user);
-  const [pageSize] = useState<number>(isSinglePupil || headmaster ? 10 : 60);
+  const [pageSize] = useState<number>(isSinglePupil ? 10 : 60);
   const mentorClass = useForecastStore((s) => s.mentorClass);
   const groupWithPupils = useForecastStore((s) => s.groupWithPupils);
   const pupil = useForecastStore((s) => s.pupil);

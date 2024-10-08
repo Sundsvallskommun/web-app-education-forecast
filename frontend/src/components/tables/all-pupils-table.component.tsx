@@ -8,7 +8,7 @@ import { searchFilter } from '@utils/search';
 export const PupilTables = (searchQuery?: string) => {
   const allPupils = useForecastStore((s) => s.allPupils);
   const [allPupilsTable, setAllPupilTable] = useState([]);
-  const [pageSize] = useState<number>(10);
+  const [pageSize] = useState<number>(999);
 
   useEffect(() => {
     const tableArr = [];
@@ -233,7 +233,7 @@ export const PupilTables = (searchQuery?: string) => {
           id="pagePageSize"
           type="number"
           min={1}
-          max={100}
+          max={1000}
           className="max-w-[6rem]"
           value={`${_pageSize}`}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
