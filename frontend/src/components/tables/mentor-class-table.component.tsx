@@ -109,6 +109,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorClassHeaders = classHeaderLabels.map((h, idx) => {
     return (
       <Table.HeaderColumn
+        sticky={h.label === 'Namn'}
         className={`${mentor && 'border-r-1 !border-gray-200 !pr-0 py-0 pl-8'}`}
         key={`headercol-${idx}`}
         aria-sort={sortColumn === h.property ? sortOrder : 'none'}
@@ -175,7 +176,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
             p.forecast === 2 && 'border-b-1 border-gray-300 bg-warning-background-200 hover:bg-warning-background-100'
           } ${p.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
         >
-          <Table.HeaderColumn scope="row" className={`border-r-1`}>
+          <Table.HeaderColumn scope="row" sticky>
             <div className="flex flex-col py-16 gap-6 min-w-[177px]">
               <span>
                 {headmaster ? (
