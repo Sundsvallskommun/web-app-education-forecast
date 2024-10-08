@@ -28,6 +28,7 @@ import {
   SAML_CALLBACK_URL,
   SAML_ENTRY_SSO,
   SAML_FAILURE_REDIRECT,
+  SAML_FAILURE_REDIRECT_MESSAGE,
   SAML_IDP_PUBLIC_CERT,
   SAML_ISSUER,
   SAML_LOGOUT_CALLBACK_URL,
@@ -105,14 +106,22 @@ const samlStrategy = new Strategy(
         url: 'education/1.0/forecast/userroles',
         params: { teacherId: personId },
       });
-      unitid = userRole.data[0].unitId;
-      const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
-      unitName = employeeSchool.data.unitCode;
 
       if (!userRole) {
         return done({
           name: 'user roles failed',
           message: 'Failed to fetch user roles from education API',
+        });
+      }
+
+      if (Array.isArray(userRole.data) && userRole.data.length > 0) {
+        unitid = userRole.data[0].unitId;
+        const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
+        unitName = employeeSchool.data.unitCode;
+      } else {
+        return done({
+          name: 'user unitId failed',
+          message: 'User is not authorized, is missing unitId, cannot fetch school unitName',
         });
       }
 
@@ -251,9 +260,9 @@ class App {
         }
 
         if (req.session.messages?.length > 0) {
-          failureRedirect = successRedirect + `?failMessage=${req.session.messages[0]}`;
+          failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage=${req.session.messages[0]}`;
         } else {
-          failureRedirect = successRedirect + `?failMessage='SAML_UNKNOWN_ERROR'`;
+          failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage='SAML_UNKNOWN_ERROR'`;
         }
         if (failureRedirect) {
           res.redirect(failureRedirect);
@@ -270,9 +279,9 @@ class App {
       }
 
       if (req.session.messages?.length > 0) {
-        failureRedirect = successRedirect + `?failMessage=${req.session.messages[0]}`;
+        failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage=${req.session.messages[0]}`;
       } else {
-        failureRedirect = successRedirect + `?failMessage='SAML_UNKNOWN_ERROR'`;
+        failureRedirect = SAML_FAILURE_REDIRECT_MESSAGE + `?failMessage='SAML_UNKNOWN_ERROR'`;
       }
 
       passport.authenticate('saml', {

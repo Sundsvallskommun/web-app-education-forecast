@@ -57,6 +57,8 @@ export default function Start() {
         setErrorMessage('Användaren saknar rätt attribut');
       } else if (failMessage === 'MISSING_PERMISSIONS') {
         setErrorMessage('Användaren saknar rättigheter');
+      } else {
+        setErrorMessage(failMessage);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
