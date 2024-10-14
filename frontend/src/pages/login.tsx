@@ -31,6 +31,7 @@ export default function Start() {
       pathname: `${process.env.NEXT_PUBLIC_API_URL}/saml/login`,
       query: {
         successRedirect: `${appURL()}${path}`,
+        failureRedirect: `${appURL()}/login`,
       },
     });
   };
@@ -55,8 +56,10 @@ export default function Start() {
         setErrorMessage('Användaren saknar rätt grupper');
       } else if (failMessage === 'SAML_MISSING_ATTRIBUTES') {
         setErrorMessage('Användaren saknar rätt attribut');
-      } else if (failMessage === 'MISSING_PERMISSIONS') {
+      } else if (failMessage === 'SAML_MISSING_PERMISSIONS') {
         setErrorMessage('Användaren saknar rättigheter');
+      } else {
+        setErrorMessage(failMessage);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
