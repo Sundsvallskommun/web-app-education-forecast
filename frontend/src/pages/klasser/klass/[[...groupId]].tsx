@@ -70,8 +70,6 @@ export const Index: React.FC = () => {
     setRiffleClasses(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
   }, [classes]);
 
-  console.log(mentorClass);
-
   const breadcrumbLinks = [
     { link: '/klasser', title: 'Klasser', currentPage: false },
     {
