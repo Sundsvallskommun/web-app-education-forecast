@@ -12,7 +12,8 @@ import { shallow } from 'zustand/shallow';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
-  const { teacher, mentor } = hasRolePermission(user);
+  const { teacher, mentor, headmaster } = hasRolePermission(user);
+  const { getMyClasses } = useForecastStore();
   const { GR } = hasRolePermission(user);
   const pageTitle = 'Mina ämnen/grupper';
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
@@ -27,9 +28,13 @@ export const Index: React.FC = () => {
       period: selectedPeriod ? selectedPeriod : currentPeriod,
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
-    if (teacher || mentor) {
+    if (teacher || (mentor && teacher)) {
       setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
-    } else {
+    } else if (mentor && !teacher) {
+      getMyClasses(myGroup).then((res) => {
+        router.push(`/min-mentorsklass/${res.data[0].groupId}`);
+      });
+    } else if (headmaster) {
       router.push('/amnen-grupper');
     }
   }, []);
