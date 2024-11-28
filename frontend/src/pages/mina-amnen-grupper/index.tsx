@@ -4,6 +4,7 @@ import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useUserStore } from '@services/user-service/user-service';
+import { Spinner } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import router from 'next/router';
@@ -41,7 +42,14 @@ export const Index: React.FC = () => {
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>
       <Main>
-        <SubjectsGroups pageTitle={pageTitle} />
+        {teacher || (teacher && mentor) ? (
+          <SubjectsGroups pageTitle={pageTitle} />
+        ) : (
+          <div className="max-w-[800px] w-full flex flex-col justify-center gap-16 m-0">
+            <span className="text-2xl">Du har inte åtkomst till den här sidan och kommer omdirigeras</span>
+            <Spinner size={6} />
+          </div>
+        )}
       </Main>
     </DefaultLayout>
   );
