@@ -14,7 +14,7 @@ interface MenuProps {
 
 export const Menu: React.FC<MenuProps> = ({ user }) => {
   const { getMyClasses, myClasses } = useForecastStore();
-  const { headmaster, mentor } = hasRolePermission(user);
+  const { headmaster, mentor, teacher } = hasRolePermission(user);
   const [activeURL, setActiveURL] = useState('/');
   const { schoolYear, currentMonthPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
@@ -66,7 +66,7 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
       url: '/elever',
     },
   ];
-  const teacherMentorLinks = [
+  const teacherLinks = [
     {
       label: 'Mina ämnen/grupper',
       url: '/mina-amnen-grupper',
@@ -91,11 +91,13 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
     </MenuBar>
   ) : (
     <MenuBar className="flex-wrap justify-end" color="vattjom">
-      {teacherMentorLinks.map((link) => {
+      {teacherLinks.map((link) => {
         return (
-          <MenuBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
-            <NextLink href={link.url}>{link.label}</NextLink>
-          </MenuBar.Item>
+          teacher && (
+            <MenuBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
+              <NextLink href={link.url}>{link.label}</NextLink>
+            </MenuBar.Item>
+          )
         );
       })}
       {mentor ? (
