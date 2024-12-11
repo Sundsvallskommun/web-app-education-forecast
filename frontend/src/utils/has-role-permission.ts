@@ -9,9 +9,9 @@ export const hasRolePermission = (user: User) => {
   const GR = roles.find((x) => x.typeOfSchool === 'GR');
   const GY = roles.find((x) => x.typeOfSchool === 'GY');
 
-  const canEditForecast = teacher || mentor;
+  const canEditForecast = teacher;
   const canViewAllSubjectsGroups = headmaster;
-  const canViewMySubjectsGroups = teacher || mentor;
+  const canViewMySubjectsGroups = teacher;
   const canViewMyMentorClass = mentor;
   const canViewAllClasses = headmaster;
   const canViewPupil = teacher || mentor || headmaster;

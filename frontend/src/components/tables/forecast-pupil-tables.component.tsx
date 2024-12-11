@@ -243,7 +243,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
               <span className="ml-8">{!p.presence ? '-' : `${p.presence}%`}</span>
             </div>
           </Table.Column>
-          <Table.Column colSpan={!p.teachers.find((x) => x.personId === user.personId) ? 2 : 1}>
+          <Table.Column colSpan={!p.teachers?.find((x) => x.personId === user.personId) ? 2 : 1}>
             <div className="flex justify-between">
               {summerPeriod && (selectedPeriod === 'HT September' || selectedPeriod === 'HT') ? (
                 <Label inverted rounded color="juniskar">
@@ -276,7 +276,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
             </div>
           </Table.Column>
 
-          {!headmaster && p.teachers.find((x) => x.personId === user.personId) ? (
+          {!headmaster && p.teachers?.find((x) => x.personId === user.personId) ? (
             <Table.Column>
               <div className="flex items-center gap-2">
                 <Button
