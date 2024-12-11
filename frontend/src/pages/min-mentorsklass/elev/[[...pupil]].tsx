@@ -15,7 +15,7 @@ export const Index: React.FC = () => {
   const routerpupilId = router.query['pupil'];
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
   const user = useUserStore((s) => s.user);
-  const { GR } = hasRolePermission(user);
+  const { GR, teacher } = hasRolePermission(user);
   const pupil = useForecastStore((s) => s.pupil);
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
@@ -36,7 +36,7 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
+        teacher && (await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects'));
         await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'pupil', pupilId);
       } else {
         if (!pupilId) {

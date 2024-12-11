@@ -22,19 +22,19 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     if (mentor || headmaster) {
       if (mentorClassGrid.length !== 0) {
         mentorClassGrid.map((p) => {
-          const allSubjects = p.forecasts.reduce((accumulator, current) => {
+          const allSubjects = p.forecasts?.reduce((accumulator, current) => {
             if (!accumulator.find((item) => item.courseId === current.courseId)) {
               accumulator.push(current);
             }
             return accumulator;
           }, []);
 
-          allSubjects.forEach((s) => {
+          allSubjects?.forEach((s) => {
             if (!subjectArr.find((x) => x.label === s.courseId))
               subjectArr.push({ label: s.courseId, property: s.courseId, isColumnSortable: true });
           });
 
-          const numberNotFilledIn = p.forecasts.filter((x) => x.forecast === null).length;
+          const numberNotFilledIn = p.forecasts?.filter((x) => x.forecast === null).length;
           const object = {
             id: p.pupil,
             pupil: `${p.givenname} ${p.lastname}`,
@@ -43,7 +43,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
             notFilledIn: numberNotFilledIn,
           };
 
-          p.forecasts.map((f) => {
+          p.forecasts?.map((f) => {
             const forecastObj = {
               [f.courseId]: f.forecast,
             };
@@ -181,6 +181,8 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
               <span>
                 {headmaster ? (
                   <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
+                ) : p.notFilledIn === undefined || p.notFilledIn === null ? (
+                  <span>{p.pupil} </span>
                 ) : (
                   <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
                 )}

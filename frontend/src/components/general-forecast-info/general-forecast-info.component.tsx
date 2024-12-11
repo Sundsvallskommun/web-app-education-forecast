@@ -198,7 +198,11 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
       {!isLoading ? (
         <span>
           <Label rounded inverted={summerPeriod} color={summerPeriod ? 'juniskar' : 'tertiary'}>
-            {summerPeriod ? 'Prognoser till hösten är låsta under sommarperioden' : numberOfNotFilledIn}
+            {summerPeriod
+              ? 'Prognoser till hösten är låsta under sommarperioden'
+              : numberOfNotFilledIn
+                ? numberOfNotFilledIn
+                : 'Saknar'}
           </Label>
           {!summerPeriod && forecastStatus}
         </span>
