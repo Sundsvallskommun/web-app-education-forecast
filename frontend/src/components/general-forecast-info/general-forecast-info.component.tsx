@@ -48,7 +48,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     'december',
   ];
 
-  const selectedMonth = selectedPeriod.toLowerCase().split(' ').slice(1)[0];
+  const selectedMonth = selectedPeriod?.toLowerCase().split(' ').slice(1)[0];
 
   const date = new Date(
     new Date().getFullYear(),

@@ -1,58 +1,52 @@
 import dayjs from 'dayjs';
+import { capitalize } from 'underscore.string';
 
 export const thisSchoolYearPeriod = () => {
-  const currentYear = new Date().getFullYear();
   const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = dayjs(currentDate).month();
+  const summerBreak = [5, 6];
+  let currentSchoolMonth;
 
-  let currentMonth;
-
-  if (
-    dayjs(currentDate).month() >= dayjs(new Date(currentYear, 5, 1)).month() &&
-    dayjs(currentDate).month() < dayjs(new Date(currentYear, 7, 1)).month()
-  ) {
-    currentMonth = 'September';
+  if (summerBreak.includes(currentMonth)) {
+    currentSchoolMonth = 'September';
   } else {
-    currentMonth =
-      currentDate.toLocaleString('sv-SE', { month: 'long' }).charAt(0).toUpperCase() +
-      currentDate.toLocaleString('sv-SE', { month: 'long' }).slice(1);
+    currentSchoolMonth = capitalize(currentDate.toLocaleString('sv-SE', { month: 'long' }));
   }
 
-  let previousMonth;
+  let previousSchoolMonth;
   let previousPeriodDate;
 
-  if (currentMonth === 'September') {
-    previousMonth = 'Maj';
-
-    previousPeriodDate = new Date(currentDate.setMonth(new Date().getMonth() - 4));
+  if (currentSchoolMonth === 'September') {
+    previousSchoolMonth = 'Maj';
+    previousPeriodDate = new Date(currentDate.setMonth(4));
+  } else if (currentSchoolMonth === 'Januari') {
+    previousSchoolMonth = 'December';
+    previousPeriodDate = new Date(currentYear - 1, 11, currentDate.getDate());
   } else {
-    previousMonth =
-      new Date(currentDate.setMonth(new Date().getMonth() - 1))
-        .toLocaleString('sv-SE', { month: 'long' })
-        .charAt(0)
-        .toUpperCase() +
-      new Date(currentDate.setMonth(new Date().getMonth() - 1)).toLocaleString('sv-SE', { month: 'long' }).slice(1);
+    previousSchoolMonth = capitalize(
+      new Date(currentYear, currentDate.getMonth() - 1, currentDate.getDate()).toLocaleString('sv-SE', {
+        month: 'long',
+      })
+    );
 
     previousPeriodDate = new Date(currentDate.setMonth(new Date().getMonth() - 1));
   }
 
-  let schoolYear;
+  let schoolYear = currentYear;
   let termPeriod;
-  if (
-    dayjs(new Date()).month() >= dayjs(new Date(currentYear, 5, 1)).month() &&
-    dayjs(new Date()).month() <= dayjs(new Date(currentYear, 11, 31)).month()
-  ) {
+  if (currentMonth >= 5 && currentMonth <= 11) {
     schoolYear = currentYear;
     termPeriod = 'HT';
-  } else if (
-    dayjs(new Date()).month() <= dayjs(new Date(currentYear, 4, 30)).month() &&
-    dayjs(new Date()).month() >= dayjs(new Date(currentYear, 1, 1)).month()
-  ) {
-    schoolYear = currentMonth === 'September' ? currentYear : currentYear - 1;
+  } else if (currentMonth <= 4 && currentMonth >= 0) {
+    schoolYear = currentYear - 1;
     termPeriod = 'VT';
   }
+
   const previousTermPeriod = termPeriod === 'HT' ? 'VT' : 'HT';
-  const previousMonthPeriod = previousMonth === 'Maj' ? 'VT Maj' : `${termPeriod} ${previousMonth}`;
-  const currentMonthPeriod = currentMonth === 'September' ? 'HT September' : `${termPeriod} ${currentMonth}`;
+  const previousMonthPeriod = previousSchoolMonth === 'Maj' ? 'VT Maj' : `${termPeriod} ${previousSchoolMonth}`;
+  const currentMonthPeriod =
+    currentSchoolMonth === 'September' ? 'HT September' : `${termPeriod} ${currentSchoolMonth}`;
 
   return {
     schoolYear,

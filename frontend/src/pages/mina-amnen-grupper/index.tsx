@@ -33,7 +33,7 @@ export const Index: React.FC = () => {
       setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        router.push(`/min-mentorsklass/${res.data[0].groupId}`);
+        router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
       });
     } else if (headmaster) {
       router.push('/amnen-grupper');

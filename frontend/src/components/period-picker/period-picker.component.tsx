@@ -35,7 +35,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
 
   if (GY) {
     forecastPeriod = currentMonthPeriod;
-    DOMPeriod = selectedPeriod.split('').slice(2);
+    DOMPeriod = selectedPeriod?.split('').slice(2);
   } else {
     forecastPeriod = termPeriod;
     DOMPeriod = `${selectedPeriod} ${selectedPeriod === 'VT' ? currentYear : selectedSchoolYear}`;
@@ -107,7 +107,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
       >
         <Icon name="arrow-left" />
       </Button>
-      <span className="font-bold">{selectedPeriod.length !== 0 ? DOMPeriod : <Spinner size={3} />}</span>
+      <span className="font-bold">{selectedPeriod?.length !== 0 ? DOMPeriod : <Spinner size={3} />}</span>
       <Button
         aria-describedby={`Visa framåt till nuvarande period ${
           GY ? currentMonthPeriod : termPeriod === 'HT' ? 'Hösttermin' : 'Vårtermin'
