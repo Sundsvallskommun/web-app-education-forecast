@@ -44,7 +44,12 @@ export const thisSchoolYearPeriod = () => {
   }
 
   const previousTermPeriod = termPeriod === 'HT' ? 'VT' : 'HT';
-  const previousMonthPeriod = previousSchoolMonth === 'Maj' ? 'VT Maj' : `${termPeriod} ${previousSchoolMonth}`;
+  const previousMonthPeriod =
+    previousSchoolMonth === 'Maj'
+      ? 'VT Maj'
+      : previousSchoolMonth === 'December'
+        ? 'HT December'
+        : `${termPeriod} ${previousSchoolMonth}`;
   const currentMonthPeriod =
     currentSchoolMonth === 'September' ? 'HT September' : `${termPeriod} ${currentSchoolMonth}`;
 
