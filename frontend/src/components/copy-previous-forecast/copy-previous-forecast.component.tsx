@@ -10,7 +10,7 @@ export const CopyPreviousForecast: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const subject = useForecastStore((s) => s.groupWithPupils);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear as number);
+  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedId = useForecastStore((s) => s.selectedId);
   const copyPreviousForecast = useForecastStore((s) => s.copyPreviousForecast);
   const { GR, GY } = hasRolePermission(user);
@@ -60,26 +60,28 @@ export const CopyPreviousForecast: React.FC = () => {
   };
 
   const onCopyHandler = async () => {
-    const body: CopyPreviousForecastDto = {
-      groupId: selectedId as string,
-      period: selectedPeriod,
-      previusPeriod: previousPeriod,
-      schoolYear: selectedSchoolYear,
-      previusSchoolYear: previousSchoolYear,
-    };
-    await copyPreviousForecast(body).then((res) => {
-      if (!res.error) {
-        message({
-          message: `Prognosen sparades`,
-          status: 'success',
-        });
-      } else {
-        message({
-          message: res.message,
-          status: 'error',
-        });
-      }
-    });
+    if (selectedId) {
+      const body: CopyPreviousForecastDto = {
+        groupId: selectedId,
+        period: selectedPeriod,
+        previusPeriod: previousPeriod,
+        schoolYear: selectedSchoolYear,
+        previusSchoolYear: previousSchoolYear,
+      };
+      await copyPreviousForecast(body).then((res) => {
+        if (!res.error) {
+          message({
+            message: `Prognosen sparades`,
+            status: 'success',
+          });
+        } else {
+          message({
+            message: res.message,
+            status: 'error',
+          });
+        }
+      });
+    }
   };
 
   let numberOfForecasts = 0;

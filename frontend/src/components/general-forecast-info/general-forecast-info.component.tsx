@@ -18,18 +18,18 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
   const user = useUserStore((s) => s.user);
   const { GY, GR } = hasRolePermission(user);
   const { CLASSES, MENTORCLASS, PUPIL, PUPILS, SUBJECTS, SUBJECT } = callbackType(callback);
-  let grouptype;
+  let grouptype = 'G';
   if (SUBJECTS) {
     grouptype = 'G';
   } else if (CLASSES) {
     grouptype = 'K';
   }
-  const { grouptable } = GroupTables(grouptype as string, user);
+  const { grouptable } = GroupTables(grouptype, user);
   const { pupilsInGroupData } = CustomPupilTable(user, PUPIL && true);
   const { mentorClassData } = MentorClassTable(user);
   const { allPupilsTable } = PupilTables();
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear as number);
+  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
   const { currentMonthPeriod } = thisSchoolYearPeriod();
 
