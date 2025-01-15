@@ -11,6 +11,7 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { ClearAllForecasts } from '@components/clear-all-forecasts/clear-all-forecasts.component';
 import { GeneralForecastInfo } from '@components/general-forecast-info/general-forecast-info.component';
 import { useDebouncedCallback } from '@react-hookz/web';
+import { User } from '@interfaces/user';
 
 interface HeadingMenuProps {
   pageTitle: string;
@@ -21,11 +22,11 @@ interface HeadingMenuProps {
     textLink?: string;
     color?: 'vattjom' | 'juniskar' | 'bjornstigen' | 'gronsta';
   };
-  teachers?: ForecastMyGroupTeacher[];
+  teachers?: ForecastMyGroupTeacher[] | null | undefined;
   objectId?: string;
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
   searchQuery?: string;
-  setSearchQuery?: Dispatch<SetStateAction<string>>;
+  setSearchQuery?: Dispatch<SetStateAction<string>> | null | undefined;
   searchPlaceholder?: string;
 }
 
@@ -39,7 +40,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   setSearchQuery,
   searchPlaceholder,
 }) => {
-  const user = useUserStore((s) => s.user);
+  const user = useUserStore((s) => s.user as User);
   const [searchTerm, setSearchTerm] = useState(searchQuery);
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher } = hasRolePermission(user);
@@ -52,7 +53,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
 
   const setDelayQuery = useDebouncedCallback(
     (query: string) => {
-      setSearchQuery(query);
+      setSearchQuery && setSearchQuery(query);
     },
     [],
     150,
@@ -117,7 +118,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
             <div className="max-w-[360px] flex justify-end">
               <div className="w-fit float-right">
                 {teachers?.map((t) => {
-                  const secondletterInLastName = t?.lastname.split('').slice(1, 2);
+                  const secondletterInLastName = t.lastname && t?.lastname.split('').slice(1, 2);
                   const abbreviation = `${initialsFunction(`${t?.givenname} ${t?.lastname}`)}${secondletterInLastName}`;
                   const lastObject = teachers[teachers.length - 1];
                   return (
@@ -162,7 +163,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                   <ClearAllForecasts />
                   <FormControl className="max-medium-device:w-full">
                     <SearchField
-                      value={searchTerm}
+                      value={searchTerm as string}
                       onChange={onSearchChangeHandler}
                       onSearch={onSearchHandler}
                       placeholder={placeHolder}
@@ -185,7 +186,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                 <div>
                   <FormControl className="max-medium-device:w-full">
                     <SearchField
-                      value={searchTerm}
+                      value={searchTerm as string}
                       onChange={onSearchChangeHandler}
                       onSearch={onSearchHandler}
                       placeholder={placeHolder}
@@ -198,7 +199,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
         ) : (
           <FormControl className="max-medium-device:w-full">
             <SearchField
-              value={searchTerm}
+              value={searchTerm as string}
               onChange={onSearchChangeHandler}
               onSearch={onSearchHandler}
               placeholder={placeHolder}

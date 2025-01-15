@@ -7,23 +7,24 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { CustomPupilTable } from '@components/tables/forecast-pupil-tables.component';
 import { Spinner } from '@sk-web-gui/react';
+import { User } from '@interfaces/user';
 
 interface SubjectWithPupilsProps {
-  setPageTitle: Dispatch<SetStateAction<string>>;
+  setPageTitle: Dispatch<SetStateAction<string | undefined>>;
   pageTitle: string;
 }
 
 export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTitle, pageTitle }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const user = useUserStore((s) => s.user, shallow);
-  const { teacher } = hasRolePermission(user);
-  const selectedId = useForecastStore((s) => s.selectedId);
+  const user = useUserStore((s) => s.user as User as User, shallow);
+  const { teacher } = hasRolePermission(user as User);
+  const selectedId = useForecastStore((s) => s.selectedId as string | undefined);
 
   const { pupilTable, groupWithPupilsIsLoading, manyPupilsListRendered, groupWithPupils, pupilsInGroupData } =
-    CustomPupilTable(user, false, searchQuery);
+    CustomPupilTable(user as User, false, searchQuery);
 
   useEffect(() => {
-    !groupWithPupilsIsLoading ? setPageTitle(groupWithPupils[0]?.courseName) : setPageTitle('Ämne/grupp');
+    !groupWithPupilsIsLoading ? setPageTitle(groupWithPupils[0]?.courseName as string) : setPageTitle('Ämne/grupp');
   });
 
   const generalInformation =
@@ -41,7 +42,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
         pageTitle={groupWithPupils.length !== 0 ? pageTitle : 'Ämne/grupp'}
         GeneralInformation={generalInformation}
         teachers={
-          teacher && groupWithPupils[0]?.teachers.find((x) => x.personId === user.personId)
+          teacher && groupWithPupils[0]?.teachers?.find((x) => x.personId === user.personId)
             ? [
                 {
                   givenname: user.name.split(' ')[0],

@@ -4,8 +4,29 @@ import { Avatar, Badge, Link, SortMode, Table, Select, Pagination, Input, Icon }
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
-import { Pupil } from '@interfaces/forecast/forecast';
+import { GridForecast, Pupil } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
+
+interface MentorClassTable {
+  id: string | undefined;
+  pupil: string | undefined;
+  className: string | null | undefined;
+  presence: number | null | undefined;
+  approved?: number | null | undefined;
+  warnings?: number | null | undefined;
+  unapproved?: number | null | undefined;
+  schoolYear?: number | null | undefined;
+  notFilledIn: number | null | undefined;
+  totalSubjects?: number | null | undefined;
+  forecast?: number | null | undefined;
+  image?: string | null | undefined;
+}
+
+interface SubjectHeaders {
+  label: string;
+  property: string;
+  isColumnSortable: boolean;
+}
 
 export const MentorClassTable = (user: User, searchQuery?: string) => {
   const { headmaster, mentor } = hasRolePermission(user);
@@ -13,17 +34,17 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorClass = useForecastStore((s) => s.mentorClass);
   const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
-  const [mentorClassData, setMentorClassData] = useState([]);
-  const [subjectHeaders, setSubjectHeaders] = useState([]);
+  const [mentorClassData, setMentorClassData] = useState<MentorClassTable[]>([]);
+  const [subjectHeaders, setSubjectHeaders] = useState<SubjectHeaders[]>([]);
 
   useEffect(() => {
-    const tableArr = [];
-    const subjectArr = [];
+    const tableArr: MentorClassTable[] = [];
+    const subjectArr: SubjectHeaders[] = [];
     if (mentor || headmaster) {
       if (mentorClassGrid.length !== 0) {
         mentorClassGrid.map((p) => {
-          const allSubjects = p.forecasts?.reduce((accumulator, current) => {
-            if (!accumulator.find((item) => item.courseId === current.courseId)) {
+          const allSubjects = p.forecasts?.reduce((accumulator: GridForecast[], current) => {
+            if (!accumulator.find((item: GridForecast) => item.courseId === current.courseId)) {
               accumulator.push(current);
             }
             return accumulator;
@@ -136,11 +157,13 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     }
   };
 
-  const mentorClassListSearchFiltered = mentorClassData.filter(searchFilter(searchQuery, mentorclassSearchFilter));
+  const mentorClassListSearchFiltered = mentorClassData.filter(
+    searchFilter(searchQuery as string, mentorclassSearchFilter)
+  );
 
   const mentorClassListRendered = mentorClassListSearchFiltered;
 
-  const iconType = (prop) => {
+  const iconType = (prop: number) => {
     if (prop === 1) {
       return 'check';
     } else if (prop === 2) {
@@ -150,7 +173,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     }
   };
 
-  const iconColor = (prop) => {
+  const iconColor = (prop: number) => {
     if (prop === 1) {
       return 'gronsta';
     } else if (prop === 2) {
@@ -220,7 +243,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
               <Avatar
-                imageUrl={`${p.image.length !== 0 || p.image ? p.image : ''}`}
+                imageUrl={`${p?.image?.length !== 0 || p.image ? p.image : ''}`}
                 color="vattjom"
                 rounded
                 initials={initialsFunction(p.pupil)}
@@ -253,7 +276,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     inverted
                     rounded
                     color={!p.approved || p.approved === 0 ? 'tertiary' : 'gronsta'}
-                    counter={p.approved == 0 ? 0 : p.approved}
+                    counter={(p.approved == 0 ? 0 : p.approved) as string | number}
                   />
                 )}
               </span>
@@ -269,7 +292,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.warnings || p.warnings === 0}
                     color={!p.warnings || p.warnings === 0 ? 'tertiary' : 'warning'}
-                    counter={p.warnings == 0 ? 0 : p.warnings}
+                    counter={(p.warnings == 0 ? 0 : p.warnings) as string | number}
                   />
                 )}
               </span>
@@ -285,7 +308,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.unapproved || p.unapproved === 0}
                     color={!p.unapproved || p.unapproved === 0 ? 'tertiary' : 'error'}
-                    counter={p.unapproved == 0 ? 0 : p.unapproved}
+                    counter={(p.unapproved == 0 ? 0 : p.unapproved) as string | number}
                   />
                 )}
               </span>
@@ -311,7 +334,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
 
   const footer = (
     <Table.Footer
-      className={mentorclassRows.length > pageSize && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}
+      className={mentorclassRows.length > pageSize ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}
     >
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">

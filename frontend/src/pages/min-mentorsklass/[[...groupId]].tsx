@@ -8,10 +8,11 @@ import { QueriesDto } from '@interfaces/forecast/forecast';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
+import { User } from '@interfaces/user';
 
 export const Index: React.FC = () => {
   const router = useRouter();
-  const user = useUserStore((s) => s.user);
+  const user = useUserStore((s) => s.user as User);
   const { GR, mentor } = hasRolePermission(user);
   const routerclassId = router.query['groupId'];
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;
@@ -31,7 +32,7 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (classId) {
         if (router.pathname.includes(classId)) return;
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'mentorclass', classId, user);
+        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'mentorclass', classId, user);
       } else {
         if (!classId) {
           router.push('/mina-amnen-grupper');

@@ -11,7 +11,7 @@ interface ClassesProps {
 }
 
 export const Classes: React.FC<ClassesProps> = ({ pageTitle }) => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user as User, shallow);
   const [searchQuery, setSearchQuery] = useState('');
   const { myClasses, grouplistTable, groupsListRendered, grouptable } = GroupTables('K', user, searchQuery);
   //const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);

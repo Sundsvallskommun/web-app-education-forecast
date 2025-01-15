@@ -7,17 +7,18 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { QueriesDto } from '@interfaces/forecast/forecast';
+import { User } from '@interfaces/user';
 
 export default function Index() {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user as User, shallow);
   const { getMyClasses } = useForecastStore();
-  const { headmaster, teacher, mentor } = hasRolePermission(user);
+  const { headmaster, teacher, mentor } = hasRolePermission(user as User);
   const router = useRouter();
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
 
-  const { GR } = hasRolePermission(user);
+  const { GR } = hasRolePermission(user as User);
   const currentPeriod = GR ? termPeriod : currentMonthPeriod;
 
   const teacherAndMentorRoutes = () => {
@@ -29,7 +30,7 @@ export default function Index() {
       router.push('/mina-amnen-grupper');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
+        res.data && router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
       });
     }
   };

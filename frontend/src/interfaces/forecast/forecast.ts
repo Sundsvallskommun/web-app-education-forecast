@@ -5,16 +5,16 @@ export interface MyGroup {
   courseId?: string | null;
   groupType: string;
   forecastPeriod?: string | null;
-  totalPupils: number;
-  approvedPupils: number;
-  warningPupils: number;
-  unapprovedPupils: number;
+  totalPupils: number | null;
+  approvedPupils: number | null;
+  warningPupils: number | null;
+  unapprovedPupils: number | null;
   presence?: number | null;
   teachers?: ForecastMyGroupTeacher[] | null;
 }
 
 export interface QueriesDto {
-  period: string;
+  period: string | undefined;
   schoolYear: number;
 }
 
@@ -45,7 +45,7 @@ export interface Pupil {
   courseName?: string | null;
   courseId?: string | null;
   teachers?: ForecastMyGroupTeacher[] | null;
-  totalSubjects: number;
+  totalSubjects: number | null;
   image?: string | null;
 }
 

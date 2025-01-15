@@ -4,18 +4,20 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
+import { User } from '@interfaces/user';
 
 export const CopyPreviousForecast: React.FC = () => {
-  const user = useUserStore((s) => s.user);
+  const user = useUserStore((s) => s.user as User);
   const subject = useForecastStore((s) => s.groupWithPupils);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
+  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear as number);
   const selectedId = useForecastStore((s) => s.selectedId);
   const copyPreviousForecast = useForecastStore((s) => s.copyPreviousForecast);
-  const { GR, GY } = hasRolePermission(user);
+  const { GR, GY } = hasRolePermission(user as User);
   const [isOpen, setisOpen] = useState(false);
   const [summerPeriod, setSummerPeriod] = useState(false);
-  // const [previousIsEmpty, setPreviousIsEmpty] = useState(true);
+
   const message = useSnackbar();
 
   const monthPeriods = [
@@ -31,8 +33,8 @@ export const CopyPreviousForecast: React.FC = () => {
   ];
 
   const termPeriods = ['HT', 'VT'];
-  let previousPeriod;
-  let previousSchoolYear;
+  let previousPeriod: string;
+  let previousSchoolYear: number;
 
   if (GY) {
     monthPeriods[monthPeriods.indexOf(selectedPeriod)] === monthPeriods[0]
@@ -59,8 +61,8 @@ export const CopyPreviousForecast: React.FC = () => {
   };
 
   const onCopyHandler = async () => {
-    const body = {
-      groupId: selectedId,
+    const body: CopyPreviousForecastDto = {
+      groupId: selectedId as string,
       period: selectedPeriod,
       previusPeriod: previousPeriod,
       schoolYear: selectedSchoolYear,
@@ -98,6 +100,7 @@ export const CopyPreviousForecast: React.FC = () => {
     } else {
       setSummerPeriod(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return summerPeriod ? (

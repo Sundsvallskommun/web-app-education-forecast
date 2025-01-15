@@ -9,12 +9,19 @@ import { QueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
+import { User } from '@interfaces/user';
+
+interface Riffle {
+  id: string;
+  link: string;
+  title: string;
+}
 
 export const Index: React.FC = () => {
   const router = useRouter();
   const routerpupilId = router.query['pupil'];
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
-  const user = useUserStore((s) => s.user);
+  const user = useUserStore((s) => s.user as User);
   const { GR, teacher } = hasRolePermission(user);
   const pupil = useForecastStore((s) => s.pupil);
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
@@ -25,7 +32,7 @@ export const Index: React.FC = () => {
 
   const mentorclass = useForecastStore((s) => s.mentorClass);
   const mentorclassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
-  const [rifflePupils, setRifflePupils] = useState([]);
+  const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
 
   const currentPeriod = GR ? termPeriod : currentMonthPeriod;
   useEffect(() => {
@@ -36,8 +43,8 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        teacher && (await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects'));
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'pupil', pupilId);
+        teacher && (await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'subjects'));
+        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'pupil', pupilId);
       } else {
         if (!pupilId) {
           router.push('/mina-amnen-grupper');
@@ -57,12 +64,12 @@ export const Index: React.FC = () => {
   }, [router.query, router.isReady]);
 
   const breadcrumbLinks = [
-    { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className, currentPage: false },
+    { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className as string, currentPage: false },
     { link: '', title: `${pupil[0]?.givenname} ${pupil[0]?.lastname}`, currentPage: true },
   ];
 
   useEffect(() => {
-    const riffleArray = [];
+    const riffleArray: Riffle[] = [];
     mentorclass.filter((p) => {
       riffleArray.push({
         id: p.pupil,
@@ -84,7 +91,7 @@ export const Index: React.FC = () => {
         <Pupil isSinglePupil />
         <RifflePrevNext
           riffleIsLoading={mentorclassIsLoading}
-          dataId={pupil[0]?.pupil}
+          dataId={pupil[0]?.pupil as string}
           riffleObjects={rifflePupils}
           callback="pupil"
         />

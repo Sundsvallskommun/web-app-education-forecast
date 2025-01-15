@@ -2,19 +2,36 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Link, Table, SortMode, Pagination, Select, Input, Badge } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
-import { Pupil } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
+
+interface AllPupils {
+  id: string | null | undefined;
+  pupil: string | null | undefined;
+  className: string | null | undefined;
+  groupId: string | null | undefined;
+  teachers: ForecastMyGroupTeacher[] | null | undefined;
+  presence: number | null | undefined;
+  forecast: number | null | undefined;
+  approved: number | null | undefined;
+  warnings: number | null | undefined;
+  unapproved: number | null | undefined;
+  notFilledIn: number | null | undefined;
+  totalSubjects: number | null | undefined;
+  image: string | null | undefined;
+}
 
 export const PupilTables = (searchQuery?: string) => {
   const allPupils = useForecastStore((s) => s.allPupils);
-  const [allPupilsTable, setAllPupilTable] = useState([]);
+  const [allPupilsTable, setAllPupilTable] = useState<AllPupils[]>([]);
   const [pageSize] = useState<number>(999);
 
   useEffect(() => {
-    const tableArr = [];
+    const tableArr: AllPupils[] = [];
     if (allPupils.length !== 0) {
       allPupils.map((p) => {
-        const numberNotFilledIn = p.totalSubjects - p.approved - p.warnings - p.unapproved;
+        const numberNotFilledIn =
+          p.approved && p.warnings && p.unapproved && p.totalSubjects - p.approved - p.warnings - p.unapproved;
         tableArr.push({
           id: p.pupil,
           pupil: `${p.givenname} ${p.lastname}`,
@@ -22,6 +39,7 @@ export const PupilTables = (searchQuery?: string) => {
           groupId: p.groupId,
           teachers: p.teachers,
           presence: p.presence,
+          forecast: p.forecast,
           approved: p.approved,
           warnings: p.warnings,
           unapproved: p.unapproved,
@@ -86,7 +104,7 @@ export const PupilTables = (searchQuery?: string) => {
     }
   };
 
-  const pupilListSearchFiltered = allPupilsTable.filter(searchFilter(searchQuery, pupilSearchFilter));
+  const pupilListSearchFiltered = allPupilsTable.filter(searchFilter(searchQuery as string, pupilSearchFilter));
 
   const pupilListRendered = pupilListSearchFiltered;
 
@@ -110,7 +128,7 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
               <Avatar
-                imageUrl={`${p.image.length !== 0 || p.image ? p.image : ''}`}
+                imageUrl={`${p.image?.length !== 0 || p.image ? p.image : ''}`}
                 color="vattjom"
                 rounded
                 initials={initialsFunction(p.pupil)}
@@ -136,7 +154,7 @@ export const PupilTables = (searchQuery?: string) => {
                       return /[A-Z]/.test(char);
                     });
 
-                    const secondletterInLastName = v.lastname.split('').slice(1, 2);
+                    const secondletterInLastName = v.lastname && v.lastname.split('').slice(1, 2);
                     const abbreviation = `${initials.join('')}${secondletterInLastName}`;
                     return v ? (
                       <span key={`teacher-${idx}`}>
@@ -223,7 +241,7 @@ export const PupilTables = (searchQuery?: string) => {
     });
 
   const footer = (
-    <Table.Footer className={pupilRows.length > 10 && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}>
+    <Table.Footer className={pupilRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
           Rader per sida:

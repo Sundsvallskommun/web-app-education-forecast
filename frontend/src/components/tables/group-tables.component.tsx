@@ -1,4 +1,4 @@
-import { MyGroup } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, MyGroup } from '@interfaces/forecast/forecast';
 import { User } from '@interfaces/user';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Badge, Link, Table, SortMode, Select, Pagination, Input } from '@sk-web-gui/react';
@@ -7,28 +7,44 @@ import { searchFilter } from '@utils/search';
 import { useEffect, useState } from 'react';
 //import { IsGradedForecast } from '@utils/is-grade-forecast';
 
+interface GroupTable {
+  id: string;
+  groupName: string;
+  teachers: ForecastMyGroupTeacher[];
+  totalPupils: number;
+  presence: number;
+  approvedPupils: number;
+  warningPupils: number;
+  unapprovedPupils: number;
+  notFilledIn: number;
+}
+
 //Table structure for group type tables
-export const GroupTables = (groupType, user: User, searchQuery?: string) => {
+export const GroupTables = (groupType: string, user: User, searchQuery?: string) => {
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const { myClasses, mySubjects } = useForecastStore();
-  const [grouptable, setGrouptable] = useState([]);
+  const [grouptable, setGrouptable] = useState<GroupTable[]>([]);
   const [pageSize] = useState<number>(10);
   // const {APPROVED, WARNINGS, UNNAPROVED, NOTFILLEDIN} = IsGradedForecast(groupType === "K" ? myClasses : mySubjects, Array);
   useEffect(() => {
-    const tableArr = [];
+    const tableArr: GroupTable[] = [];
     if (groupType === 'K') {
       if (myClasses.length !== 0) {
         myClasses.map((c) => {
-          const numberNotFilledIn = c.totalPupils - c.approvedPupils - c.warningPupils - c.unapprovedPupils;
+          const numberNotFilledIn =
+            (c.totalPupils as number) -
+            (c.approvedPupils as number) -
+            (c.warningPupils as number) -
+            (c.unapprovedPupils as number);
           tableArr.push({
             id: c.groupId,
             groupName: `Klass ${c.groupName}`,
-            teachers: c.teachers,
-            totalPupils: c.totalPupils,
-            presence: c.presence,
-            approvedPupils: c.approvedPupils,
-            warningPupils: c.warningPupils,
-            unapprovedPupils: c.unapprovedPupils,
+            teachers: c.teachers as ForecastMyGroupTeacher[],
+            totalPupils: c.totalPupils as number,
+            presence: c.presence as number,
+            approvedPupils: c.approvedPupils as number,
+            warningPupils: c.warningPupils as number,
+            unapprovedPupils: c.unapprovedPupils as number,
             notFilledIn: numberNotFilledIn,
           });
         });
@@ -36,16 +52,20 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
     } else if (groupType === 'G') {
       if (mySubjects.length !== 0) {
         mySubjects.map((s) => {
-          const numberNotFilledIn = s.totalPupils - s.approvedPupils - s.warningPupils - s.unapprovedPupils;
+          const numberNotFilledIn =
+            (s.totalPupils as number) -
+            (s.approvedPupils as number) -
+            (s.warningPupils as number) -
+            (s.unapprovedPupils as number);
           tableArr.push({
             id: s.groupId,
-            groupName: s.groupName,
-            teachers: s.teachers,
-            totalPupils: s.totalPupils,
-            presence: s.presence,
-            approvedPupils: s.approvedPupils,
-            warningPupils: s.warningPupils,
-            unapprovedPupils: s.unapprovedPupils,
+            groupName: s.groupName as string,
+            teachers: s.teachers as ForecastMyGroupTeacher[],
+            totalPupils: s.totalPupils as number,
+            presence: s.presence as number,
+            approvedPupils: s.approvedPupils as number,
+            warningPupils: s.warningPupils as number,
+            unapprovedPupils: s.unapprovedPupils as number,
             notFilledIn: numberNotFilledIn,
           });
         });
@@ -102,7 +122,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
             isActive={sortColumn === h.property}
             aria-description={sortColumn === h.property ? undefined : 'sortera'}
             sortOrder={sortOrder}
-            onClick={() => handleSort(h.property)}
+            onClick={() => handleSort(h.property as string)}
           >
             {h.label}
           </Table.SortButton>
@@ -127,14 +147,14 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
   });
 
   const groupSearchFilter = (q: string, obj: MyGroup) => {
-    if (obj.groupName.toLowerCase().includes(q)) {
+    if (obj?.groupName?.toLowerCase().includes(q)) {
       return true; // Titel
     } else {
       return false;
     }
   };
 
-  const GroupsListSearchFiltered = grouptable.filter(searchFilter(searchQuery, groupSearchFilter));
+  const GroupsListSearchFiltered = grouptable.filter(searchFilter(searchQuery as string, groupSearchFilter));
 
   const groupsListRendered = GroupsListSearchFiltered;
 
@@ -154,7 +174,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
                 // imageUrl=""
                 color="vattjom"
                 rounded
-                initials={g.groupName.split('').slice(0, 2)}
+                initials={`${g.groupName.split('').slice(0, 2)}`}
                 size="sm"
                 accent
               />
@@ -183,16 +203,15 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
                         return /[A-Z]/.test(char);
                       });
 
-                      const secondletterInLastName = t.lastname.split('').slice(1, 2);
+                      const secondletterInLastName = t.lastname && t.lastname.split('').slice(1, 2);
                       const abbreviation = `${initials.join('')}${secondletterInLastName}`;
                       const lastObject = g.teachers[g.teachers.length - 1];
                       return t ? (
                         <span key={`teacher-${t.personId}`}>
                           {groupType === 'K' ? (
-                            <Link
-                              title={`${t?.givenname} ${t?.lastname}`}
-                              href={`mailto:${t?.email}`}
-                            >{t?.email}</Link>
+                            <Link title={`${t?.givenname} ${t?.lastname}`} href={`mailto:${t?.email}`}>
+                              {t?.email}
+                            </Link>
                           ) : (
                             `${t?.givenname} ${t?.lastname} (${abbreviation})`
                           )}
@@ -282,7 +301,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
     });
 
   const footer = (
-    <Table.Footer className={groupRows.length > 10 && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}>
+    <Table.Footer className={groupRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
           Rader per sida:

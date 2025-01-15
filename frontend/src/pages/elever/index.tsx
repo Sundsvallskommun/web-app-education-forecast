@@ -9,9 +9,10 @@ import { shallow } from 'zustand/shallow';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { QueriesDto } from '@interfaces/forecast/forecast';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { User } from '@interfaces/user';
 
 export const Index: React.FC = () => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user as User, shallow);
   const { headmaster, GR } = hasRolePermission(user);
   const pageTitle = 'Elever';
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
@@ -27,7 +28,9 @@ export const Index: React.FC = () => {
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
 
-    !headmaster ? router.push('/mina-amnen-grupper') : setSelectedPeriod(queries.period, queries.schoolYear, 'pupils');
+    !headmaster
+      ? router.push('/mina-amnen-grupper')
+      : setSelectedPeriod(queries.period as string, queries.schoolYear, 'pupils');
   });
 
   return (

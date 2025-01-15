@@ -5,11 +5,32 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 
 import router from 'next/router';
-import { Pupil } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 import { initialsFunction } from '@utils/initials';
 import { EditForecast } from '@components/edit-forecast/edit-forecast.component';
 import dayjs from 'dayjs';
+
+interface TablePupil {
+  id: string | null | undefined;
+  pupil: string | null | undefined;
+  className: string | null | undefined;
+  groupId: string | null | undefined;
+  classGroupId?: string | null | undefined;
+  courseName: string | null | undefined;
+  courseId: string | null | undefined;
+  presence: number | null | undefined;
+  approved: number | null | undefined;
+  warnings: number | null | undefined;
+  forecast: number | null | undefined;
+  unapproved: number | null | undefined;
+  schoolYear: number | null | undefined;
+  teachers: ForecastMyGroupTeacher[] | null | undefined;
+  hasNotFilledIn?: number | null | undefined;
+  notFilledIn?: number | null | undefined;
+  image?: string | null | undefined;
+  forecastPeriod?: string;
+}
 
 export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuery?: string) => {
   const { headmaster } = hasRolePermission(user);
@@ -21,11 +42,11 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
   const singlePupilIsLoading = useForecastStore((s) => s.singlePupilIsLoading);
   const groupWithPupilsIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const [pupilsInGroupData, setPupilsInGroupData] = useState([]);
+  const [pupilsInGroupData, setPupilsInGroupData] = useState<TablePupil[]>([]);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
 
   useEffect(() => {
-    const tableArr = [];
+    const tableArr: TablePupil[] = [];
     if (isSinglePupil) {
       if (pupil.length !== 0) {
         pupil.map((p) => {
@@ -50,7 +71,10 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
     } else {
       if (groupWithPupils.length !== 0) {
         groupWithPupils.map((p) => {
-          const numberNotFilledIn = p.totalSubjects ? p.totalSubjects - p.approved - p.warnings - p.unapproved : 0;
+          const numberNotFilledIn =
+            p.approved && p.warnings && p.unapproved && p.totalSubjects
+              ? p.totalSubjects - p.approved - p.warnings - p.unapproved
+              : 0;
           tableArr.push({
             id: p.pupil,
             pupil: `${p.givenname} ${p.lastname}`,
@@ -63,6 +87,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
             approved: p.approved,
             warnings: p.warnings,
             forecast: p.forecast,
+            forecastPeriod: p.forecastPeriod as string,
             unapproved: p.unapproved,
             schoolYear: p.schoolYear,
             notFilledIn: numberNotFilledIn,
@@ -169,11 +194,13 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
     }
   };
 
-  const singlePupilListSearchFiltered = pupil.filter(searchFilter(searchQuery, singlePupilSearchFilter));
+  const singlePupilListSearchFiltered = pupil.filter(searchFilter(searchQuery as string, singlePupilSearchFilter));
 
   const singlepPupilListRendered = singlePupilListSearchFiltered;
 
-  const manyPupilsListSearchFiltered = pupilsInGroupData.filter(searchFilter(searchQuery, manyPupilSearchFilter));
+  const manyPupilsListSearchFiltered = pupilsInGroupData.filter(
+    searchFilter(searchQuery as string, manyPupilSearchFilter)
+  );
 
   const manyPupilsListRendered = manyPupilsListSearchFiltered;
 
@@ -201,7 +228,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
               <Avatar
                 color="vattjom"
                 rounded
-                initials={p.courseName.split('').slice(0, 2).toString().replace(',', '')}
+                initials={`${p.courseName && p.courseName.split('').slice(0, 2).toString().replace(',', '')}`}
                 size="sm"
                 accent
               />
@@ -225,7 +252,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
                       return /[A-Z]/.test(char);
                     });
 
-                    const secondletterInLastName = v.lastname.split('').slice(1, 2);
+                    const secondletterInLastName = v.lastname && v.lastname.split('').slice(1, 2);
                     const abbreviation = `${initials.join('')}${secondletterInLastName}`;
                     return v ? (
                       <span key={`teacher-${idx}`}>
@@ -402,10 +429,10 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
                   <EditForecast
                     pupil={
                       p && {
-                        pupilId: p?.id,
-                        groupId: p?.groupId,
-                        period: p?.forecastPeriod,
-                        schoolYear: p?.schoolYear,
+                        pupilId: p?.id as string,
+                        groupId: p?.groupId as string,
+                        period: p?.forecastPeriod as string,
+                        schoolYear: p?.schoolYear as number,
                       }
                     }
                     forecast={p.forecast === null ? null : p.forecast}
@@ -420,7 +447,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
 
   const rowdata = isSinglePupil ? pupilRows : groupWithPupilsRows;
   const footer = (
-    <Table.Footer className={rowdata.length > 10 && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}>
+    <Table.Footer className={rowdata.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
           Rader per sida:

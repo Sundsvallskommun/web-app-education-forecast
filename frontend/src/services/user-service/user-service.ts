@@ -26,7 +26,7 @@ const getMe: () => Promise<ServiceResponse<User>> = () => {
 };
 
 interface State {
-  user: User;
+  user: User | undefined;
 }
 interface Actions {
   setUser: (user: User) => void;

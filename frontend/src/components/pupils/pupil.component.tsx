@@ -15,7 +15,7 @@ interface PupilProps {
 export const Pupil: React.FC<PupilProps> = ({ isSinglePupil }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user as User, shallow);
   const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
   const { headmaster } = hasRolePermission(user);
 

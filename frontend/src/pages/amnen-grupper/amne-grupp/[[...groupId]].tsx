@@ -4,16 +4,23 @@ import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
 import { SubjectWithPupils } from '@components/subjects-groups/subject-with-pupils.component';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { QueriesDto } from '@interfaces/forecast/forecast';
+import { MyGroup, QueriesDto } from '@interfaces/forecast/forecast';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { useUserStore } from '@services/user-service/user-service';
 import { formatPreviousPeriod } from '@utils/format-previous-period';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { hasRolePermission } from '@utils/has-role-permission';
+import { User } from '@interfaces/user';
+
+interface Riffle {
+  id: string;
+  link: string;
+  title: string;
+}
 
 export const Index: React.FC = () => {
   const router = useRouter();
-  const user = useUserStore((s) => s.user);
+  const user = useUserStore((s) => s.user as User);
   const { GR } = hasRolePermission(user);
   const routersubjectId = router.query['groupId'];
   const subjectId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
@@ -25,9 +32,9 @@ export const Index: React.FC = () => {
   const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
   const [pageTitle, setPageTitle] = useState<string>();
 
-  const allSubjects = useForecastStore((s) => s.mySubjects);
+  const allSubjects = useForecastStore((s) => s.mySubjects as MyGroup[]);
   const subjectsIsLoading = useForecastStore((s) => s.subjectsIsLoading);
-  const [riffleSubjects, setRiffleSubjects] = useState([]);
+  const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
 
   const currentPeriod = GR ? termPeriod : currentMonthPeriod;
 
@@ -42,7 +49,7 @@ export const Index: React.FC = () => {
       if (subjectId) {
         if (router.pathname.includes(subjectId)) return;
         //await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subject', subjectId);
+        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'subject', subjectId);
         await getPreviousPeriodGroup(subjectId, { period: previousPeriod, schoolYear: previousSchoolYear });
       } else {
         if (!subjectId) {
@@ -64,11 +71,11 @@ export const Index: React.FC = () => {
 
   const breadcrumbLinks = [
     { link: '/amnen-grupper', title: 'Ämnen/grupper', currentPage: false },
-    { link: '', title: pageTitle, currentPage: true },
+    { link: '', title: pageTitle as string, currentPage: true },
   ];
 
   useEffect(() => {
-    const riffleArray = [];
+    const riffleArray: Riffle[] = [];
 
     allSubjects.filter((s) => {
       riffleArray.push({
@@ -88,7 +95,7 @@ export const Index: React.FC = () => {
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}
     >
       <Main>
-        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle} />
+        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle as string} />
         <RifflePrevNext riffleIsLoading={subjectsIsLoading} riffleObjects={riffleSubjects} callback="subject" />
       </Main>
     </DefaultLayout>

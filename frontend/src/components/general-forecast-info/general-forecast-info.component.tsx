@@ -10,12 +10,13 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { User } from '@interfaces/user';
 interface GeneralForecastInfoProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
 
 export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callback }) => {
-  const user = useUserStore((s) => s.user);
+  const user = useUserStore((s) => s.user as User);
   const { GY, GR } = hasRolePermission(user);
   const { CLASSES, MENTORCLASS, PUPIL, PUPILS, SUBJECTS, SUBJECT } = callbackType(callback);
   let grouptype;
@@ -24,12 +25,12 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
   } else if (CLASSES) {
     grouptype = 'K';
   }
-  const { grouptable } = GroupTables(grouptype, user);
+  const { grouptable } = GroupTables(grouptype as string, user);
   const { pupilsInGroupData } = CustomPupilTable(user, PUPIL && true);
   const { mentorClassData } = MentorClassTable(user);
   const { allPupilsTable } = PupilTables();
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
+  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear as number);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
   const { currentMonthPeriod } = thisSchoolYearPeriod();
 
@@ -55,7 +56,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     months.findIndex((x) => x === selectedMonth)
   );
 
-  const year = date.getFullYear();
+  const year = selectedMonth === 'december' ? selectedSchoolYear : date.getFullYear();
   const month = date.getMonth();
 
   const lastDay = new Date(year, month + 1, 0);
@@ -63,7 +64,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   let forecastStatus;
 
-  const daysLeft = (dat1, date2) => {
+  const daysLeft = (dat1: Date, date2: Date) => {
     return Math.round((dat1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
   };
 
@@ -140,7 +141,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   if (PUPILS) {
     allPupilsTable.forEach((g) => {
-      numberOfNotFilledIn += g.notFilledIn;
+      numberOfNotFilledIn += g.notFilledIn as number;
     });
 
     isLoading = allPupilsTable.length === 0;
@@ -148,21 +149,21 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   if (SUBJECT) {
     pupilsInGroupData.forEach((g) => {
-      numberOfNotFilledIn += g.hasNotFilledIn;
+      numberOfNotFilledIn += g.hasNotFilledIn as number;
     });
     isLoading = pupilsInGroupData.length === 0;
   }
 
   if (MENTORCLASS) {
     mentorClassData.forEach((g) => {
-      numberOfNotFilledIn += g.notFilledIn;
+      numberOfNotFilledIn += g.notFilledIn as number;
     });
     isLoading = mentorClassData.length === 0;
   }
 
   if (PUPIL) {
     pupilsInGroupData.forEach((g) => {
-      numberOfNotFilledIn += g.hasNotFilledIn;
+      numberOfNotFilledIn += g.hasNotFilledIn as number;
     });
     isLoading = pupilsInGroupData.length === 0;
   }
@@ -191,6 +192,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
         setSummerPeriod(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return numberOfNotFilledIn !== 0 ? (

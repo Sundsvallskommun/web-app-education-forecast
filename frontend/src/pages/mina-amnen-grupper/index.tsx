@@ -1,5 +1,6 @@
 import { SubjectsGroups } from '@components/subjects-groups/subjects-groups.component';
 import { QueriesDto } from '@interfaces/forecast/forecast';
+import { User } from '@interfaces/user';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
@@ -13,9 +14,9 @@ import { shallow } from 'zustand/shallow';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
-  const { teacher, mentor, headmaster } = hasRolePermission(user);
+  const { teacher, mentor, headmaster } = hasRolePermission(user as User);
   const { getMyClasses } = useForecastStore();
-  const { GR } = hasRolePermission(user);
+  const { GR } = hasRolePermission(user as User);
   const pageTitle = 'Mina ämnen/grupper';
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
@@ -26,18 +27,19 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
+      period: selectedPeriod ? selectedPeriod : (currentPeriod as string),
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
     if (teacher || (mentor && teacher)) {
-      setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
+      setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'subjects');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
+        res.data && router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
       });
     } else if (headmaster) {
       router.push('/amnen-grupper');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>

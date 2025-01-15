@@ -9,9 +9,10 @@ import { Classes } from '@components/classes/classes.component';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { QueriesDto } from '@interfaces/forecast/forecast';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { User } from '@interfaces/user';
 
 export const Index: React.FC = () => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user as User, shallow);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
@@ -26,7 +27,9 @@ export const Index: React.FC = () => {
       period: selectedPeriod ? selectedPeriod : currentPeriod,
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
-    !headmaster ? router.push('/mina-amnen-grupper') : setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'classes');
+    !headmaster
+      ? router.push('/mina-amnen-grupper')
+      : setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'classes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

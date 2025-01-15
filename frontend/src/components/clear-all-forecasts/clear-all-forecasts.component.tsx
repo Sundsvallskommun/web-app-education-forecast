@@ -26,7 +26,7 @@ export const ClearAllForecasts: React.FC = () => {
       const body: clearGroupForecastsDto = {
         groupId: selectedId,
         period: selectedPeriod,
-        schoolYear: selectedSchoolYear,
+        schoolYear: selectedSchoolYear as number,
       };
       clearAll(body).then((res) => {
         if (!res.error) {

@@ -4,6 +4,7 @@ import { Button, Icon, Spinner } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { formatPreviousPeriod } from '@utils/format-previous-period';
+import { User } from '@interfaces/user';
 
 interface PeriodPickerProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
@@ -11,11 +12,11 @@ interface PeriodPickerProps {
 
 export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
   //stores
-  const user = useUserStore((s) => s.user);
+  const user = useUserStore((s) => s.user as User);
   const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedId = useForecastStore((s) => s.selectedId);
+  const selectedId = useForecastStore((s) => s.selectedId as string);
   const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);
 
   //utils
@@ -62,20 +63,26 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
     const { previousPeriod, previousSchoolYear } = formatPreviousPeriod(user, prevPeriod, year);
 
     await setSelectedPeriod(
-      GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : prevPeriod,
-      GY && previousMonthPeriod === 'VT Maj' ? currentYear - 1 : year,
+      GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : (prevPeriod as string),
+      GY && (previousMonthPeriod === 'VT Maj' || previousMonthPeriod === 'HT December')
+        ? currentYear - 1
+        : (year as number),
       callback,
-      selectedId
+      selectedId,
+      user
     );
     callback === 'subject' &&
       (await getPreviousPeriodGroup(selectedId, {
         period: GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : previousPeriod,
-        schoolYear: GY && previousMonthPeriod === 'VT Maj' ? currentYear - 1 : previousSchoolYear,
+        schoolYear:
+          GY && (previousMonthPeriod === 'VT Maj' || previousMonthPeriod === 'HT December')
+            ? currentYear - 1
+            : previousSchoolYear,
       }));
   };
 
   const pickForwardToCurrentHandler = async () => {
-    let currentPeriod;
+    let currentPeriod: string | undefined;
     let year;
     if (GY) {
       currentPeriod = forecastPeriod;
@@ -86,7 +93,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
     }
     const { previousPeriod, previousSchoolYear } = formatPreviousPeriod(user, currentPeriod, year);
 
-    await setSelectedPeriod(currentPeriod, year, callback, selectedId);
+    await setSelectedPeriod(currentPeriod as string, year as number, callback, selectedId, user);
     callback === 'subject' &&
       (await getPreviousPeriodGroup(selectedId, { period: previousPeriod, schoolYear: previousSchoolYear }));
   };
