@@ -1,6 +1,5 @@
 import { SubjectsGroups } from '@components/subjects-groups/subjects-groups.component';
 import { QueriesDto } from '@interfaces/forecast/forecast';
-import { User } from '@interfaces/user';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
@@ -14,9 +13,9 @@ import { shallow } from 'zustand/shallow';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
-  const { teacher, mentor, headmaster } = hasRolePermission(user as User);
+  const { teacher, mentor, headmaster } = hasRolePermission(user);
   const { getMyClasses } = useForecastStore();
-  const { GR } = hasRolePermission(user as User);
+  const { GR } = hasRolePermission(user);
   const pageTitle = 'Mina ämnen/grupper';
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);

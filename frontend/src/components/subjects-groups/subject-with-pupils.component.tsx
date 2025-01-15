@@ -7,7 +7,6 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { CustomPupilTable } from '@components/tables/forecast-pupil-tables.component';
 import { Spinner } from '@sk-web-gui/react';
-import { User } from '@interfaces/user';
 
 interface SubjectWithPupilsProps {
   setPageTitle: Dispatch<SetStateAction<string | undefined>>;
@@ -16,12 +15,12 @@ interface SubjectWithPupilsProps {
 
 export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTitle, pageTitle }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const user = useUserStore((s) => s.user as User as User, shallow);
-  const { teacher } = hasRolePermission(user as User);
+  const user = useUserStore((s) => s.user, shallow);
+  const { teacher } = hasRolePermission(user);
   const selectedId = useForecastStore((s) => s.selectedId as string | undefined);
 
   const { pupilTable, groupWithPupilsIsLoading, manyPupilsListRendered, groupWithPupils, pupilsInGroupData } =
-    CustomPupilTable(user as User, false, searchQuery);
+    CustomPupilTable(user, false, searchQuery);
 
   useEffect(() => {
     !groupWithPupilsIsLoading ? setPageTitle(groupWithPupils[0]?.courseName as string) : setPageTitle('Ämne/grupp');

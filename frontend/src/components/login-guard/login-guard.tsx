@@ -7,7 +7,7 @@ import { useAppContext } from '@contexts/app.context';
 import { appURL } from '@utils/app-url';
 
 export const LoginGuard: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const getMe = useUserStore((s) => s.getMe);
   const {
     canViewAllSubjectsGroups,

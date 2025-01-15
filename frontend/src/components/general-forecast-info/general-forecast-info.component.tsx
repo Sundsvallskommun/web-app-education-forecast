@@ -10,13 +10,12 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { User } from '@interfaces/user';
 interface GeneralForecastInfoProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
 
 export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callback }) => {
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const { GY, GR } = hasRolePermission(user);
   const { CLASSES, MENTORCLASS, PUPIL, PUPILS, SUBJECTS, SUBJECT } = callbackType(callback);
   let grouptype;

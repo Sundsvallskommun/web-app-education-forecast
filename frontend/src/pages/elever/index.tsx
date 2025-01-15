@@ -9,10 +9,9 @@ import { shallow } from 'zustand/shallow';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { QueriesDto } from '@interfaces/forecast/forecast';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { User } from '@interfaces/user';
 
 export const Index: React.FC = () => {
-  const user = useUserStore((s) => s.user as User, shallow);
+  const user = useUserStore((s) => s.user, shallow);
   const { headmaster, GR } = hasRolePermission(user);
   const pageTitle = 'Elever';
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);

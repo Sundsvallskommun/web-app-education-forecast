@@ -8,11 +8,10 @@ import { QueriesDto } from '@interfaces/forecast/forecast';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
-import { User } from '@interfaces/user';
 
 export const Index: React.FC = () => {
   const router = useRouter();
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const { GR, mentor } = hasRolePermission(user);
   const routerclassId = router.query['groupId'];
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;

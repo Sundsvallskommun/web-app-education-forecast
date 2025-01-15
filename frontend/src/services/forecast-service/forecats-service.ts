@@ -213,7 +213,7 @@ interface Actions {
     selectedSchoolYear: number | null,
     callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil',
     objectId?: string | null,
-    user?: User | null
+    user?: User
   ) => Promise<void>;
   getMySubjects: (body: QueriesDto, signal?: AbortSignal) => Promise<ServiceResponse<MyGroup[]>>;
   // getGroup: (groupId: string) => Promise<ServiceResponse<MyGroup>>;
@@ -299,7 +299,7 @@ export const useForecastStore = createWithEqualityFn<
             (await get().getMentorClass(
               objectId,
               { period: selectedPeriod, schoolYear: selectedSchoolYear as number },
-              user as User
+              user
             ));
           PUPILS && (await get().getAllPupils({ period: selectedPeriod, schoolYear: selectedSchoolYear as number }));
           PUPIL &&
@@ -311,7 +311,7 @@ export const useForecastStore = createWithEqualityFn<
                 period: selectedPeriod,
                 schoolYear: selectedSchoolYear as number,
               },
-              user as User
+              user
             ));
           await set(() => ({ listByPeriodIsLoading: false }));
         },

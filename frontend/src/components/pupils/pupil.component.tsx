@@ -15,7 +15,7 @@ interface PupilProps {
 export const Pupil: React.FC<PupilProps> = ({ isSinglePupil }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const user = useUserStore((s) => s.user as User, shallow);
+  const user = useUserStore((s) => s.user, shallow);
   const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
   const { headmaster } = hasRolePermission(user);
 
@@ -42,7 +42,7 @@ export const Pupil: React.FC<PupilProps> = ({ isSinglePupil }) => {
   );
 
   const imageWithText = {
-    initials: `${pupil[0]?.className.slice(0, 2)}`,
+    initials: `${pupil[0]?.className?.slice(0, 2)}`,
     imageText: `${pupil[0]?.className}`,
     textLink: headmaster ? `/klasser/klass/${pupil[0]?.classGroupId}` : `/min-mentorsklass/${pupil[0]?.classGroupId}`,
     color: 'vattjom' as 'vattjom' | 'juniskar' | 'bjornstigen' | 'gronsta',

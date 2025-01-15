@@ -10,7 +10,6 @@ import { useUserStore } from '@services/user-service/user-service';
 import { formatPreviousPeriod } from '@utils/format-previous-period';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { User } from '@interfaces/user';
 
 interface Riffle {
   id: string;
@@ -20,7 +19,7 @@ interface Riffle {
 
 export const Index: React.FC = () => {
   const router = useRouter();
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const { GR } = hasRolePermission(user);
   const routersubjectId = router.query['groupId'];
   const subjectId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;

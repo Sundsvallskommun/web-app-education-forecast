@@ -7,10 +7,9 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useState } from 'react';
 import { MentorClassTable } from '@components/tables/mentor-class-table.component';
 import { Spinner } from '@sk-web-gui/react';
-import { User } from '@interfaces/user';
 
 export const ClassWithPupils: React.FC = () => {
-  const user = useUserStore((s) => s.user as User, shallow);
+  const user = useUserStore((s) => s.user, shallow);
   const [searchQuery, setSearchQuery] = useState('');
   const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
   const { mentor, headmaster } = hasRolePermission(user);

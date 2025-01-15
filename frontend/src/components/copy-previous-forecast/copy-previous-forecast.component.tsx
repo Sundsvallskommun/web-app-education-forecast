@@ -5,16 +5,15 @@ import { useUserStore } from '@services/user-service/user-service';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
-import { User } from '@interfaces/user';
 
 export const CopyPreviousForecast: React.FC = () => {
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const subject = useForecastStore((s) => s.groupWithPupils);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear as number);
   const selectedId = useForecastStore((s) => s.selectedId);
   const copyPreviousForecast = useForecastStore((s) => s.copyPreviousForecast);
-  const { GR, GY } = hasRolePermission(user as User);
+  const { GR, GY } = hasRolePermission(user);
   const [isOpen, setisOpen] = useState(false);
   const [summerPeriod, setSummerPeriod] = useState(false);
 

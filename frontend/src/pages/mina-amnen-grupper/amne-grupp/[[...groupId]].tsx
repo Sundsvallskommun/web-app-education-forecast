@@ -10,7 +10,6 @@ import { formatPreviousPeriod } from '@utils/format-previous-period';
 import { useUserStore } from '@services/user-service/user-service';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { User } from '@interfaces/user';
 
 interface Riffle {
   id: string;
@@ -22,7 +21,7 @@ export const Index: React.FC = () => {
   const router = useRouter();
   const routersubjectId = router.query['groupId'];
   const subjectId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const { GR, mentor, headmaster } = hasRolePermission(user);
 
   const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);

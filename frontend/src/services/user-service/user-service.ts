@@ -26,7 +26,7 @@ const getMe: () => Promise<ServiceResponse<User>> = () => {
 };
 
 interface State {
-  user: User | undefined;
+  user: User;
 }
 interface Actions {
   setUser: (user: User) => void;
@@ -47,7 +47,7 @@ export const useUserStore = createWithEqualityFn<State & Actions>()(
         let user = get().user;
         const res = await getMe();
         if (!res.error) {
-          user = res.data;
+          res.data ? (user = res.data) : (user = emptyUser);
           set(() => ({ user: user }));
         }
         return { data: user };

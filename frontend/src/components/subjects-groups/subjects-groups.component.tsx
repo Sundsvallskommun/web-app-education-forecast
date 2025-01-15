@@ -13,7 +13,7 @@ interface SubjectsGroupsProps {
 export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const user = useUserStore((s) => s.user as User, shallow);
+  const user = useUserStore((s) => s.user, shallow);
   const { mySubjects, grouplistTable, groupsListRendered, grouptable } = GroupTables('G', user, searchQuery);
   const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
   const subjectsIsLoading = useForecastStore((s) => s.subjectsIsLoading);

@@ -9,10 +9,9 @@ import router from 'next/router';
 import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { User } from '@interfaces/user';
 
 export const Index: React.FC = () => {
-  const user = useUserStore((s) => s.user as User, shallow);
+  const user = useUserStore((s) => s.user, shallow);
   const { headmaster, GR } = hasRolePermission(user);
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);

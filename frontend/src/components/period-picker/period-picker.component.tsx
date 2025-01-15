@@ -4,7 +4,6 @@ import { Button, Icon, Spinner } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { formatPreviousPeriod } from '@utils/format-previous-period';
-import { User } from '@interfaces/user';
 
 interface PeriodPickerProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
@@ -12,7 +11,7 @@ interface PeriodPickerProps {
 
 export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
   //stores
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);

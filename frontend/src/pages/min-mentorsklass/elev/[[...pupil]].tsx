@@ -9,7 +9,6 @@ import { QueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
-import { User } from '@interfaces/user';
 
 interface Riffle {
   id: string;
@@ -21,7 +20,7 @@ export const Index: React.FC = () => {
   const router = useRouter();
   const routerpupilId = router.query['pupil'];
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const { GR, teacher } = hasRolePermission(user);
   const pupil = useForecastStore((s) => s.pupil);
   const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();

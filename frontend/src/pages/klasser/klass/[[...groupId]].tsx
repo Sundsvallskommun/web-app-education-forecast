@@ -9,7 +9,6 @@ import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
-import { User } from '@interfaces/user';
 
 interface Riffle {
   id: string;
@@ -20,7 +19,7 @@ interface Riffle {
 export const Index: React.FC = () => {
   const router = useRouter();
   const routerclassId = router.query['groupId'];
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const { GR } = hasRolePermission(user);
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;
   const mentorClass = useForecastStore((s) => s.mentorClassGrid);

@@ -11,7 +11,6 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { ClearAllForecasts } from '@components/clear-all-forecasts/clear-all-forecasts.component';
 import { GeneralForecastInfo } from '@components/general-forecast-info/general-forecast-info.component';
 import { useDebouncedCallback } from '@react-hookz/web';
-import { User } from '@interfaces/user';
 
 interface HeadingMenuProps {
   pageTitle: string;
@@ -40,7 +39,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   setSearchQuery,
   searchPlaceholder,
 }) => {
-  const user = useUserStore((s) => s.user as User);
+  const user = useUserStore((s) => s.user);
   const [searchTerm, setSearchTerm] = useState(searchQuery);
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher } = hasRolePermission(user);

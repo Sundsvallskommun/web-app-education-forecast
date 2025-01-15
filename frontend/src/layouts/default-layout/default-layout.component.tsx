@@ -6,7 +6,6 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { shallow } from 'zustand/shallow';
 import { Breadcrumb } from '@sk-web-gui/react';
-import { User } from '@interfaces/user';
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -37,7 +36,7 @@ export default function DefaultLayout({
   breadcrumbsIsLoading,
 }: DefaultLayoutProps) {
   const router = useRouter();
-  const user = useUserStore((s) => s.user as User, shallow);
+  const user = useUserStore((s) => s.user, shallow);
   const headerSubtitle = user.school;
   const layoutTitle = `${process.env.NEXT_PUBLIC_APP_NAME}${headerSubtitle ? ` - ${headerSubtitle}` : ''}`;
   const fullTitle = postTitle ? `${layoutTitle} - ${postTitle}` : `${layoutTitle}`;
