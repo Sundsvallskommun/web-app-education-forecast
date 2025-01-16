@@ -15,7 +15,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
   const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedId = useForecastStore((s) => s.selectedId as string);
+  const selectedId = useForecastStore((s) => s.selectedId);
   const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);
 
   //utils
@@ -30,12 +30,12 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
     schoolYear,
   } = thisSchoolYearPeriod();
 
-  let forecastPeriod;
-  let DOMPeriod;
+  let forecastPeriod: string = currentMonthPeriod;
+  let DOMPeriod: string = `${selectedPeriod?.slice(2)}`;
 
   if (GY) {
     forecastPeriod = currentMonthPeriod;
-    DOMPeriod = selectedPeriod?.split('').slice(2);
+    DOMPeriod = `${selectedPeriod?.slice(2)}`;
   } else {
     forecastPeriod = termPeriod;
     DOMPeriod = `${selectedPeriod} ${selectedPeriod === 'VT' ? currentYear : selectedSchoolYear}`;
@@ -71,6 +71,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
       user
     );
     callback === 'subject' &&
+      selectedId &&
       (await getPreviousPeriodGroup(selectedId, {
         period: GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : previousPeriod,
         schoolYear:
@@ -81,7 +82,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
   };
 
   const pickForwardToCurrentHandler = async () => {
-    let currentPeriod: string | undefined;
+    let currentPeriod: string = forecastPeriod;
     let year;
     if (GY) {
       currentPeriod = forecastPeriod;
@@ -94,6 +95,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
 
     await setSelectedPeriod(currentPeriod as string, year as number, callback, selectedId, user);
     callback === 'subject' &&
+      selectedId &&
       (await getPreviousPeriodGroup(selectedId, { period: previousPeriod, schoolYear: previousSchoolYear }));
   };
 

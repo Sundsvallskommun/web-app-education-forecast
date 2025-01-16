@@ -34,7 +34,7 @@ export const thisSchoolYearPeriod = () => {
   }
 
   let schoolYear = currentYear;
-  let termPeriod;
+  let termPeriod = 'HT';
   if (currentMonth >= 5 && currentMonth <= 11) {
     schoolYear = currentYear;
     termPeriod = 'HT';

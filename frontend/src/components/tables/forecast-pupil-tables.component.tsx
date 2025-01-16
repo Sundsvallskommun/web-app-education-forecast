@@ -12,24 +12,24 @@ import { EditForecast } from '@components/edit-forecast/edit-forecast.component'
 import dayjs from 'dayjs';
 
 interface TablePupil {
-  id: string | null | undefined;
-  pupil: string | null | undefined;
-  className: string | null | undefined;
-  groupId: string | null | undefined;
-  classGroupId?: string | null | undefined;
-  courseName: string | null | undefined;
-  courseId: string | null | undefined;
-  presence: number | null | undefined;
-  approved: number | null | undefined;
-  warnings: number | null | undefined;
-  forecast: number | null | undefined;
-  unapproved: number | null | undefined;
-  schoolYear: number | null | undefined;
-  teachers: ForecastMyGroupTeacher[] | null | undefined;
-  hasNotFilledIn?: number | null | undefined;
-  notFilledIn?: number | null | undefined;
-  image?: string | null | undefined;
-  forecastPeriod?: string;
+  id?: string | null;
+  pupil?: string | null;
+  className?: string | null;
+  groupId?: string | null;
+  classGroupId?: string | null;
+  courseName?: string | null;
+  courseId?: string | null;
+  presence?: number | null;
+  approved?: number | null;
+  warnings?: number | null;
+  forecast?: number | null;
+  unapproved?: number | null;
+  schoolYear?: number | null;
+  teachers?: ForecastMyGroupTeacher[] | null;
+  hasNotFilledIn?: number | null;
+  notFilledIn?: number | null;
+  image?: string | null;
+  forecastPeriod?: string | null;
 }
 
 export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuery?: string) => {
@@ -42,6 +42,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
   const singlePupilIsLoading = useForecastStore((s) => s.singlePupilIsLoading);
   const groupWithPupilsIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
+  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const [pupilsInGroupData, setPupilsInGroupData] = useState<TablePupil[]>([]);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
 
@@ -72,9 +73,10 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
       if (groupWithPupils.length !== 0) {
         groupWithPupils.map((p) => {
           const numberNotFilledIn =
-            p.approved && p.warnings && p.unapproved && p.totalSubjects
-              ? p.totalSubjects - p.approved - p.warnings - p.unapproved
-              : 0;
+            (p?.totalSubjects as number) -
+            (p?.approved as number) -
+            (p?.warnings as number) -
+            (p?.unapproved as number);
           tableArr.push({
             id: p.pupil,
             pupil: `${p.givenname} ${p.lastname}`,
@@ -87,7 +89,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
             approved: p.approved,
             warnings: p.warnings,
             forecast: p.forecast,
-            forecastPeriod: p.forecastPeriod as string,
+            forecastPeriod: p.forecastPeriod,
             unapproved: p.unapproved,
             schoolYear: p.schoolYear,
             notFilledIn: numberNotFilledIn,
@@ -206,9 +208,13 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
 
   // rows single pupil
   const pupilRows = singlepPupilListRendered
-    .sort((a, b) => {
+    .sort((a: Pupil, b: Pupil) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn as keyof Pupil]}` < `${b[sortColumn as keyof Pupil]}`
+        ? order
+        : `${a[sortColumn as keyof Pupil]}` > `${b[sortColumn as keyof Pupil]}`
+          ? order * -1
+          : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -327,9 +333,13 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
 
   // rows group with pupils
   const groupWithPupilsRows = manyPupilsListRendered
-    .sort((a, b) => {
+    .sort((a: TablePupil, b: TablePupil) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn as keyof TablePupil]}` < `${b[sortColumn as keyof TablePupil]}`
+        ? order
+        : `${a[sortColumn as keyof TablePupil]}` > `${b[sortColumn as keyof TablePupil]}`
+          ? order * -1
+          : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -429,10 +439,10 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
                   <EditForecast
                     pupil={
                       p && {
-                        pupilId: p?.id as string,
-                        groupId: p?.groupId as string,
-                        period: p?.forecastPeriod as string,
-                        schoolYear: p?.schoolYear as number,
+                        pupilId: p.id ? p.id : '',
+                        groupId: p.groupId ? p.groupId : '',
+                        period: p.forecastPeriod ? p.forecastPeriod : selectedPeriod,
+                        schoolYear: p.schoolYear ? p.schoolYear : selectedSchoolYear,
                       }
                     }
                     forecast={p.forecast === null ? null : p.forecast}

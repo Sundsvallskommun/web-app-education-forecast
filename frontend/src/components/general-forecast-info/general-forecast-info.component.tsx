@@ -132,7 +132,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
   let numberOfNotFilledIn = 0;
   if (SUBJECTS || CLASSES) {
     grouptable.forEach((g) => {
-      numberOfNotFilledIn += g.notFilledIn;
+      numberOfNotFilledIn += g.notFilledIn ? g.notFilledIn : 0;
     });
 
     isLoading = grouptable.length === 0;
@@ -140,7 +140,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   if (PUPILS) {
     allPupilsTable.forEach((g) => {
-      numberOfNotFilledIn += g.notFilledIn as number;
+      numberOfNotFilledIn += g.notFilledIn ? g.notFilledIn : 0;
     });
 
     isLoading = allPupilsTable.length === 0;
@@ -148,21 +148,21 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   if (SUBJECT) {
     pupilsInGroupData.forEach((g) => {
-      numberOfNotFilledIn += g.hasNotFilledIn as number;
+      numberOfNotFilledIn += g.hasNotFilledIn ? g.hasNotFilledIn : 0;
     });
     isLoading = pupilsInGroupData.length === 0;
   }
 
   if (MENTORCLASS) {
     mentorClassData.forEach((g) => {
-      numberOfNotFilledIn += g.notFilledIn as number;
+      numberOfNotFilledIn += g.notFilledIn ? g.notFilledIn : 0;
     });
     isLoading = mentorClassData.length === 0;
   }
 
   if (PUPIL) {
     pupilsInGroupData.forEach((g) => {
-      numberOfNotFilledIn += g.hasNotFilledIn as number;
+      numberOfNotFilledIn += g.hasNotFilledIn ? g.hasNotFilledIn : 0;
     });
     isLoading = pupilsInGroupData.length === 0;
   }

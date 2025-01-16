@@ -6,19 +6,19 @@ import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 
 interface AllPupils {
-  id: string | null | undefined;
-  pupil: string | null | undefined;
-  className: string | null | undefined;
-  groupId: string | null | undefined;
-  teachers: ForecastMyGroupTeacher[] | null | undefined;
-  presence: number | null | undefined;
-  forecast: number | null | undefined;
-  approved: number | null | undefined;
-  warnings: number | null | undefined;
-  unapproved: number | null | undefined;
-  notFilledIn: number | null | undefined;
-  totalSubjects: number | null | undefined;
-  image: string | null | undefined;
+  id?: string | null;
+  pupil?: string | null;
+  className?: string | null;
+  groupId?: string | null;
+  teachers?: ForecastMyGroupTeacher[] | null;
+  presence?: number | null;
+  forecast?: number | null;
+  approved?: number | null;
+  warnings?: number | null;
+  unapproved?: number | null;
+  notFilledIn: number | null;
+  totalSubjects?: number | null;
+  image?: string | null;
 }
 
 export const PupilTables = (searchQuery?: string) => {
@@ -31,7 +31,7 @@ export const PupilTables = (searchQuery?: string) => {
     if (allPupils.length !== 0) {
       allPupils.map((p) => {
         const numberNotFilledIn =
-          p.approved && p.warnings && p.unapproved && p.totalSubjects - p.approved - p.warnings - p.unapproved;
+          (p?.totalSubjects as number) - (p?.approved as number) - (p?.warnings as number) - (p?.unapproved as number);
         tableArr.push({
           id: p.pupil,
           pupil: `${p.givenname} ${p.lastname}`,
@@ -110,9 +110,13 @@ export const PupilTables = (searchQuery?: string) => {
 
   //rows all pupils
   const pupilRows = pupilListRendered
-    .sort((a, b) => {
+    .sort((a: AllPupils, b: AllPupils) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn as keyof AllPupils]}` < `${b[sortColumn as keyof AllPupils]}`
+        ? order
+        : `${a[sortColumn as keyof AllPupils]}` > `${b[sortColumn as keyof AllPupils]}`
+          ? order * -1
+          : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -175,7 +179,7 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -191,7 +195,7 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -207,7 +211,7 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge

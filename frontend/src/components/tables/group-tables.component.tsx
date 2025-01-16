@@ -8,15 +8,15 @@ import { useEffect, useState } from 'react';
 //import { IsGradedForecast } from '@utils/is-grade-forecast';
 
 interface GroupTable {
-  id: string;
-  groupName: string;
-  teachers: ForecastMyGroupTeacher[];
-  totalPupils: number;
-  presence: number;
-  approvedPupils: number;
-  warningPupils: number;
-  unapprovedPupils: number;
-  notFilledIn: number;
+  id?: string | null;
+  groupName?: string | null;
+  teachers?: ForecastMyGroupTeacher[] | null;
+  totalPupils: number | null;
+  presence?: number | null;
+  approvedPupils: number | null;
+  warningPupils: number | null;
+  unapprovedPupils: number | null;
+  notFilledIn: number | null;
 }
 
 //Table structure for group type tables
@@ -32,19 +32,19 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
       if (myClasses.length !== 0) {
         myClasses.map((c) => {
           const numberNotFilledIn =
-            (c.totalPupils as number) -
-            (c.approvedPupils as number) -
-            (c.warningPupils as number) -
-            (c.unapprovedPupils as number);
+            (c?.totalPupils as number) -
+            (c?.approvedPupils as number) -
+            (c?.warningPupils as number) -
+            (c?.unapprovedPupils as number);
           tableArr.push({
             id: c.groupId,
             groupName: `Klass ${c.groupName}`,
-            teachers: c.teachers as ForecastMyGroupTeacher[],
-            totalPupils: c.totalPupils as number,
-            presence: c.presence as number,
-            approvedPupils: c.approvedPupils as number,
-            warningPupils: c.warningPupils as number,
-            unapprovedPupils: c.unapprovedPupils as number,
+            teachers: c.teachers,
+            totalPupils: c.totalPupils,
+            presence: c.presence,
+            approvedPupils: c.approvedPupils,
+            warningPupils: c.warningPupils,
+            unapprovedPupils: c.unapprovedPupils,
             notFilledIn: numberNotFilledIn,
           });
         });
@@ -53,19 +53,19 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
       if (mySubjects.length !== 0) {
         mySubjects.map((s) => {
           const numberNotFilledIn =
-            (s.totalPupils as number) -
-            (s.approvedPupils as number) -
-            (s.warningPupils as number) -
-            (s.unapprovedPupils as number);
+            (s?.totalPupils as number) -
+            (s?.approvedPupils as number) -
+            (s?.warningPupils as number) -
+            (s?.unapprovedPupils as number);
           tableArr.push({
             id: s.groupId,
-            groupName: s.groupName as string,
-            teachers: s.teachers as ForecastMyGroupTeacher[],
-            totalPupils: s.totalPupils as number,
-            presence: s.presence as number,
-            approvedPupils: s.approvedPupils as number,
-            warningPupils: s.warningPupils as number,
-            unapprovedPupils: s.unapprovedPupils as number,
+            groupName: s.groupName,
+            teachers: s.teachers,
+            totalPupils: s.totalPupils,
+            presence: s.presence,
+            approvedPupils: s.approvedPupils,
+            warningPupils: s.warningPupils,
+            unapprovedPupils: s.unapprovedPupils,
             notFilledIn: numberNotFilledIn,
           });
         });
@@ -160,9 +160,13 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
 
   //rows
   const groupRows = groupsListRendered
-    .sort((a, b) => {
+    .sort((a: GroupTable, b: GroupTable) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn as keyof GroupTable]}` < `${b[sortColumn as keyof GroupTable]}`
+        ? order
+        : `${a[sortColumn as keyof GroupTable]}` > `${b[sortColumn as keyof GroupTable]}`
+          ? order * -1
+          : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((g, idx: number) => {
@@ -174,7 +178,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                 // imageUrl=""
                 color="vattjom"
                 rounded
-                initials={`${g.groupName.split('').slice(0, 2)}`}
+                initials={`${g.groupName && g.groupName.split('').slice(0, 2)}`}
                 size="sm"
                 accent
               />
@@ -205,7 +209,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
 
                       const secondletterInLastName = t.lastname && t.lastname.split('').slice(1, 2);
                       const abbreviation = `${initials.join('')}${secondletterInLastName}`;
-                      const lastObject = g.teachers[g.teachers.length - 1];
+                      const lastObject = g.teachers && g.teachers[g.teachers.length - 1];
                       return t ? (
                         <span key={`teacher-${t.personId}`}>
                           {groupType === 'K' ? (
@@ -215,7 +219,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                           ) : (
                             `${t?.givenname} ${t?.lastname} (${abbreviation})`
                           )}
-                          {g.teachers.length > 1 && t.personId !== lastObject.personId && ','}
+                          {g.teachers && g.teachers.length > 1 && t.personId !== lastObject?.personId && ','}
                           {'  '}
                         </span>
                       ) : (
@@ -239,7 +243,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -255,7 +259,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -271,7 +275,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge

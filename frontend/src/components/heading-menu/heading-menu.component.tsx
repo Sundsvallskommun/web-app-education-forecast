@@ -40,7 +40,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   searchPlaceholder,
 }) => {
   const user = useUserStore((s) => s.user);
-  const [searchTerm, setSearchTerm] = useState(searchQuery);
+  const [searchTerm, setSearchTerm] = useState(searchQuery ?? '');
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher } = hasRolePermission(user);
   const subject = useForecastStore((s) => s.groupWithPupils);
@@ -162,7 +162,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                   <ClearAllForecasts />
                   <FormControl className="max-medium-device:w-full">
                     <SearchField
-                      value={searchTerm as string}
+                      value={searchTerm}
                       onChange={onSearchChangeHandler}
                       onSearch={onSearchHandler}
                       placeholder={placeHolder}

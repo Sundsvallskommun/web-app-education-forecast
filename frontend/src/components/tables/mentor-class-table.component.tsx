@@ -8,18 +8,18 @@ import { GridForecast, Pupil } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 
 interface MentorClassTable {
-  id: string | undefined;
-  pupil: string | undefined;
-  className: string | null | undefined;
-  presence: number | null | undefined;
-  approved?: number | null | undefined;
-  warnings?: number | null | undefined;
-  unapproved?: number | null | undefined;
-  schoolYear?: number | null | undefined;
-  notFilledIn: number | null | undefined;
-  totalSubjects?: number | null | undefined;
-  forecast?: number | null | undefined;
-  image?: string | null | undefined;
+  id?: string;
+  pupil?: string;
+  className?: string | null;
+  presence?: number | null;
+  approved?: number | null;
+  warnings?: number | null;
+  unapproved?: number | null;
+  schoolYear?: number | null;
+  notFilledIn?: number | null;
+  totalSubjects?: number | null;
+  forecast?: number | null;
+  image?: string | null;
 }
 
 interface SubjectHeaders {
@@ -101,18 +101,10 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   }, [mentorClass, mentorClassGrid]);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
-  const [sortColumn, setSortColumn] = useState<string>('pupil');
+
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
-
-  const handleSort = (column: string) => {
-    if (sortColumn !== column) {
-      setSortColumn(column);
-    } else {
-      setSortOrder(sortOrder === SortMode.ASC ? SortMode.DESC : SortMode.ASC);
-    }
-  };
 
   const mentorclassHeaderLabels = [
     { label: 'Namn', property: 'pupil', isColumnSortable: true },
@@ -122,6 +114,16 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
   ];
+
+  const [sortColumn, setSortColumn] = useState<string>('pupil');
+
+  const handleSort = (column: string) => {
+    if (sortColumn !== column) {
+      setSortColumn(column);
+    } else {
+      setSortOrder(sortOrder === SortMode.ASC ? SortMode.DESC : SortMode.ASC);
+    }
+  };
 
   const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }, ...subjectHeaders];
 
@@ -161,7 +163,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     searchFilter(searchQuery as string, mentorclassSearchFilter)
   );
 
-  const mentorClassListRendered = mentorClassListSearchFiltered;
+  const mentorClassListRendered: MentorClassTable[] = mentorClassListSearchFiltered;
 
   const iconType = (prop: number) => {
     if (prop === 1) {
@@ -184,9 +186,13 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   };
 
   const mentorclassRows = mentorClassListRendered
-    .sort((a, b) => {
+    .sort((a: MentorClassTable, b: MentorClassTable) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn as keyof MentorClassTable]}` < `${b[sortColumn as keyof MentorClassTable]}`
+        ? order
+        : `${a[sortColumn as keyof MentorClassTable]}` > `${b[sortColumn as keyof MentorClassTable]}`
+          ? order * -1
+          : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -218,8 +224,13 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
               <Table.Column key={index} className="border-r-1">
                 <div className="w-full flex justify-center items-center">
                   {s.label in p ? (
-                    p[s.label] !== null ? (
-                      <Icon.Padded inverted color={iconColor(p[s.label])} rounded name={iconType(p[s.label])} />
+                    p[s.label as keyof MentorClassTable] !== null ? (
+                      <Icon.Padded
+                        inverted
+                        color={iconColor(p[s.label as keyof MentorClassTable] as number)}
+                        rounded
+                        name={iconType(p[s.label as keyof MentorClassTable] as number)}
+                      />
                     ) : (
                       <Icon size={14} name="minus" />
                     )
@@ -276,7 +287,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     inverted
                     rounded
                     color={!p.approved || p.approved === 0 ? 'tertiary' : 'gronsta'}
-                    counter={(p.approved == 0 ? 0 : p.approved) as string | number}
+                    counter={!p.approved || p.approved == 0 ? 0 : p.approved}
                   />
                 )}
               </span>
@@ -292,7 +303,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.warnings || p.warnings === 0}
                     color={!p.warnings || p.warnings === 0 ? 'tertiary' : 'warning'}
-                    counter={(p.warnings == 0 ? 0 : p.warnings) as string | number}
+                    counter={!p.warnings || p.warnings == 0 ? 0 : p.warnings}
                   />
                 )}
               </span>
@@ -308,7 +319,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.unapproved || p.unapproved === 0}
                     color={!p.unapproved || p.unapproved === 0 ? 'tertiary' : 'error'}
-                    counter={(p.unapproved == 0 ? 0 : p.unapproved) as string | number}
+                    counter={!p.unapproved || p.unapproved == 0 ? 0 : p.unapproved}
                   />
                 )}
               </span>

@@ -17,7 +17,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const [searchQuery, setSearchQuery] = useState('');
   const user = useUserStore((s) => s.user, shallow);
   const { teacher } = hasRolePermission(user);
-  const selectedId = useForecastStore((s) => s.selectedId as string | undefined);
+  const selectedId = useForecastStore((s) => s.selectedId);
 
   const { pupilTable, groupWithPupilsIsLoading, manyPupilsListRendered, groupWithPupils, pupilsInGroupData } =
     CustomPupilTable(user, false, searchQuery);

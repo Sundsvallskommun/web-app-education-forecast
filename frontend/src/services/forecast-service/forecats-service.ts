@@ -191,7 +191,7 @@ interface State {
   pupil: Pupil[];
   selectedSchoolYear: number;
   selectedPeriod: string;
-  selectedId: string | null;
+  selectedId?: string;
 }
 interface Actions {
   setSubjects: (mySubjects: MyGroup[] | ((prevState: MyGroup[]) => MyGroup[])) => Promise<void>;
@@ -281,7 +281,7 @@ export const useForecastStore = createWithEqualityFn<
           await set(() => ({
             selectedPeriod: selectedPeriod,
             selectedSchoolYear: selectedSchoolYear,
-            selectedId: objectId ? objectId : null,
+            selectedId: objectId ? objectId : '',
             listByPeriodIsLoading: true,
           }));
 
