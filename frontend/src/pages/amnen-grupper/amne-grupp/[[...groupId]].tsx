@@ -48,7 +48,12 @@ export const Index: React.FC = () => {
       if (subjectId) {
         if (router.pathname.includes(subjectId)) return;
         //await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
-        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'subject', subjectId);
+        await setSelectedPeriod(
+          myGroup.period ? myGroup.period : selectedPeriod,
+          myGroup.schoolYear,
+          'subject',
+          subjectId
+        );
         await getPreviousPeriodGroup(subjectId, { period: previousPeriod, schoolYear: previousSchoolYear });
       } else {
         if (!subjectId) {
@@ -70,7 +75,7 @@ export const Index: React.FC = () => {
 
   const breadcrumbLinks = [
     { link: '/amnen-grupper', title: 'Ämnen/grupper', currentPage: false },
-    { link: '', title: pageTitle as string, currentPage: true },
+    { link: '', title: pageTitle ? pageTitle : '...', currentPage: true },
   ];
 
   useEffect(() => {
@@ -94,7 +99,7 @@ export const Index: React.FC = () => {
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}
     >
       <Main>
-        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle as string} />
+        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle ?? '...'} />
         <RifflePrevNext riffleIsLoading={subjectsIsLoading} riffleObjects={riffleSubjects} callback="subject" />
       </Main>
     </DefaultLayout>

@@ -43,8 +43,8 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'pupils');
-        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'pupil', pupilId);
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'pupils');
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'pupil', pupilId);
       } else {
         if (!pupilId) {
           router.push('/klasser');
@@ -68,7 +68,7 @@ export const Index: React.FC = () => {
 
     allPupils.filter((p) => {
       riffleArray.push({
-        id: p.pupil as string,
+        id: p.pupil ?? pupilId ?? '',
         link: `/klasser/klass/elev/${p.pupil}`,
         title: `${p.givenname} ${p.lastname}`,
       });
@@ -79,7 +79,11 @@ export const Index: React.FC = () => {
 
   const breadcrumbLinks = [
     { link: '/klasser', title: 'Klasser', currentPage: false },
-    { link: `/klasser/klass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className as string, currentPage: false },
+    {
+      link: `/klasser/klass/${pupil[0]?.classGroupId}`,
+      title: pupil[0]?.className ?? 'Elev',
+      currentPage: false,
+    },
     {
       link: `/klasser/klass/elev/${pupil[0]?.pupil}`,
       title: `${pupil[0]?.givenname} ${pupil[0]?.lastname}`,

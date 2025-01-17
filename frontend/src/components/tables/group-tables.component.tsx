@@ -19,6 +19,12 @@ interface GroupTable {
   notFilledIn: number | null;
 }
 
+interface GroupHeaders {
+  label?: string;
+  property?: keyof GroupTable;
+  isColumnSortable: boolean;
+}
+
 //Table structure for group type tables
 export const GroupTables = (groupType: string, user: User, searchQuery?: string) => {
   const { headmaster, mentor, teacher } = hasRolePermission(user);
@@ -32,10 +38,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
       if (myClasses.length !== 0) {
         myClasses.map((c) => {
           const numberNotFilledIn =
-            (c?.totalPupils as number) -
-            (c?.approvedPupils as number) -
-            (c?.warningPupils as number) -
-            (c?.unapprovedPupils as number);
+            (c?.totalPupils || 0) - (c?.approvedPupils || 0) - (c?.warningPupils || 0) - (c?.unapprovedPupils || 0);
           tableArr.push({
             id: c.groupId,
             groupName: `Klass ${c.groupName}`,
@@ -53,10 +56,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
       if (mySubjects.length !== 0) {
         mySubjects.map((s) => {
           const numberNotFilledIn =
-            (s?.totalPupils as number) -
-            (s?.approvedPupils as number) -
-            (s?.warningPupils as number) -
-            (s?.unapprovedPupils as number);
+            (s?.totalPupils || 0) - (s?.approvedPupils || 0) - (s?.warningPupils || 0) - (s?.unapprovedPupils || 0);
           tableArr.push({
             id: s.groupId,
             groupName: s.groupName,
@@ -77,12 +77,12 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
   }, [groupType === 'K' ? myClasses : mySubjects]);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
-  const [sortColumn, setSortColumn] = useState<string>('groupName');
+  const [sortColumn, setSortColumn] = useState<keyof GroupTable>('groupName');
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: keyof GroupTable) => {
     if (sortColumn !== column) {
       setSortColumn(column);
     } else {
@@ -90,7 +90,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
     }
   };
 
-  const subjectsHeaderLabels = [
+  const subjectsHeaderLabels: GroupHeaders[] = [
     { label: 'Grupp', property: 'groupName', isColumnSortable: true },
     !mentor && !teacher
       ? { label: 'Lärare', property: 'teachers', isColumnSortable: true }
@@ -103,14 +103,14 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
   ];
 
-  const classesHeaderLabels = [
-    { label: 'Namn', property: 'pupil', isColumnSortable: true },
+  const classesHeaderLabels: GroupHeaders[] = [
+    //{ label: 'Namn', property: 'pupil', isColumnSortable: true },
     { label: 'Mentor', property: 'teachers', isColumnSortable: true },
     { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true },
-    { label: 'Når målen', property: 'approved', isColumnSortable: true },
-    { label: 'Varning', property: 'warning', isColumnSortable: true },
-    { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
+    { label: 'Når målen', property: 'approvedPupils', isColumnSortable: true },
+    { label: 'Varning', property: 'warningPupils', isColumnSortable: true },
+    { label: 'Når ej målen', property: 'unapprovedPupils', isColumnSortable: true },
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
   ];
 
@@ -122,7 +122,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
             isActive={sortColumn === h.property}
             aria-description={sortColumn === h.property ? undefined : 'sortera'}
             sortOrder={sortOrder}
-            onClick={() => handleSort(h.property as string)}
+            onClick={() => handleSort(h.property ? h.property : 'groupName')}
           >
             {h.label}
           </Table.SortButton>
@@ -138,7 +138,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
           isActive={sortColumn === h.property}
           aria-description={sortColumn === h.property ? undefined : 'sortera'}
           sortOrder={sortOrder}
-          onClick={() => handleSort(h.property)}
+          onClick={() => handleSort(h.property ? h.property : 'groupName')}
         >
           {h.label}
         </Table.SortButton>
@@ -154,7 +154,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
     }
   };
 
-  const GroupsListSearchFiltered = grouptable.filter(searchFilter(searchQuery as string, groupSearchFilter));
+  const GroupsListSearchFiltered = grouptable.filter(searchFilter(searchQuery ? searchQuery : '', groupSearchFilter));
 
   const groupsListRendered = GroupsListSearchFiltered;
 
@@ -162,11 +162,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
   const groupRows = groupsListRendered
     .sort((a: GroupTable, b: GroupTable) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return `${a[sortColumn as keyof GroupTable]}` < `${b[sortColumn as keyof GroupTable]}`
-        ? order
-        : `${a[sortColumn as keyof GroupTable]}` > `${b[sortColumn as keyof GroupTable]}`
-          ? order * -1
-          : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((g, idx: number) => {

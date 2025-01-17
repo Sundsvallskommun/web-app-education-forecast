@@ -28,7 +28,7 @@ export const Index: React.FC = () => {
     };
     !headmaster
       ? router.push('/mina-amnen-grupper')
-      : setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'classes');
+      : setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

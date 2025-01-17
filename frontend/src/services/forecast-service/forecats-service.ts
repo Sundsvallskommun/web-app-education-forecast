@@ -302,7 +302,7 @@ export const useForecastStore = createWithEqualityFn<
             objectId &&
             (await get().getPupil(objectId, selectedPeriod, selectedSchoolYear)) &&
             (await get().getMentorClass(
-              get().pupil[0]?.classGroupId as string,
+              get().pupil[0]?.classGroupId ?? '',
               {
                 period: selectedPeriod,
                 schoolYear: selectedSchoolYear,
@@ -352,9 +352,9 @@ export const useForecastStore = createWithEqualityFn<
           }
           await set(() => ({ groupWithPupilsIsLoading: true }));
           const res = await getGroupWithPupils(
-            groupId ? groupId : (get().groupWithPupils[0].groupId as string),
+            groupId ? groupId : get().groupWithPupils[0].groupId ?? '',
             fPeriod,
-            fSchoolYear as number,
+            fSchoolYear,
             signal
           );
 
@@ -377,7 +377,7 @@ export const useForecastStore = createWithEqualityFn<
                 : previousPeriodGroup,
           })),
         getPreviousPeriodGroup: async (groupId: string, queries: QueriesDto, signal?: AbortSignal) => {
-          const fPeriod = queries.period;
+          const fPeriod: string = queries.period ?? '';
           const fSchoolYear = queries.schoolYear;
           const dataArr: Pupil[] = [];
           if (groupId == null) {
@@ -389,8 +389,8 @@ export const useForecastStore = createWithEqualityFn<
           await set(() => ({ previousPeriodGroupIsLoading: true }));
           //const myClasses = get().myClasses;
           const res = await getGroupWithPupils(
-            groupId ? groupId : (get().previousPeriodGroup[0]?.groupId as string),
-            fPeriod as string,
+            groupId ? groupId : get().previousPeriodGroup[0]?.groupId ?? '',
+            fPeriod,
             fSchoolYear,
             signal
           );
@@ -420,7 +420,7 @@ export const useForecastStore = createWithEqualityFn<
             await get().reset();
           }
           await set(() => ({ classesIsLoading: true }));
-          const res = await getMyClasses(body.period as string, body.schoolYear, signal);
+          const res = await getMyClasses(body.period ?? get().selectedPeriod, body.schoolYear, signal);
           const data = (res.data && res.data) || initialState.myClasses;
           await set(() => ({ myClasses: data, classesIsLoading: false }));
           await set(() => ({
@@ -469,7 +469,7 @@ export const useForecastStore = createWithEqualityFn<
 
           let data: MentorClassPupil[] | MentorClassPupilGrid[];
           if ((user && hasRolePermission(user).mentor) || (user && hasRolePermission(user).headmaster)) {
-            const res = await getMentorClassGrid(groupId, fPeriod, fSchoolYear as number, signal);
+            const res = await getMentorClassGrid(groupId, fPeriod, fSchoolYear, signal);
             data = (res.data && res.data) || initialState.mentorClass;
             await set(() => ({
               mentorClassGrid: data as MentorClassPupilGrid[],
@@ -478,7 +478,7 @@ export const useForecastStore = createWithEqualityFn<
 
             err = res.error ? res.error : '';
           } else {
-            const res = await getMentorClass(groupId, fPeriod, fSchoolYear as number, signal);
+            const res = await getMentorClass(groupId, fPeriod, fSchoolYear, signal);
             data = (res.data && res.data) || initialState.mentorClass;
 
             data.map((d) => {
@@ -579,7 +579,7 @@ export const useForecastStore = createWithEqualityFn<
           const subject = get().group;
           if (!res.error) {
             await get().getGroupWithPupils(subject.groupId, {
-              period: subject.forecastPeriod as string | undefined,
+              period: subject.forecastPeriod ?? get().selectedPeriod,
               schoolYear: forecast.schoolYear,
             });
           }

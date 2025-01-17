@@ -155,7 +155,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   if (MENTORCLASS) {
     mentorClassData.forEach((g) => {
-      numberOfNotFilledIn += g.notFilledIn ? g.notFilledIn : 0;
+      numberOfNotFilledIn += g.notFilledIn ? Number(g.notFilledIn) : 0;
     });
     isLoading = mentorClassData.length === 0;
   }

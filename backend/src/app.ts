@@ -46,6 +46,7 @@ import { isValidUrl } from './utils/util';
 import { additionalConverters } from './utils/custom-validation-classes';
 import { User } from './interfaces/users.interface';
 import ApiService from './services/api.service';
+import QueryString from 'qs';
 
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
@@ -237,13 +238,13 @@ class App {
         next();
       },
       (req, res, next) => {
-        const successRedirect = req.query.successRedirect;
+        const successRedirect: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] = req.query.successRedirect;
         samlStrategy.logout(req as any, () => {
           req.logout(err => {
             if (err) {
               return next(err);
             }
-            res.redirect(successRedirect as string);
+            res.redirect(successRedirect.toString());
           });
         });
       },

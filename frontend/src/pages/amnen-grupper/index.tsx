@@ -29,7 +29,7 @@ export const Index: React.FC = () => {
     };
     !headmaster
       ? router.push('/mina-amnen-grupper')
-      : setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'subjects');
+      : setSelectedPeriod(myGroup.period ? myGroup.period : selectedPeriod, myGroup.schoolYear, 'subjects');
   });
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>

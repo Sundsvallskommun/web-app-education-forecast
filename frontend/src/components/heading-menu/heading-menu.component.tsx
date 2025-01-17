@@ -185,7 +185,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                 <div>
                   <FormControl className="max-medium-device:w-full">
                     <SearchField
-                      value={searchTerm as string}
+                      value={searchTerm}
                       onChange={onSearchChangeHandler}
                       onSearch={onSearchHandler}
                       placeholder={placeHolder}
@@ -198,7 +198,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
         ) : (
           <FormControl className="max-medium-device:w-full">
             <SearchField
-              value={searchTerm as string}
+              value={searchTerm}
               onChange={onSearchChangeHandler}
               onSearch={onSearchHandler}
               placeholder={placeHolder}

@@ -42,8 +42,8 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        teacher && (await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'subjects'));
-        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'pupil', pupilId);
+        teacher && (await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects'));
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'pupil', pupilId);
       } else {
         if (!pupilId) {
           router.push('/mina-amnen-grupper');
@@ -63,7 +63,7 @@ export const Index: React.FC = () => {
   }, [router.query, router.isReady]);
 
   const breadcrumbLinks = [
-    { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className as string, currentPage: false },
+    { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className ?? 'Klass', currentPage: false },
     { link: '', title: `${pupil[0]?.givenname} ${pupil[0]?.lastname}`, currentPage: true },
   ];
 
@@ -90,7 +90,7 @@ export const Index: React.FC = () => {
         <Pupil isSinglePupil />
         <RifflePrevNext
           riffleIsLoading={mentorclassIsLoading}
-          dataId={pupil[0]?.pupil as string}
+          dataId={pupil[0]?.pupil ?? pupilId ?? ''}
           riffleObjects={rifflePupils}
           callback="pupil"
         />

@@ -21,6 +21,12 @@ interface AllPupils {
   image?: string | null;
 }
 
+interface PupilHeaders {
+  label: string;
+  property: keyof AllPupils;
+  isColumnSortable: boolean;
+}
+
 export const PupilTables = (searchQuery?: string) => {
   const allPupils = useForecastStore((s) => s.allPupils);
   const [allPupilsTable, setAllPupilTable] = useState<AllPupils[]>([]);
@@ -31,7 +37,7 @@ export const PupilTables = (searchQuery?: string) => {
     if (allPupils.length !== 0) {
       allPupils.map((p) => {
         const numberNotFilledIn =
-          (p?.totalSubjects as number) - (p?.approved as number) - (p?.warnings as number) - (p?.unapproved as number);
+          (p?.totalSubjects || 0) - (p?.approved || 0) - (p?.warnings || 0) - (p?.unapproved || 0);
         tableArr.push({
           id: p.pupil,
           pupil: `${p.givenname} ${p.lastname}`,
@@ -55,12 +61,12 @@ export const PupilTables = (searchQuery?: string) => {
   }, [allPupils]);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
-  const [sortColumn, setSortColumn] = useState<string>('pupil');
+  const [sortColumn, setSortColumn] = useState<keyof AllPupils>('pupil');
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: keyof AllPupils) => {
     if (sortColumn !== column) {
       setSortColumn(column);
     } else {
@@ -68,7 +74,7 @@ export const PupilTables = (searchQuery?: string) => {
     }
   };
 
-  const pupilHeaderLabels = [
+  const pupilHeaderLabels: PupilHeaders[] = [
     { label: 'Namn', property: 'pupil', isColumnSortable: true },
     { label: 'Klass', property: 'className', isColumnSortable: true },
     { label: 'mentor', property: 'teachers', isColumnSortable: true },
@@ -104,7 +110,9 @@ export const PupilTables = (searchQuery?: string) => {
     }
   };
 
-  const pupilListSearchFiltered = allPupilsTable.filter(searchFilter(searchQuery as string, pupilSearchFilter));
+  const pupilListSearchFiltered = allPupilsTable.filter(
+    searchFilter(searchQuery ? searchQuery : '', pupilSearchFilter)
+  );
 
   const pupilListRendered = pupilListSearchFiltered;
 
@@ -112,11 +120,7 @@ export const PupilTables = (searchQuery?: string) => {
   const pupilRows = pupilListRendered
     .sort((a: AllPupils, b: AllPupils) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return `${a[sortColumn as keyof AllPupils]}` < `${b[sortColumn as keyof AllPupils]}`
-        ? order
-        : `${a[sortColumn as keyof AllPupils]}` > `${b[sortColumn as keyof AllPupils]}`
-          ? order * -1
-          : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {

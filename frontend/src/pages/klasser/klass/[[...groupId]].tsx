@@ -42,8 +42,8 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (classId) {
         if (router.pathname.includes(classId)) return;
-        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'classes');
-        await setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'mentorclass', classId, user);
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes');
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'mentorclass', classId, user);
       } else {
         if (!classId) {
           router.push('/klasser');

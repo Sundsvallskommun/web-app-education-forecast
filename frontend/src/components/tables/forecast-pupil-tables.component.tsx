@@ -32,6 +32,12 @@ interface TablePupil {
   forecastPeriod?: string | null;
 }
 
+interface TablePupilHeaders {
+  label: string;
+  property: keyof TablePupil;
+  isColumnSortable: boolean;
+}
+
 export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuery?: string) => {
   const { headmaster } = hasRolePermission(user);
   const [pageSize] = useState<number>(isSinglePupil ? 10 : 60);
@@ -73,10 +79,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
       if (groupWithPupils.length !== 0) {
         groupWithPupils.map((p) => {
           const numberNotFilledIn =
-            (p?.totalSubjects as number) -
-            (p?.approved as number) -
-            (p?.warnings as number) -
-            (p?.unapproved as number);
+            (p?.totalSubjects || 0) - (p?.approved || 0) - (p?.warnings || 0) - (p?.unapproved || 0);
           tableArr.push({
             id: p.pupil,
             pupil: `${p.givenname} ${p.lastname}`,
@@ -117,12 +120,12 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
   }, []);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
-  const [sortColumn, setSortColumn] = useState<string>(isSinglePupil ? 'courseName' : 'pupil');
+  const [sortColumn, setSortColumn] = useState<keyof TablePupil>(isSinglePupil ? 'courseName' : 'pupil');
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: keyof TablePupil) => {
     if (sortColumn !== column) {
       setSortColumn(column);
     } else {
@@ -130,14 +133,14 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
     }
   };
 
-  const pupilHeaderLabels = [
+  const pupilHeaderLabels: TablePupilHeaders[] = [
     { label: 'Ämne', property: 'courseName', isColumnSortable: true },
     { label: 'Lärare', property: 'teachers', isColumnSortable: true },
     { label: 'Närvaro i ämnet', property: 'presence', isColumnSortable: true },
     { label: 'Prognos', property: 'forecast', isColumnSortable: true },
   ];
 
-  const groupHeaderLabels = [
+  const groupHeaderLabels: TablePupilHeaders[] = [
     { label: 'Elev', property: 'pupil', isColumnSortable: true },
     { label: 'Klass', property: 'className', isColumnSortable: true },
     { label: 'Närvaro i ämnet', property: 'presence', isColumnSortable: true },
@@ -196,25 +199,23 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
     }
   };
 
-  const singlePupilListSearchFiltered = pupil.filter(searchFilter(searchQuery as string, singlePupilSearchFilter));
+  const singlePupilListSearchFiltered = pupil.filter(
+    searchFilter(searchQuery ? searchQuery : '', singlePupilSearchFilter)
+  );
 
   const singlepPupilListRendered = singlePupilListSearchFiltered;
 
   const manyPupilsListSearchFiltered = pupilsInGroupData.filter(
-    searchFilter(searchQuery as string, manyPupilSearchFilter)
+    searchFilter(searchQuery ? searchQuery : '', manyPupilSearchFilter)
   );
 
   const manyPupilsListRendered = manyPupilsListSearchFiltered;
 
   // rows single pupil
   const pupilRows = singlepPupilListRendered
-    .sort((a: Pupil, b: Pupil) => {
+    .sort((a: TablePupil, b: TablePupil) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return `${a[sortColumn as keyof Pupil]}` < `${b[sortColumn as keyof Pupil]}`
-        ? order
-        : `${a[sortColumn as keyof Pupil]}` > `${b[sortColumn as keyof Pupil]}`
-          ? order * -1
-          : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -335,11 +336,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
   const groupWithPupilsRows = manyPupilsListRendered
     .sort((a: TablePupil, b: TablePupil) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return `${a[sortColumn as keyof TablePupil]}` < `${b[sortColumn as keyof TablePupil]}`
-        ? order
-        : `${a[sortColumn as keyof TablePupil]}` > `${b[sortColumn as keyof TablePupil]}`
-          ? order * -1
-          : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {

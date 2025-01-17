@@ -26,11 +26,11 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : (currentPeriod as string),
+      period: selectedPeriod ? selectedPeriod : currentPeriod,
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
     if (teacher || (mentor && teacher)) {
-      setSelectedPeriod(myGroup.period as string, myGroup.schoolYear, 'subjects');
+      setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
         res.data && router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);

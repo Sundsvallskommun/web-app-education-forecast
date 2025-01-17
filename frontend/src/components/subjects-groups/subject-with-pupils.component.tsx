@@ -23,7 +23,9 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
     CustomPupilTable(user, false, searchQuery);
 
   useEffect(() => {
-    !groupWithPupilsIsLoading ? setPageTitle(groupWithPupils[0]?.courseName as string) : setPageTitle('Ämne/grupp');
+    !groupWithPupilsIsLoading
+      ? setPageTitle(groupWithPupils[0]?.courseName || 'Ämne/grupp')
+      : setPageTitle('Ämne/grupp');
   });
 
   const generalInformation =

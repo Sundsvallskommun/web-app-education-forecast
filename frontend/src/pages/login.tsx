@@ -59,7 +59,7 @@ export default function Start() {
       } else if (failMessage === 'SAML_MISSING_PERMISSIONS') {
         setErrorMessage('Användaren saknar rättigheter');
       } else {
-        setErrorMessage(failMessage as string);
+        failMessage && setErrorMessage(failMessage);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

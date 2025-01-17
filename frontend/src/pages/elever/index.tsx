@@ -29,7 +29,7 @@ export const Index: React.FC = () => {
 
     !headmaster
       ? router.push('/mina-amnen-grupper')
-      : setSelectedPeriod(queries.period as string, queries.schoolYear, 'pupils');
+      : setSelectedPeriod(queries.period ?? selectedPeriod, queries.schoolYear, 'pupils');
   });
 
   return (

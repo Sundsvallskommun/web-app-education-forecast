@@ -8,21 +8,10 @@ import { GridForecast, Pupil } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 
 interface MentorClassTable {
-  id?: string;
-  pupil?: string;
-  className?: string | null;
-  presence?: number | null;
-  approved?: number | null;
-  warnings?: number | null;
-  unapproved?: number | null;
-  schoolYear?: number | null;
-  notFilledIn?: number | null;
-  totalSubjects?: number | null;
-  forecast?: number | null;
-  image?: string | null;
+  [key: string]: string | number | null | undefined;
 }
 
-interface SubjectHeaders {
+interface MentorClassHeaders {
   label: string;
   property: string;
   isColumnSortable: boolean;
@@ -35,11 +24,11 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
   const [mentorClassData, setMentorClassData] = useState<MentorClassTable[]>([]);
-  const [subjectHeaders, setSubjectHeaders] = useState<SubjectHeaders[]>([]);
+  const [subjectHeaders, setSubjectHeaders] = useState<MentorClassHeaders[]>([]);
 
   useEffect(() => {
     const tableArr: MentorClassTable[] = [];
-    const subjectArr: SubjectHeaders[] = [];
+    const subjectArr: MentorClassHeaders[] = [];
     if (mentor || headmaster) {
       if (mentorClassGrid.length !== 0) {
         mentorClassGrid.map((p) => {
@@ -106,7 +95,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
-  const mentorclassHeaderLabels = [
+  const mentorclassHeaderLabels: MentorClassHeaders[] = [
     { label: 'Namn', property: 'pupil', isColumnSortable: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true },
     { label: 'Når målen', property: 'approved', isColumnSortable: true },
@@ -160,10 +149,10 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   };
 
   const mentorClassListSearchFiltered = mentorClassData.filter(
-    searchFilter(searchQuery as string, mentorclassSearchFilter)
+    searchFilter(searchQuery ? searchQuery : '', mentorclassSearchFilter)
   );
 
-  const mentorClassListRendered: MentorClassTable[] = mentorClassListSearchFiltered;
+  const mentorClassListRendered: MentorClassTable[] | string[] = mentorClassListSearchFiltered;
 
   const iconType = (prop: number) => {
     if (prop === 1) {
@@ -186,13 +175,9 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   };
 
   const mentorclassRows = mentorClassListRendered
-    .sort((a: MentorClassTable, b: MentorClassTable) => {
+    .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return `${a[sortColumn as keyof MentorClassTable]}` < `${b[sortColumn as keyof MentorClassTable]}`
-        ? order
-        : `${a[sortColumn as keyof MentorClassTable]}` > `${b[sortColumn as keyof MentorClassTable]}`
-          ? order * -1
-          : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -224,12 +209,12 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
               <Table.Column key={index} className="border-r-1">
                 <div className="w-full flex justify-center items-center">
                   {s.label in p ? (
-                    p[s.label as keyof MentorClassTable] !== null ? (
+                    p[s.label] !== null ? (
                       <Icon.Padded
                         inverted
-                        color={iconColor(p[s.label as keyof MentorClassTable] as number)}
+                        color={iconColor(Number(p[s.label]))}
                         rounded
-                        name={iconType(p[s.label as keyof MentorClassTable] as number)}
+                        name={iconType(Number(p[s.label]))}
                       />
                     ) : (
                       <Icon size={14} name="minus" />
@@ -254,7 +239,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
               <Avatar
-                imageUrl={`${p?.image?.length !== 0 || p.image ? p.image : ''}`}
+                imageUrl={`${p?.image?.toString().length !== 0 || p.image ? p.image : ''}`}
                 color="vattjom"
                 rounded
                 initials={initialsFunction(p.pupil)}
