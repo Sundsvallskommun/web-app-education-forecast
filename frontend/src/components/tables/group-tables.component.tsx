@@ -30,7 +30,6 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
   const { myClasses, mySubjects } = useForecastStore();
   const [grouptable, setGrouptable] = useState<KeyStringTable[]>([]);
   const [pageSize] = useState<number>(10);
-  // const {APPROVED, WARNINGS, UNNAPROVED, NOTFILLEDIN} = IsGradedForecast(groupType === "K" ? myClasses : mySubjects, Array);
   useEffect(() => {
     const tableArr: KeyStringTable[] = [];
     if (groupType === 'K') {
@@ -103,7 +102,6 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
   ];
 
   const classesHeaderLabels: GroupHeaders[] = [
-    //{ label: 'Namn', property: 'pupil', isColumnSortable: true },
     { label: 'Mentor', property: 'teachers', isColumnSortable: true },
     { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true },
