@@ -9,7 +9,7 @@ import { CustomPupilTable } from '@components/tables/forecast-pupil-tables.compo
 import { Spinner } from '@sk-web-gui/react';
 
 interface SubjectWithPupilsProps {
-  setPageTitle: Dispatch<SetStateAction<string>>;
+  setPageTitle: Dispatch<SetStateAction<string | undefined>>;
   pageTitle: string;
 }
 
@@ -23,7 +23,9 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
     CustomPupilTable(user, false, searchQuery);
 
   useEffect(() => {
-    !groupWithPupilsIsLoading ? setPageTitle(groupWithPupils[0]?.courseName) : setPageTitle('Ämne/grupp');
+    !groupWithPupilsIsLoading
+      ? setPageTitle(groupWithPupils[0]?.courseName || 'Ämne/grupp')
+      : setPageTitle('Ämne/grupp');
   });
 
   const generalInformation =
@@ -41,7 +43,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
         pageTitle={groupWithPupils.length !== 0 ? pageTitle : 'Ämne/grupp'}
         GeneralInformation={generalInformation}
         teachers={
-          teacher && groupWithPupils[0]?.teachers.find((x) => x.personId === user.personId)
+          teacher && groupWithPupils[0]?.teachers?.find((x) => x.personId === user.personId)
             ? [
                 {
                   givenname: user.name.split(' ')[0],

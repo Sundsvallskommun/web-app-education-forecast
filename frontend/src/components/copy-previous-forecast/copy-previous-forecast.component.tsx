@@ -4,6 +4,7 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
 
 export const CopyPreviousForecast: React.FC = () => {
   const user = useUserStore((s) => s.user);
@@ -15,7 +16,7 @@ export const CopyPreviousForecast: React.FC = () => {
   const { GR, GY } = hasRolePermission(user);
   const [isOpen, setisOpen] = useState(false);
   const [summerPeriod, setSummerPeriod] = useState(false);
-  // const [previousIsEmpty, setPreviousIsEmpty] = useState(true);
+
   const message = useSnackbar();
 
   const monthPeriods = [
@@ -31,8 +32,8 @@ export const CopyPreviousForecast: React.FC = () => {
   ];
 
   const termPeriods = ['HT', 'VT'];
-  let previousPeriod;
-  let previousSchoolYear;
+  let previousPeriod: string;
+  let previousSchoolYear: number;
 
   if (GY) {
     monthPeriods[monthPeriods.indexOf(selectedPeriod)] === monthPeriods[0]
@@ -59,26 +60,28 @@ export const CopyPreviousForecast: React.FC = () => {
   };
 
   const onCopyHandler = async () => {
-    const body = {
-      groupId: selectedId,
-      period: selectedPeriod,
-      previusPeriod: previousPeriod,
-      schoolYear: selectedSchoolYear,
-      previusSchoolYear: previousSchoolYear,
-    };
-    await copyPreviousForecast(body).then((res) => {
-      if (!res.error) {
-        message({
-          message: `Prognosen sparades`,
-          status: 'success',
-        });
-      } else {
-        message({
-          message: res.message,
-          status: 'error',
-        });
-      }
-    });
+    if (selectedId) {
+      const body: CopyPreviousForecastDto = {
+        groupId: selectedId,
+        period: selectedPeriod,
+        previusPeriod: previousPeriod,
+        schoolYear: selectedSchoolYear,
+        previusSchoolYear: previousSchoolYear,
+      };
+      await copyPreviousForecast(body).then((res) => {
+        if (!res.error) {
+          message({
+            message: `Prognosen sparades`,
+            status: 'success',
+          });
+        } else {
+          message({
+            message: res.message,
+            status: 'error',
+          });
+        }
+      });
+    }
   };
 
   let numberOfForecasts = 0;
@@ -98,6 +101,7 @@ export const CopyPreviousForecast: React.FC = () => {
     } else {
       setSummerPeriod(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return summerPeriod ? (

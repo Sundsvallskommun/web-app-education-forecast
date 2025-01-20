@@ -26,7 +26,9 @@ export const Index: React.FC = () => {
       period: selectedPeriod ? selectedPeriod : currentPeriod,
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
-    !headmaster ? router.push('/mina-amnen-grupper') : setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'classes');
+    !headmaster
+      ? router.push('/mina-amnen-grupper')
+      : setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

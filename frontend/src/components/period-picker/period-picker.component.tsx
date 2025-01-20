@@ -30,20 +30,20 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
     schoolYear,
   } = thisSchoolYearPeriod();
 
-  let forecastPeriod;
-  let DOMPeriod;
+  let forecastPeriod: string = currentMonthPeriod;
+  let DOMPeriod: string = `${selectedPeriod?.slice(2)}`;
 
   if (GY) {
     forecastPeriod = currentMonthPeriod;
-    DOMPeriod = selectedPeriod?.split('').slice(2);
+    DOMPeriod = `${selectedPeriod?.slice(2)}`;
   } else {
     forecastPeriod = termPeriod;
     DOMPeriod = `${selectedPeriod} ${selectedPeriod === 'VT' ? currentYear : selectedSchoolYear}`;
   }
 
   const pickPreviousHandler = async () => {
-    let prevPeriod;
-    let year;
+    let prevPeriod = previousMonthPeriod;
+    let year = selectedSchoolYear;
     if (GY) {
       prevPeriod = previousMonthPeriod;
       if (previousPeriodDate <= new Date(currentYear, 7, 30)) {
@@ -63,20 +63,25 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
 
     await setSelectedPeriod(
       GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : prevPeriod,
-      GY && previousMonthPeriod === 'VT Maj' ? currentYear - 1 : year,
+      GY && (previousMonthPeriod === 'VT Maj' || previousMonthPeriod === 'HT December') ? currentYear - 1 : year,
       callback,
-      selectedId
+      selectedId,
+      user
     );
     callback === 'subject' &&
+      selectedId &&
       (await getPreviousPeriodGroup(selectedId, {
         period: GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : previousPeriod,
-        schoolYear: GY && previousMonthPeriod === 'VT Maj' ? currentYear - 1 : previousSchoolYear,
+        schoolYear:
+          GY && (previousMonthPeriod === 'VT Maj' || previousMonthPeriod === 'HT December')
+            ? currentYear - 1
+            : previousSchoolYear ?? currentYear - 1,
       }));
   };
 
   const pickForwardToCurrentHandler = async () => {
-    let currentPeriod;
-    let year;
+    let currentPeriod: string = forecastPeriod;
+    let year = selectedSchoolYear;
     if (GY) {
       currentPeriod = forecastPeriod;
       year = schoolYear;
@@ -86,9 +91,13 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
     }
     const { previousPeriod, previousSchoolYear } = formatPreviousPeriod(user, currentPeriod, year);
 
-    await setSelectedPeriod(currentPeriod, year, callback, selectedId);
+    await setSelectedPeriod(currentPeriod, year, callback, selectedId, user);
     callback === 'subject' &&
-      (await getPreviousPeriodGroup(selectedId, { period: previousPeriod, schoolYear: previousSchoolYear }));
+      selectedId &&
+      (await getPreviousPeriodGroup(selectedId, {
+        period: previousPeriod,
+        schoolYear: previousSchoolYear ?? currentYear - 1,
+      }));
   };
 
   return (

@@ -11,6 +11,12 @@ import { useUserStore } from '@services/user-service/user-service';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { hasRolePermission } from '@utils/has-role-permission';
 
+interface Riffle {
+  id: string;
+  link: string;
+  title: string;
+}
+
 export const Index: React.FC = () => {
   const router = useRouter();
   const routersubjectId = router.query['groupId'];
@@ -19,7 +25,7 @@ export const Index: React.FC = () => {
   const { GR, mentor, headmaster } = hasRolePermission(user);
 
   const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
+  const { schoolYear, currentMonthPeriod, termPeriod, currentYear } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const subjectIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
@@ -28,7 +34,7 @@ export const Index: React.FC = () => {
 
   const allSubjects = useForecastStore((s) => s.mySubjects);
   const subjectsIsLoading = useForecastStore((s) => s.subjectsIsLoading);
-  const [riffleSubjects, setRiffleSubjects] = useState([]);
+  const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
 
   const { previousPeriod, previousSchoolYear } = formatPreviousPeriod(user, selectedPeriod, selectedSchoolYear);
   const currentPeriod = GR ? termPeriod : currentMonthPeriod;
@@ -40,10 +46,14 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (subjectId) {
         if (router.pathname.includes(subjectId)) return;
-        mentor || (headmaster && (await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'classes')));
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subject', subjectId);
-        await getPreviousPeriodGroup(subjectId, { period: previousPeriod, schoolYear: previousSchoolYear });
+        mentor ||
+          (headmaster && (await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes')));
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects');
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subject', subjectId);
+        await getPreviousPeriodGroup(subjectId, {
+          period: previousPeriod,
+          schoolYear: previousSchoolYear ?? currentYear - 1,
+        });
       } else {
         if (!subjectId) {
           router.push('/mina-amnen-grupper');
@@ -64,11 +74,11 @@ export const Index: React.FC = () => {
 
   const breadcrumbLinks = [
     { link: '/mina-amnen-grupper', title: 'Mina ämnen/grupper', currentPage: false },
-    { link: '', title: pageTitle, currentPage: true },
+    { link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true },
   ];
 
   useEffect(() => {
-    const riffleArray = [];
+    const riffleArray: Riffle[] = [];
 
     allSubjects.filter((s) => {
       riffleArray.push({
@@ -88,7 +98,7 @@ export const Index: React.FC = () => {
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}
     >
       <Main>
-        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle} />
+        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle ?? selectedPeriod} />
         {riffleSubjects.length > 1 && (
           <RifflePrevNext riffleIsLoading={subjectsIsLoading} riffleObjects={riffleSubjects} callback="subject" />
         )}

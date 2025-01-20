@@ -2,19 +2,41 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Link, Table, SortMode, Pagination, Select, Input, Badge } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
-import { Pupil } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
+export interface AllPupils {
+  id?: string | null;
+  pupil?: string | null;
+  className?: string | null;
+  groupId?: string | null;
+  teachers?: ForecastMyGroupTeacher[] | null;
+  presence?: number | null;
+  forecast?: number | null;
+  approved?: number | null;
+  warnings?: number | null;
+  unapproved?: number | null;
+  notFilledIn: number | null;
+  totalSubjects?: number | null;
+  image?: string | null;
+}
+
+interface PupilHeaders {
+  label: string;
+  property: keyof AllPupils;
+  isColumnSortable: boolean;
+}
 
 export const PupilTables = (searchQuery?: string) => {
   const allPupils = useForecastStore((s) => s.allPupils);
-  const [allPupilsTable, setAllPupilTable] = useState([]);
+  const [allPupilsTable, setAllPupilTable] = useState<KeyStringTable[]>([]);
   const [pageSize] = useState<number>(999);
 
   useEffect(() => {
-    const tableArr = [];
+    const tableArr: KeyStringTable[] = [];
     if (allPupils.length !== 0) {
       allPupils.map((p) => {
-        const numberNotFilledIn = p.totalSubjects - p.approved - p.warnings - p.unapproved;
+        const numberNotFilledIn =
+          (p?.totalSubjects || 0) - (p?.approved || 0) - (p?.warnings || 0) - (p?.unapproved || 0);
         tableArr.push({
           id: p.pupil,
           pupil: `${p.givenname} ${p.lastname}`,
@@ -22,6 +44,7 @@ export const PupilTables = (searchQuery?: string) => {
           groupId: p.groupId,
           teachers: p.teachers,
           presence: p.presence,
+          forecast: p.forecast,
           approved: p.approved,
           warnings: p.warnings,
           unapproved: p.unapproved,
@@ -37,12 +60,12 @@ export const PupilTables = (searchQuery?: string) => {
   }, [allPupils]);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
-  const [sortColumn, setSortColumn] = useState<string>('pupil');
+  const [sortColumn, setSortColumn] = useState<keyof AllPupils>('pupil');
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: keyof AllPupils) => {
     if (sortColumn !== column) {
       setSortColumn(column);
     } else {
@@ -50,7 +73,7 @@ export const PupilTables = (searchQuery?: string) => {
     }
   };
 
-  const pupilHeaderLabels = [
+  const pupilHeaderLabels: PupilHeaders[] = [
     { label: 'Namn', property: 'pupil', isColumnSortable: true },
     { label: 'Klass', property: 'className', isColumnSortable: true },
     { label: 'mentor', property: 'teachers', isColumnSortable: true },
@@ -76,17 +99,19 @@ export const PupilTables = (searchQuery?: string) => {
     );
   });
 
-  const pupilSearchFilter = (q: string, obj: Pupil) => {
-    if (obj.pupil?.toLowerCase().includes(q)) {
+  const pupilSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (typeof obj.pupil === 'string' && obj.pupil?.toLowerCase().includes(q)) {
       return true; // pupil
-    } else if (obj.className?.toLowerCase().includes(q)) {
+    } else if (typeof obj.className === 'string' && obj.className?.toLowerCase().includes(q)) {
       return true; //class
     } else {
       return false;
     }
   };
 
-  const pupilListSearchFiltered = allPupilsTable.filter(searchFilter(searchQuery, pupilSearchFilter));
+  const pupilListSearchFiltered = allPupilsTable.filter(
+    searchFilter(searchQuery ? searchQuery : '', pupilSearchFilter)
+  );
 
   const pupilListRendered = pupilListSearchFiltered;
 
@@ -94,7 +119,7 @@ export const PupilTables = (searchQuery?: string) => {
   const pupilRows = pupilListRendered
     .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -110,15 +135,19 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
               <Avatar
-                imageUrl={`${p.image.length !== 0 || p.image ? p.image : ''}`}
+                imageUrl={`${(typeof p.image === 'string' && p.image?.length !== 0) || p.image ? p.image : ''}`}
                 color="vattjom"
                 rounded
-                initials={initialsFunction(p.pupil)}
+                initials={initialsFunction(typeof p.pupil === 'string' && p.pupil ? p.pupil : '')}
                 size="sm"
                 accent
               />
               <span className="ml-8 font-bold">
-                {p.totalSubjects !== 0 ? <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link> : <>{p.pupil} </>}
+                {p.totalSubjects !== 0 ? (
+                  <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
+                ) : (
+                  <>{typeof p.pupil === 'string' && p.pupil} </>
+                )}
               </span>
             </div>
           </Table.HeaderColumn>
@@ -129,6 +158,7 @@ export const PupilTables = (searchQuery?: string) => {
             <div className="flex max-w-[300px] items-center gap-2">
               <span className="ml-8">
                 {p.teachers &&
+                  Array.isArray(p.teachers) &&
                   p.teachers.map((v, idx) => {
                     const fullName = `${v.givenname} ${v.lastname}`;
                     const nameArr = fullName.split('');
@@ -136,7 +166,7 @@ export const PupilTables = (searchQuery?: string) => {
                       return /[A-Z]/.test(char);
                     });
 
-                    const secondletterInLastName = v.lastname.split('').slice(1, 2);
+                    const secondletterInLastName = v.lastname && v.lastname.split('').slice(1, 2);
                     const abbreviation = `${initials.join('')}${secondletterInLastName}`;
                     return v ? (
                       <span key={`teacher-${idx}`}>
@@ -157,14 +187,14 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
                     inverted
                     rounded
                     color={!p.approved ? 'tertiary' : 'gronsta'}
-                    counter={!p.approved ? 0 : p.approved}
+                    counter={!p.approved || typeof p.approved !== 'number' ? 0 : p.approved}
                   />
                 )}
               </span>
@@ -173,14 +203,14 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
                     rounded
                     inverted={!p.warnings}
                     color={!p.warnings ? 'tertiary' : 'warning'}
-                    counter={!p.warnings ? 0 : p.warnings}
+                    counter={!p.warnings || typeof p.warnings !== 'number' ? 0 : p.warnings}
                   />
                 )}
               </span>
@@ -189,14 +219,14 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
                     rounded
                     inverted={!p.unapproved}
                     color={!p.unapproved ? 'tertiary' : 'error'}
-                    counter={!p.unapproved ? 0 : p.unapproved}
+                    counter={!p.unapproved || typeof p.unapproved !== 'number' ? 0 : p.unapproved}
                   />
                 )}
               </span>
@@ -210,7 +240,7 @@ export const PupilTables = (searchQuery?: string) => {
                     rounded
                     inverted={!p.notFilledIn}
                     color="tertiary"
-                    counter={!p.notFilledIn ? 0 : p.notFilledIn}
+                    counter={!p.notFilledIn || typeof p.notFilledIn !== 'number' ? 0 : p.notFilledIn}
                   />
                 </span>
               ) : (
@@ -223,7 +253,7 @@ export const PupilTables = (searchQuery?: string) => {
     });
 
   const footer = (
-    <Table.Footer className={pupilRows.length > 10 && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}>
+    <Table.Footer className={pupilRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
           Rader per sida:

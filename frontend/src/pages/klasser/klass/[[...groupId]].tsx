@@ -10,6 +10,12 @@ import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.co
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
 
+interface Riffle {
+  id: string;
+  link: string;
+  title: string;
+}
+
 export const Index: React.FC = () => {
   const router = useRouter();
   const routerclassId = router.query['groupId'];
@@ -24,7 +30,7 @@ export const Index: React.FC = () => {
 
   const classes = useForecastStore((s) => s.myClasses);
   const classesIsLoading = useForecastStore((s) => s.classesIsLoading);
-  const [riffleClasses, setRiffleClasses] = useState([]);
+  const [riffleClasses, setRiffleClasses] = useState<Riffle[]>([]);
 
   const currentPeriod = GR ? termPeriod : currentMonthPeriod;
 
@@ -36,8 +42,8 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (classId) {
         if (router.pathname.includes(classId)) return;
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'classes');
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'mentorclass', classId, user);
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes');
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'mentorclass', classId, user);
       } else {
         if (!classId) {
           router.push('/klasser');
@@ -57,7 +63,7 @@ export const Index: React.FC = () => {
   }, [router.query, router.isReady]);
 
   useEffect(() => {
-    const riffleArray = [];
+    const riffleArray: Riffle[] = [];
 
     classes.filter((c) => {
       riffleArray.push({

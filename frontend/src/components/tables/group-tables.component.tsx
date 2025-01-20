@@ -1,25 +1,42 @@
-import { MyGroup } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { User } from '@interfaces/user';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Badge, Link, Table, SortMode, Select, Pagination, Input } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { searchFilter } from '@utils/search';
 import { useEffect, useState } from 'react';
-//import { IsGradedForecast } from '@utils/is-grade-forecast';
+
+interface GroupTable {
+  id?: string | null;
+  groupName?: string | null;
+  teachers?: ForecastMyGroupTeacher[] | null;
+  totalPupils: number | null;
+  presence?: number | null;
+  approvedPupils: number | null;
+  warningPupils: number | null;
+  unapprovedPupils: number | null;
+  notFilledIn: number | null;
+}
+
+interface GroupHeaders {
+  label?: string;
+  property?: keyof GroupTable;
+  isColumnSortable: boolean;
+}
 
 //Table structure for group type tables
-export const GroupTables = (groupType, user: User, searchQuery?: string) => {
+export const GroupTables = (groupType: string, user: User, searchQuery?: string) => {
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const { myClasses, mySubjects } = useForecastStore();
-  const [grouptable, setGrouptable] = useState([]);
+  const [grouptable, setGrouptable] = useState<KeyStringTable[]>([]);
   const [pageSize] = useState<number>(10);
-  // const {APPROVED, WARNINGS, UNNAPROVED, NOTFILLEDIN} = IsGradedForecast(groupType === "K" ? myClasses : mySubjects, Array);
   useEffect(() => {
-    const tableArr = [];
+    const tableArr: KeyStringTable[] = [];
     if (groupType === 'K') {
       if (myClasses.length !== 0) {
         myClasses.map((c) => {
-          const numberNotFilledIn = c.totalPupils - c.approvedPupils - c.warningPupils - c.unapprovedPupils;
+          const numberNotFilledIn =
+            (c?.totalPupils || 0) - (c?.approvedPupils || 0) - (c?.warningPupils || 0) - (c?.unapprovedPupils || 0);
           tableArr.push({
             id: c.groupId,
             groupName: `Klass ${c.groupName}`,
@@ -36,7 +53,8 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
     } else if (groupType === 'G') {
       if (mySubjects.length !== 0) {
         mySubjects.map((s) => {
-          const numberNotFilledIn = s.totalPupils - s.approvedPupils - s.warningPupils - s.unapprovedPupils;
+          const numberNotFilledIn =
+            (s?.totalPupils || 0) - (s?.approvedPupils || 0) - (s?.warningPupils || 0) - (s?.unapprovedPupils || 0);
           tableArr.push({
             id: s.groupId,
             groupName: s.groupName,
@@ -57,12 +75,12 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
   }, [groupType === 'K' ? myClasses : mySubjects]);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
-  const [sortColumn, setSortColumn] = useState<string>('groupName');
+  const [sortColumn, setSortColumn] = useState<keyof GroupTable>('groupName');
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: keyof GroupTable) => {
     if (sortColumn !== column) {
       setSortColumn(column);
     } else {
@@ -70,7 +88,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
     }
   };
 
-  const subjectsHeaderLabels = [
+  const subjectsHeaderLabels: GroupHeaders[] = [
     { label: 'Grupp', property: 'groupName', isColumnSortable: true },
     !mentor && !teacher
       ? { label: 'Lärare', property: 'teachers', isColumnSortable: true }
@@ -83,14 +101,13 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
   ];
 
-  const classesHeaderLabels = [
-    { label: 'Namn', property: 'pupil', isColumnSortable: true },
+  const classesHeaderLabels: GroupHeaders[] = [
     { label: 'Mentor', property: 'teachers', isColumnSortable: true },
     { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true },
-    { label: 'Når målen', property: 'approved', isColumnSortable: true },
-    { label: 'Varning', property: 'warning', isColumnSortable: true },
-    { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
+    { label: 'Når målen', property: 'approvedPupils', isColumnSortable: true },
+    { label: 'Varning', property: 'warningPupils', isColumnSortable: true },
+    { label: 'Når ej målen', property: 'unapprovedPupils', isColumnSortable: true },
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
   ];
 
@@ -102,7 +119,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
             isActive={sortColumn === h.property}
             aria-description={sortColumn === h.property ? undefined : 'sortera'}
             sortOrder={sortOrder}
-            onClick={() => handleSort(h.property)}
+            onClick={() => handleSort(h.property ? h.property : 'groupName')}
           >
             {h.label}
           </Table.SortButton>
@@ -118,7 +135,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
           isActive={sortColumn === h.property}
           aria-description={sortColumn === h.property ? undefined : 'sortera'}
           sortOrder={sortOrder}
-          onClick={() => handleSort(h.property)}
+          onClick={() => handleSort(h.property ? h.property : 'groupName')}
         >
           {h.label}
         </Table.SortButton>
@@ -126,15 +143,15 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
     );
   });
 
-  const groupSearchFilter = (q: string, obj: MyGroup) => {
-    if (obj.groupName.toLowerCase().includes(q)) {
+  const groupSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (obj?.groupName == '' && obj?.groupName?.toLowerCase().includes(q)) {
       return true; // Titel
     } else {
       return false;
     }
   };
 
-  const GroupsListSearchFiltered = grouptable.filter(searchFilter(searchQuery, groupSearchFilter));
+  const GroupsListSearchFiltered = grouptable.filter(searchFilter(searchQuery ? searchQuery : '', groupSearchFilter));
 
   const groupsListRendered = GroupsListSearchFiltered;
 
@@ -142,7 +159,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
   const groupRows = groupsListRendered
     .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((g, idx: number) => {
@@ -154,7 +171,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
                 // imageUrl=""
                 color="vattjom"
                 rounded
-                initials={g.groupName.split('').slice(0, 2)}
+                initials={`${g.groupName && typeof g.groupName === 'string' && g.groupName.split('').slice(0, 2)}`}
                 size="sm"
                 accent
               />
@@ -176,6 +193,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
               <div className="flex max-w-[300px] items-center gap-2">
                 <span className="ml-8">
                   {g.teachers &&
+                    Array.isArray(g.teachers) &&
                     g.teachers.map((t) => {
                       const fullName = `${t.givenname} ${t.lastname}`;
                       const nameArr = fullName.split('');
@@ -183,20 +201,23 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
                         return /[A-Z]/.test(char);
                       });
 
-                      const secondletterInLastName = t.lastname.split('').slice(1, 2);
+                      const secondletterInLastName = t.lastname && t.lastname.split('').slice(1, 2);
                       const abbreviation = `${initials.join('')}${secondletterInLastName}`;
-                      const lastObject = g.teachers[g.teachers.length - 1];
+                      const lastObject = g.teachers && Array.isArray(g.teachers) && g.teachers[g.teachers.length - 1];
                       return t ? (
                         <span key={`teacher-${t.personId}`}>
                           {groupType === 'K' ? (
-                            <Link
-                              title={`${t?.givenname} ${t?.lastname}`}
-                              href={`mailto:${t?.email}`}
-                            >{t?.email}</Link>
+                            <Link title={`${t?.givenname} ${t?.lastname}`} href={`mailto:${t?.email}`}>
+                              {t?.email}
+                            </Link>
                           ) : (
                             `${t?.givenname} ${t?.lastname} (${abbreviation})`
                           )}
-                          {g.teachers.length > 1 && t.personId !== lastObject.personId && ','}
+                          {g.teachers &&
+                            Array.isArray(g.teachers) &&
+                            g.teachers.length > 1 &&
+                            t.personId !== lastObject?.personId &&
+                            ','}
                           {'  '}
                         </span>
                       ) : (
@@ -210,7 +231,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
             <></>
           )}
           <Table.Column>
-            <span>{g.totalPupils}</span>
+            <span>{g.totalPupils == '' && g.totalPupils}</span>
           </Table.Column>
           <Table.Column>
             <div className="flex items-center gap-2">
@@ -220,14 +241,14 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
                     inverted
                     rounded
                     color={!g.approvedPupils ? 'tertiary' : 'gronsta'}
-                    counter={!g.approvedPupils ? 0 : g.approvedPupils}
+                    counter={!g.approvedPupils ? 0 : typeof g?.approvedPupils === 'number' ? g?.approvedPupils : 0}
                   />
                 )}
               </span>
@@ -236,14 +257,14 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
                     rounded
                     inverted={!g.warningPupils}
                     color={!g.warningPupils ? 'tertiary' : 'warning'}
-                    counter={!g.warningPupils ? 0 : g.warningPupils}
+                    counter={!g.warningPupils ? 0 : typeof g.warningPupils === 'number' ? g.warningPupils : 0}
                   />
                 )}
               </span>
@@ -252,14 +273,14 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
                     rounded
                     inverted={!g.unapprovedPupils}
                     color={!g.unapprovedPupils ? 'tertiary' : 'error'}
-                    counter={!g.unapprovedPupils ? 0 : g.unapprovedPupils}
+                    counter={!g.unapprovedPupils ? 0 : typeof g.unapprovedPupils === 'number' ? g.unapprovedPupils : 0}
                   />
                 )}
               </span>
@@ -272,7 +293,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
                   rounded
                   inverted={!g.notFilledIn}
                   color="tertiary"
-                  counter={!g.notFilledIn ? 0 : g.notFilledIn}
+                  counter={!g.notFilledIn ? 0 : typeof g.notFilledIn === 'number' ? g.notFilledIn : 0}
                 />
               </span>
             </div>
@@ -282,7 +303,7 @@ export const GroupTables = (groupType, user: User, searchQuery?: string) => {
     });
 
   const footer = (
-    <Table.Footer className={groupRows.length > 10 && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}>
+    <Table.Footer className={groupRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
           Rader per sida:

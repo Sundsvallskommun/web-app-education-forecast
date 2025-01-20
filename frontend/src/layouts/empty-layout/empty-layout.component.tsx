@@ -1,6 +1,12 @@
 import Head from 'next/head';
 
-export default function EmptyLayout({ title, children }) {
+interface EmptyLayout {
+  title: string;
+  children: React.ReactNode;
+}
+
+export default function EmptyLayout(props: EmptyLayout) {
+  const { title, children } = props;
   return (
     <div className="EmptyLayout">
       <Head>

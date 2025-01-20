@@ -21,11 +21,11 @@ interface HeadingMenuProps {
     textLink?: string;
     color?: 'vattjom' | 'juniskar' | 'bjornstigen' | 'gronsta';
   };
-  teachers?: ForecastMyGroupTeacher[];
+  teachers?: ForecastMyGroupTeacher[] | null | undefined;
   objectId?: string;
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
   searchQuery?: string;
-  setSearchQuery?: Dispatch<SetStateAction<string>>;
+  setSearchQuery?: Dispatch<SetStateAction<string>> | null | undefined;
   searchPlaceholder?: string;
 }
 
@@ -40,7 +40,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   searchPlaceholder,
 }) => {
   const user = useUserStore((s) => s.user);
-  const [searchTerm, setSearchTerm] = useState(searchQuery);
+  const [searchTerm, setSearchTerm] = useState(searchQuery ?? '');
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher } = hasRolePermission(user);
   const subject = useForecastStore((s) => s.groupWithPupils);
@@ -52,7 +52,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
 
   const setDelayQuery = useDebouncedCallback(
     (query: string) => {
-      setSearchQuery(query);
+      setSearchQuery && setSearchQuery(query);
     },
     [],
     150,
@@ -117,7 +117,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
             <div className="max-w-[360px] flex justify-end">
               <div className="w-fit float-right">
                 {teachers?.map((t) => {
-                  const secondletterInLastName = t?.lastname.split('').slice(1, 2);
+                  const secondletterInLastName = t.lastname && t?.lastname.split('').slice(1, 2);
                   const abbreviation = `${initialsFunction(`${t?.givenname} ${t?.lastname}`)}${secondletterInLastName}`;
                   const lastObject = teachers[teachers.length - 1];
                   return (

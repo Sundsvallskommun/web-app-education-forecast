@@ -42,7 +42,7 @@ export const Pupil: React.FC<PupilProps> = ({ isSinglePupil }) => {
   );
 
   const imageWithText = {
-    initials: `${pupil[0]?.className.slice(0, 2)}`,
+    initials: `${pupil[0]?.className?.slice(0, 2)}`,
     imageText: `${pupil[0]?.className}`,
     textLink: headmaster ? `/klasser/klass/${pupil[0]?.classGroupId}` : `/min-mentorsklass/${pupil[0]?.classGroupId}`,
     color: 'vattjom' as 'vattjom' | 'juniskar' | 'bjornstigen' | 'gronsta',

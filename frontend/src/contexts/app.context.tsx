@@ -1,5 +1,7 @@
 import { createContext, useContext, useState } from 'react';
-
+interface AppProps {
+  children: React.ReactNode;
+}
 export interface AppContextInterface {
   isCookieConsentOpen: boolean;
   setIsCookieConsentOpen: (isOpen: boolean) => void;
@@ -7,9 +9,13 @@ export interface AppContextInterface {
   setDefaults: () => void;
 }
 
-const AppContext = createContext<AppContextInterface>(null);
+const AppContext = createContext<AppContextInterface>({
+  isCookieConsentOpen: false,
+  setIsCookieConsentOpen: () => ({}),
+  setDefaults: () => ({}),
+});
 
-export function AppWrapper({ children }) {
+export function AppWrapper({ children }: AppProps) {
   const contextDefaults = {
     isCookieConsentOpen: true,
   };

@@ -27,7 +27,9 @@ export const Index: React.FC = () => {
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
 
-    !headmaster ? router.push('/mina-amnen-grupper') : setSelectedPeriod(queries.period, queries.schoolYear, 'pupils');
+    !headmaster
+      ? router.push('/mina-amnen-grupper')
+      : setSelectedPeriod(queries.period ?? selectedPeriod, queries.schoolYear, 'pupils');
   });
 
   return (

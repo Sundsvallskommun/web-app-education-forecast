@@ -29,7 +29,7 @@ export default function Index() {
       router.push('/mina-amnen-grupper');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
+        res.data && router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
       });
     }
   };

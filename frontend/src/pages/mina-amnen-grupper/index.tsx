@@ -30,14 +30,15 @@ export const Index: React.FC = () => {
       schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
     };
     if (teacher || (mentor && teacher)) {
-      setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
+      setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
+        res.data && router.push(`/min-mentorsklass/${res.data[0]?.groupId}`);
       });
     } else if (headmaster) {
       router.push('/amnen-grupper');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>

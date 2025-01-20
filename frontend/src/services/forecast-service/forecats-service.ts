@@ -27,11 +27,11 @@ import { apiURL } from '@utils/api-url';
 import { User } from '@interfaces/user';
 import { hasRolePermission } from '@utils/has-role-permission';
 
-const getMySubjects: (period: string, schoolYear: number, signal?) => Promise<ServiceResponse<MyGroup[]>> = (
-  period,
-  schoolYear,
-  signal
-) => {
+const getMySubjects: (
+  period: string,
+  schoolYear: number,
+  signal?: AbortSignal
+) => Promise<ServiceResponse<MyGroup[]>> = (period, schoolYear, signal) => {
   return apiService
     .get<ApiResponse<MyGroup[]>>(`/forecast/mygroups`, { params: { period, schoolYear, groupType: 'G' }, signal })
     .then((res) => ({ data: handleGetMyGroupsResponse(res.data) }))
@@ -45,7 +45,7 @@ const getGroupWithPupils: (
   groupId: string,
   period: string,
   schoolYear: number,
-  signal?
+  signal?: AbortSignal
 ) => Promise<ServiceResponse<Pupil[]>> = (groupId, period, schoolYear, signal) => {
   return apiService
     .get<ApiResponse<Pupil[]>>(`/forecast/pupilsbygroup/${groupId}`, { params: { period, schoolYear }, signal })
@@ -56,11 +56,11 @@ const getGroupWithPupils: (
     }));
 };
 
-const getMyClasses: (period: string, schoolYear: number, signal?) => Promise<ServiceResponse<MyGroup[]>> = (
-  period,
-  schoolYear,
-  signal
-) => {
+const getMyClasses: (
+  period: string,
+  schoolYear: number,
+  signal?: AbortSignal
+) => Promise<ServiceResponse<MyGroup[]>> = (period, schoolYear, signal) => {
   return apiService
     .get<ApiResponse<MyGroup[]>>('/forecast/mygroups', { params: { period, schoolYear, groupType: 'K' }, signal })
     .then((res) => ({ data: handleGetMyGroupsResponse(res.data) }))
@@ -74,7 +74,7 @@ const getMentorClass: (
   groupId: string,
   period: string,
   schoolYear: number,
-  signal?
+  signal?: AbortSignal
 ) => Promise<ServiceResponse<MentorClassPupil[]>> = (groupId, period, schoolYear, signal) => {
   return apiService
     .get<ApiResponse<MentorClassPupil[]>>(`/forecast/mentorclass/${groupId}`, {
@@ -92,7 +92,7 @@ const getMentorClassGrid: (
   groupId: string,
   period: string,
   schoolYear: number,
-  signal?
+  signal?: AbortSignal
 ) => Promise<ServiceResponse<MentorClassPupilGrid[]>> = (groupId, period, schoolYear, signal) => {
   return apiService
     .get<ApiResponse<MentorClassPupilGrid[]>>(`/forecast/mentorclass/${groupId}/grid`, {
@@ -106,7 +106,7 @@ const getMentorClassGrid: (
     }));
 };
 
-const getAllPupils: (period: string, schoolYear: number, signal?) => Promise<ServiceResponse<Pupil[]>> = (
+const getAllPupils: (period: string, schoolYear: number, signal?: AbortSignal) => Promise<ServiceResponse<Pupil[]>> = (
   period,
   schoolYear,
   signal
@@ -120,12 +120,12 @@ const getAllPupils: (period: string, schoolYear: number, signal?) => Promise<Ser
     }));
 };
 
-const getPupil: (pupilId: string, period: string, schoolYear: number, signal?) => Promise<ServiceResponse<Pupil[]>> = (
-  pupilId,
-  period,
-  schoolYear,
-  signal
-) => {
+const getPupil: (
+  pupilId: string,
+  period: string,
+  schoolYear: number,
+  signal?: AbortSignal
+) => Promise<ServiceResponse<Pupil[]>> = (pupilId, period, schoolYear, signal) => {
   return apiService
     .get<ApiResponse<Pupil[]>>(`/forecast/pupil/${pupilId}`, { params: { period, schoolYear }, signal })
     .then((res) => ({ data: handleGetManyPupils(res.data) }))
@@ -191,7 +191,7 @@ interface State {
   pupil: Pupil[];
   selectedSchoolYear: number;
   selectedPeriod: string;
-  selectedId: string;
+  selectedId?: string;
 }
 interface Actions {
   setSubjects: (mySubjects: MyGroup[] | ((prevState: MyGroup[]) => MyGroup[])) => Promise<void>;
@@ -213,7 +213,7 @@ interface Actions {
     selectedSchoolYear: number,
     callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil',
     objectId?: string | null,
-    user?: User | null
+    user?: User
   ) => Promise<void>;
   getMySubjects: (body: QueriesDto, signal?: AbortSignal) => Promise<ServiceResponse<MyGroup[]>>;
   // getGroup: (groupId: string) => Promise<ServiceResponse<MyGroup>>;
@@ -254,7 +254,7 @@ const initialState: State = {
   classDetails: emptyMyGroup,
   allPupils: [],
   pupil: [],
-  selectedSchoolYear: null,
+  selectedSchoolYear: new Date().getFullYear(),
   selectedPeriod: '',
   selectedId: '',
 };
@@ -281,7 +281,7 @@ export const useForecastStore = createWithEqualityFn<
           await set(() => ({
             selectedPeriod: selectedPeriod,
             selectedSchoolYear: selectedSchoolYear,
-            selectedId: objectId ? objectId : null,
+            selectedId: objectId ? objectId : '',
             listByPeriodIsLoading: true,
           }));
 
@@ -289,7 +289,10 @@ export const useForecastStore = createWithEqualityFn<
           SUBJECTS && (await get().getMySubjects({ period: selectedPeriod, schoolYear: selectedSchoolYear }));
           SUBJECT &&
             objectId &&
-            (await get().getGroupWithPupils(objectId, { period: selectedPeriod, schoolYear: selectedSchoolYear })) &&
+            (await get().getGroupWithPupils(objectId, {
+              period: selectedPeriod,
+              schoolYear: selectedSchoolYear,
+            })) &&
             (await get().getMySubjects({ period: selectedPeriod, schoolYear: selectedSchoolYear }));
           MENTORCLASS &&
             objectId &&
@@ -299,7 +302,7 @@ export const useForecastStore = createWithEqualityFn<
             objectId &&
             (await get().getPupil(objectId, selectedPeriod, selectedSchoolYear)) &&
             (await get().getMentorClass(
-              get().pupil[0]?.classGroupId,
+              get().pupil[0]?.classGroupId ?? '',
               {
                 period: selectedPeriod,
                 schoolYear: selectedSchoolYear,
@@ -337,10 +340,10 @@ export const useForecastStore = createWithEqualityFn<
             groupWithPupils:
               typeof groupWithPupils === 'function' ? groupWithPupils(s.groupWithPupils) : groupWithPupils,
           })),
-        getGroupWithPupils: async (groupId: string, queries: QueriesDto, signal?) => {
+        getGroupWithPupils: async (groupId: string, queries: QueriesDto, signal?: AbortSignal) => {
           const fPeriod = queries.period || get().selectedPeriod;
           const fSchoolYear = queries.schoolYear || get().selectedSchoolYear;
-          const dataArr = [];
+          const dataArr: Pupil[] = [];
           if (groupId == null) {
             await set(() => ({
               groupWithPupils: initialState.groupWithPupils,
@@ -349,7 +352,7 @@ export const useForecastStore = createWithEqualityFn<
           }
           await set(() => ({ groupWithPupilsIsLoading: true }));
           const res = await getGroupWithPupils(
-            groupId ? groupId : get().groupWithPupils[0].groupId,
+            groupId ? groupId : get().groupWithPupils[0].groupId ?? '',
             fPeriod,
             fSchoolYear,
             signal
@@ -373,10 +376,10 @@ export const useForecastStore = createWithEqualityFn<
                 ? previousPeriodGroup(s.previousPeriodGroup)
                 : previousPeriodGroup,
           })),
-        getPreviousPeriodGroup: async (groupId: string, queries: QueriesDto, signal?) => {
-          const fPeriod = queries.period;
+        getPreviousPeriodGroup: async (groupId: string, queries: QueriesDto, signal?: AbortSignal) => {
+          const fPeriod: string = queries.period ?? '';
           const fSchoolYear = queries.schoolYear;
-          const dataArr = [];
+          const dataArr: Pupil[] = [];
           if (groupId == null) {
             await set(() => ({
               previousPeriodGroup: initialState.previousPeriodGroup,
@@ -386,7 +389,7 @@ export const useForecastStore = createWithEqualityFn<
           await set(() => ({ previousPeriodGroupIsLoading: true }));
           //const myClasses = get().myClasses;
           const res = await getGroupWithPupils(
-            groupId ? groupId : get().previousPeriodGroup[0]?.groupId,
+            groupId ? groupId : get().previousPeriodGroup[0]?.groupId ?? '',
             fPeriod,
             fSchoolYear,
             signal
@@ -407,7 +410,7 @@ export const useForecastStore = createWithEqualityFn<
           await set((s) => ({
             myClasses: typeof myClasses === 'function' ? myClasses(s.myClasses) : myClasses,
           })),
-        getMyClasses: async (body: QueriesDto, signal?) => {
+        getMyClasses: async (body: QueriesDto, signal?: AbortSignal) => {
           const fPeriod = body.period || get().selectedPeriod;
           const fSchoolYear = body.schoolYear || get().selectedSchoolYear;
           if (fPeriod == null || fSchoolYear == null) {
@@ -417,7 +420,7 @@ export const useForecastStore = createWithEqualityFn<
             await get().reset();
           }
           await set(() => ({ classesIsLoading: true }));
-          const res = await getMyClasses(body.period, body.schoolYear, signal);
+          const res = await getMyClasses(body.period ?? get().selectedPeriod, body.schoolYear, signal);
           const data = (res.data && res.data) || initialState.myClasses;
           await set(() => ({ myClasses: data, classesIsLoading: false }));
           await set(() => ({
@@ -449,10 +452,11 @@ export const useForecastStore = createWithEqualityFn<
             mentorClassGrid:
               typeof mentorClassGrid === 'function' ? mentorClassGrid(s.mentorClassGrid) : mentorClassGrid,
           })),
-        getMentorClass: async (groupId: string, queries: QueriesDto, user, signal?) => {
+        getMentorClass: async (groupId: string, queries: QueriesDto, user, signal?: AbortSignal) => {
           const fPeriod = queries.period || get().selectedPeriod;
           const fSchoolYear = queries.schoolYear || get().selectedSchoolYear;
-          const dataArr = [];
+          const dataArr: MentorClassPupil[] | MentorClassPupilGrid[] = [];
+          let err: string | number | true;
           if (groupId == null) {
             set(() => ({
               mentorClass: initialState.mentorClass,
@@ -463,15 +467,16 @@ export const useForecastStore = createWithEqualityFn<
           }
           await set(() => ({ mentorClassIsLoading: true }));
 
-          let res;
-          let data;
+          let data: MentorClassPupil[] | MentorClassPupilGrid[];
           if ((user && hasRolePermission(user).mentor) || (user && hasRolePermission(user).headmaster)) {
             const res = await getMentorClassGrid(groupId, fPeriod, fSchoolYear, signal);
             data = (res.data && res.data) || initialState.mentorClass;
             await set(() => ({
-              mentorClassGrid: data,
+              mentorClassGrid: data as MentorClassPupilGrid[],
               mentorClassIsLoading: false,
             }));
+
+            err = res.error ? res.error : '';
           } else {
             const res = await getMentorClass(groupId, fPeriod, fSchoolYear, signal);
             data = (res.data && res.data) || initialState.mentorClass;
@@ -480,26 +485,29 @@ export const useForecastStore = createWithEqualityFn<
               const img = apiURL(`/education/${d.pupil}/personimage?width=${68}`);
               dataArr.push({
                 ...d,
+                forecasts: [],
                 image: img.length === 0 || !img ? null : img,
               });
             });
 
+            err = res.error ? res.error : '';
+
             await set(() => ({
-              mentorClass: dataArr,
+              mentorClass: dataArr as MentorClassPupil[],
               mentorClassIsLoading: false,
             }));
           }
 
-          return { data, error: res?.error };
+          return { data, error: err };
         },
         setAllPupils: async (allPupils) =>
           await set((s) => ({
             allPupils: typeof allPupils === 'function' ? allPupils(s.allPupils) : allPupils,
           })),
-        getAllPupils: async (queries: QueriesDto, signal?) => {
+        getAllPupils: async (queries: QueriesDto, signal?: AbortSignal) => {
           const fPeriod = queries.period || get().selectedPeriod;
           const fSchoolYear = queries.schoolYear || get().selectedSchoolYear;
-          const dataArr = [];
+          const dataArr: Pupil[] = [];
           if (fPeriod == null || fSchoolYear == null) {
             await set(() => ({
               allPupils: initialState.allPupils,
@@ -528,7 +536,7 @@ export const useForecastStore = createWithEqualityFn<
           await set((s) => ({
             pupil: typeof pupil === 'function' ? pupil(s.pupil) : pupil,
           })),
-        getPupil: async (pupilId: string, period: string, schoolYear: number, signal?) => {
+        getPupil: async (pupilId: string, period: string, schoolYear: number, signal?: AbortSignal) => {
           if (pupilId == null) {
             await set(() => ({
               pupil: initialState.pupil,
@@ -571,7 +579,7 @@ export const useForecastStore = createWithEqualityFn<
           const subject = get().group;
           if (!res.error) {
             await get().getGroupWithPupils(subject.groupId, {
-              period: subject.forecastPeriod,
+              period: subject.forecastPeriod ?? get().selectedPeriod,
               schoolYear: forecast.schoolYear,
             });
           }

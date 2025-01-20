@@ -10,6 +10,12 @@ import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.co
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
 
+interface Riffle {
+  id: string;
+  link: string;
+  title: string;
+}
+
 export const Index: React.FC = () => {
   const router = useRouter();
   const routerpupilId = router.query['pupil'];
@@ -25,7 +31,7 @@ export const Index: React.FC = () => {
 
   const mentorclass = useForecastStore((s) => s.mentorClass);
   const mentorclassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
-  const [rifflePupils, setRifflePupils] = useState([]);
+  const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
 
   const currentPeriod = GR ? termPeriod : currentMonthPeriod;
   useEffect(() => {
@@ -36,8 +42,8 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        teacher && (await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects'));
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'pupil', pupilId);
+        teacher && (await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects'));
+        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'pupil', pupilId);
       } else {
         if (!pupilId) {
           router.push('/mina-amnen-grupper');
@@ -57,12 +63,12 @@ export const Index: React.FC = () => {
   }, [router.query, router.isReady]);
 
   const breadcrumbLinks = [
-    { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className, currentPage: false },
+    { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className ?? 'Klass', currentPage: false },
     { link: '', title: `${pupil[0]?.givenname} ${pupil[0]?.lastname}`, currentPage: true },
   ];
 
   useEffect(() => {
-    const riffleArray = [];
+    const riffleArray: Riffle[] = [];
     mentorclass.filter((p) => {
       riffleArray.push({
         id: p.pupil,
@@ -84,7 +90,7 @@ export const Index: React.FC = () => {
         <Pupil isSinglePupil />
         <RifflePrevNext
           riffleIsLoading={mentorclassIsLoading}
-          dataId={pupil[0]?.pupil}
+          dataId={pupil[0]?.pupil ?? pupilId ?? ''}
           riffleObjects={rifflePupils}
           callback="pupil"
         />

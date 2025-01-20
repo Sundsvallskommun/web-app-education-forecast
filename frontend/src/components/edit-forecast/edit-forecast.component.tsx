@@ -11,7 +11,7 @@ interface EditForecastprops {
     period: string;
     schoolYear: number;
   };
-  forecast?: number;
+  forecast?: number | null;
 }
 
 export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) => {
@@ -19,12 +19,12 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const [forecastLoading, setForecastLoading] = useState(false);
-  const { APPROVED, WARNINGS, UNNAPROVED } = IsGradedForecast(forecast, Number);
+  const { APPROVED, WARNINGS, UNNAPROVED } = IsGradedForecast(forecast);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [focusedForecast, setFocusedForecast] = useState(false);
   const message = useSnackbar();
 
-  const onSetForecastHandler = async (e) => {
+  const onSetForecastHandler = async (e: React.BaseSyntheticEvent) => {
     const forecast = e.target.value;
     sessionStorage.setItem('scrollposition', `${document.querySelectorAll('.sk-table-wrapper-inside')[0].scrollTop}`);
     const setForecastBody: SetForecastDto = {

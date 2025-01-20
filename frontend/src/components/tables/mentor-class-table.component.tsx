@@ -4,8 +4,14 @@ import { Avatar, Badge, Link, SortMode, Table, Select, Pagination, Input, Icon }
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
-import { Pupil } from '@interfaces/forecast/forecast';
+import { GridForecast, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
+
+interface MentorClassHeaders {
+  label: string;
+  property: string;
+  isColumnSortable: boolean;
+}
 
 export const MentorClassTable = (user: User, searchQuery?: string) => {
   const { headmaster, mentor } = hasRolePermission(user);
@@ -13,17 +19,17 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorClass = useForecastStore((s) => s.mentorClass);
   const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
-  const [mentorClassData, setMentorClassData] = useState([]);
-  const [subjectHeaders, setSubjectHeaders] = useState([]);
+  const [mentorClassData, setMentorClassData] = useState<KeyStringTable[]>([]);
+  const [subjectHeaders, setSubjectHeaders] = useState<MentorClassHeaders[]>([]);
 
   useEffect(() => {
-    const tableArr = [];
-    const subjectArr = [];
+    const tableArr: KeyStringTable[] = [];
+    const subjectArr: MentorClassHeaders[] = [];
     if (mentor || headmaster) {
       if (mentorClassGrid.length !== 0) {
         mentorClassGrid.map((p) => {
-          const allSubjects = p.forecasts?.reduce((accumulator, current) => {
-            if (!accumulator.find((item) => item.courseId === current.courseId)) {
+          const allSubjects = p.forecasts?.reduce((accumulator: GridForecast[], current) => {
+            if (!accumulator.find((item: GridForecast) => item.courseId === current.courseId)) {
               accumulator.push(current);
             }
             return accumulator;
@@ -80,10 +86,21 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   }, [mentorClass, mentorClassGrid]);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
-  const [sortColumn, setSortColumn] = useState<string>('pupil');
+
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowHeight, setRowHeight] = useState<string>('normal');
+
+  const mentorclassHeaderLabels: MentorClassHeaders[] = [
+    { label: 'Namn', property: 'pupil', isColumnSortable: true },
+    { label: 'Närvaro', property: 'presence', isColumnSortable: true },
+    { label: 'Når målen', property: 'approved', isColumnSortable: true },
+    { label: 'Varning', property: 'warnings', isColumnSortable: true },
+    { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
+    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
+  ];
+
+  const [sortColumn, setSortColumn] = useState<string>('pupil');
 
   const handleSort = (column: string) => {
     if (sortColumn !== column) {
@@ -92,15 +109,6 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
       setSortOrder(sortOrder === SortMode.ASC ? SortMode.DESC : SortMode.ASC);
     }
   };
-
-  const mentorclassHeaderLabels = [
-    { label: 'Namn', property: 'pupil', isColumnSortable: true },
-    { label: 'Närvaro', property: 'presence', isColumnSortable: true },
-    { label: 'Når målen', property: 'approved', isColumnSortable: true },
-    { label: 'Varning', property: 'warnings', isColumnSortable: true },
-    { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
-    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
-  ];
 
   const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }, ...subjectHeaders];
 
@@ -128,19 +136,21 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     );
   });
 
-  const mentorclassSearchFilter = (q: string, obj: Pupil) => {
-    if (obj.pupil?.toLowerCase().includes(q)) {
+  const mentorclassSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (obj.pupil == '' && obj.pupil?.toLowerCase().includes(q)) {
       return true; // pupil
     } else {
       return false;
     }
   };
 
-  const mentorClassListSearchFiltered = mentorClassData.filter(searchFilter(searchQuery, mentorclassSearchFilter));
+  const mentorClassListSearchFiltered = mentorClassData.filter(
+    searchFilter(searchQuery ? searchQuery : '', mentorclassSearchFilter)
+  );
 
-  const mentorClassListRendered = mentorClassListSearchFiltered;
+  const mentorClassListRendered: KeyStringTable[] | string[] = mentorClassListSearchFiltered;
 
-  const iconType = (prop) => {
+  const iconType = (prop: number) => {
     if (prop === 1) {
       return 'check';
     } else if (prop === 2) {
@@ -150,7 +160,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     }
   };
 
-  const iconColor = (prop) => {
+  const iconColor = (prop: number) => {
     if (prop === 1) {
       return 'gronsta';
     } else if (prop === 2) {
@@ -163,7 +173,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorclassRows = mentorClassListRendered
     .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return a[sortColumn] < b[sortColumn] ? order : a[sortColumn] > b[sortColumn] ? order * -1 : 0;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
     .map((p, idx: number) => {
@@ -182,12 +192,12 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                 {headmaster ? (
                   <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
                 ) : p.notFilledIn === undefined || p.notFilledIn === null ? (
-                  <span>{p.pupil} </span>
+                  <span>{typeof p.pupil === 'string' && p.pupil} </span>
                 ) : (
                   <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
                 )}
               </span>
-              <span>Närvaro: {p.presence}%</span>
+              <span>Närvaro: {typeof p.presence === 'number' && p.presence}%</span>
             </div>
           </Table.HeaderColumn>
           {subjectHeaders.map((s, index) => {
@@ -196,7 +206,12 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                 <div className="w-full flex justify-center items-center">
                   {s.label in p ? (
                     p[s.label] !== null ? (
-                      <Icon.Padded inverted color={iconColor(p[s.label])} rounded name={iconType(p[s.label])} />
+                      <Icon.Padded
+                        inverted
+                        color={iconColor(Number(p[s.label]))}
+                        rounded
+                        name={iconType(Number(p[s.label]))}
+                      />
                     ) : (
                       <Icon size={14} name="minus" />
                     )
@@ -220,10 +235,10 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
               <Avatar
-                imageUrl={`${p.image.length !== 0 || p.image ? p.image : ''}`}
+                imageUrl={`${(typeof p.image === 'string' && p?.image?.length !== 0) || p.image ? p.image : ''}`}
                 color="vattjom"
                 rounded
-                initials={initialsFunction(p.pupil)}
+                initials={initialsFunction(typeof p.pupil === 'string' && p.pupil ? p.pupil : '')}
                 size="sm"
                 accent
               />
@@ -253,7 +268,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     inverted
                     rounded
                     color={!p.approved || p.approved === 0 ? 'tertiary' : 'gronsta'}
-                    counter={p.approved == 0 ? 0 : p.approved}
+                    counter={!p.approved || p.approved == 0 || typeof p.approved !== 'number' ? 0 : p.approved}
                   />
                 )}
               </span>
@@ -269,7 +284,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.warnings || p.warnings === 0}
                     color={!p.warnings || p.warnings === 0 ? 'tertiary' : 'warning'}
-                    counter={p.warnings == 0 ? 0 : p.warnings}
+                    counter={!p.warnings || p.warnings == 0 || typeof p.warnings !== 'number' ? 0 : p.warnings}
                   />
                 )}
               </span>
@@ -285,7 +300,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.unapproved || p.unapproved === 0}
                     color={!p.unapproved || p.unapproved === 0 ? 'tertiary' : 'error'}
-                    counter={p.unapproved == 0 ? 0 : p.unapproved}
+                    counter={!p.unapproved || p.unapproved == 0 || typeof p.unapproved !== 'number' ? 0 : p.unapproved}
                   />
                 )}
               </span>
@@ -300,7 +315,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                   rounded
                   inverted={!p.notFilledIn}
                   color="tertiary"
-                  counter={!p.notFilledIn ? 0 : p.notFilledIn}
+                  counter={!p.notFilledIn || typeof p.notFilledIn !== 'number' ? 0 : p.notFilledIn}
                 />
               </span>
             </div>
@@ -311,7 +326,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
 
   const footer = (
     <Table.Footer
-      className={mentorclassRows.length > pageSize && 'border-0 outline outline-1 outline-gray-300 rounded-b-18'}
+      className={mentorclassRows.length > pageSize ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}
     >
       <div className="sk-table-bottom-section">
         <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
