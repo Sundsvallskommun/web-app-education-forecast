@@ -21,15 +21,15 @@ export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsL
 
   const currentRiffle = riffleObjects.find((f) => f.id === selectedId?.toLowerCase());
   const prevRiffle =
-    riffleObjects[riffleObjects.indexOf(currentRiffle)] === riffleObjects[0]
+    riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0])] === riffleObjects[0]
       ? riffleObjects[riffleObjects.length - 1]
-      : riffleObjects[riffleObjects.indexOf(currentRiffle) - 1];
+      : riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0]) - 1];
   const nextRiffle =
-    riffleObjects[riffleObjects.indexOf(currentRiffle)] === riffleObjects[riffleObjects.length - 1]
+    riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0])] === riffleObjects[riffleObjects.length - 1]
       ? riffleObjects[0]
-      : riffleObjects[riffleObjects.indexOf(currentRiffle) + 1];
+      : riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0]) + 1];
 
-  const riffleHandler = (id) => {
+  const riffleHandler = (id: string) => {
     setObjectWithPeriod(selectedPeriod, selectedSchoolYear, callback, id);
   };
 

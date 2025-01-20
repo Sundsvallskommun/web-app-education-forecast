@@ -25,7 +25,7 @@ export const Index: React.FC = () => {
   const { GR, mentor, headmaster } = hasRolePermission(user);
 
   const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
+  const { schoolYear, currentMonthPeriod, termPeriod, currentYear } = thisSchoolYearPeriod();
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const subjectIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
@@ -50,7 +50,10 @@ export const Index: React.FC = () => {
           (headmaster && (await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes')));
         await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects');
         await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subject', subjectId);
-        await getPreviousPeriodGroup(subjectId, { period: previousPeriod, schoolYear: previousSchoolYear });
+        await getPreviousPeriodGroup(subjectId, {
+          period: previousPeriod,
+          schoolYear: previousSchoolYear ?? currentYear - 1,
+        });
       } else {
         if (!subjectId) {
           router.push('/mina-amnen-grupper');

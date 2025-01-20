@@ -75,7 +75,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
         schoolYear:
           GY && (previousMonthPeriod === 'VT Maj' || previousMonthPeriod === 'HT December')
             ? currentYear - 1
-            : previousSchoolYear,
+            : previousSchoolYear ?? currentYear - 1,
       }));
   };
 
@@ -94,7 +94,10 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
     await setSelectedPeriod(currentPeriod, year, callback, selectedId, user);
     callback === 'subject' &&
       selectedId &&
-      (await getPreviousPeriodGroup(selectedId, { period: previousPeriod, schoolYear: previousSchoolYear }));
+      (await getPreviousPeriodGroup(selectedId, {
+        period: previousPeriod,
+        schoolYear: previousSchoolYear ?? currentYear - 1,
+      }));
   };
 
   return (

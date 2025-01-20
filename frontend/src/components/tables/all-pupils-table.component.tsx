@@ -2,10 +2,9 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Link, Table, SortMode, Pagination, Select, Input, Badge } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
-import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
-
-interface AllPupils {
+export interface AllPupils {
   id?: string | null;
   pupil?: string | null;
   className?: string | null;
@@ -29,11 +28,11 @@ interface PupilHeaders {
 
 export const PupilTables = (searchQuery?: string) => {
   const allPupils = useForecastStore((s) => s.allPupils);
-  const [allPupilsTable, setAllPupilTable] = useState<AllPupils[]>([]);
+  const [allPupilsTable, setAllPupilTable] = useState<KeyStringTable[]>([]);
   const [pageSize] = useState<number>(999);
 
   useEffect(() => {
-    const tableArr: AllPupils[] = [];
+    const tableArr: KeyStringTable[] = [];
     if (allPupils.length !== 0) {
       allPupils.map((p) => {
         const numberNotFilledIn =
@@ -100,10 +99,10 @@ export const PupilTables = (searchQuery?: string) => {
     );
   });
 
-  const pupilSearchFilter = (q: string, obj: Pupil) => {
-    if (obj.pupil?.toLowerCase().includes(q)) {
+  const pupilSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (typeof obj.pupil === 'string' && obj.pupil?.toLowerCase().includes(q)) {
       return true; // pupil
-    } else if (obj.className?.toLowerCase().includes(q)) {
+    } else if (typeof obj.className === 'string' && obj.className?.toLowerCase().includes(q)) {
       return true; //class
     } else {
       return false;
@@ -118,7 +117,7 @@ export const PupilTables = (searchQuery?: string) => {
 
   //rows all pupils
   const pupilRows = pupilListRendered
-    .sort((a: AllPupils, b: AllPupils) => {
+    .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
       return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
@@ -136,15 +135,19 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
               <Avatar
-                imageUrl={`${p.image?.length !== 0 || p.image ? p.image : ''}`}
+                imageUrl={`${(typeof p.image === 'string' && p.image?.length !== 0) || p.image ? p.image : ''}`}
                 color="vattjom"
                 rounded
-                initials={initialsFunction(p.pupil)}
+                initials={initialsFunction(typeof p.pupil === 'string' && p.pupil ? p.pupil : '')}
                 size="sm"
                 accent
               />
               <span className="ml-8 font-bold">
-                {p.totalSubjects !== 0 ? <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link> : <>{p.pupil} </>}
+                {p.totalSubjects !== 0 ? (
+                  <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
+                ) : (
+                  <>{typeof p.pupil === 'string' && p.pupil} </>
+                )}
               </span>
             </div>
           </Table.HeaderColumn>
@@ -155,6 +158,7 @@ export const PupilTables = (searchQuery?: string) => {
             <div className="flex max-w-[300px] items-center gap-2">
               <span className="ml-8">
                 {p.teachers &&
+                  Array.isArray(p.teachers) &&
                   p.teachers.map((v, idx) => {
                     const fullName = `${v.givenname} ${v.lastname}`;
                     const nameArr = fullName.split('');
@@ -190,7 +194,7 @@ export const PupilTables = (searchQuery?: string) => {
                     inverted
                     rounded
                     color={!p.approved ? 'tertiary' : 'gronsta'}
-                    counter={!p.approved ? 0 : p.approved}
+                    counter={!p.approved || typeof p.approved !== 'number' ? 0 : p.approved}
                   />
                 )}
               </span>
@@ -206,7 +210,7 @@ export const PupilTables = (searchQuery?: string) => {
                     rounded
                     inverted={!p.warnings}
                     color={!p.warnings ? 'tertiary' : 'warning'}
-                    counter={!p.warnings ? 0 : p.warnings}
+                    counter={!p.warnings || typeof p.warnings !== 'number' ? 0 : p.warnings}
                   />
                 )}
               </span>
@@ -222,7 +226,7 @@ export const PupilTables = (searchQuery?: string) => {
                     rounded
                     inverted={!p.unapproved}
                     color={!p.unapproved ? 'tertiary' : 'error'}
-                    counter={!p.unapproved ? 0 : p.unapproved}
+                    counter={!p.unapproved || typeof p.unapproved !== 'number' ? 0 : p.unapproved}
                   />
                 )}
               </span>
@@ -236,7 +240,7 @@ export const PupilTables = (searchQuery?: string) => {
                     rounded
                     inverted={!p.notFilledIn}
                     color="tertiary"
-                    counter={!p.notFilledIn ? 0 : p.notFilledIn}
+                    counter={!p.notFilledIn || typeof p.notFilledIn !== 'number' ? 0 : p.notFilledIn}
                   />
                 </span>
               ) : (

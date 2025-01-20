@@ -4,7 +4,7 @@ import Loader from './loader';
 export default function CenteredLoader() {
   return (
     <div className="absolute inset-0 m-auto flex justify-center items-center">
-      <Loader size="lg" />
+      <Loader size={8} />
     </div>
   );
 }

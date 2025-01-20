@@ -23,7 +23,7 @@ export const Index: React.FC = () => {
   const { GR } = hasRolePermission(user);
   const routersubjectId = router.query['groupId'];
   const subjectId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
+  const { schoolYear, currentMonthPeriod, termPeriod, currentYear } = thisSchoolYearPeriod();
   const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
@@ -54,7 +54,10 @@ export const Index: React.FC = () => {
           'subject',
           subjectId
         );
-        await getPreviousPeriodGroup(subjectId, { period: previousPeriod, schoolYear: previousSchoolYear });
+        await getPreviousPeriodGroup(subjectId, {
+          period: previousPeriod,
+          schoolYear: previousSchoolYear ?? currentYear - 1,
+        });
       } else {
         if (!subjectId) {
           router.push('/amnen-grupper');

@@ -4,12 +4,8 @@ import { Avatar, Badge, Link, SortMode, Table, Select, Pagination, Input, Icon }
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
-import { GridForecast, Pupil } from '@interfaces/forecast/forecast';
+import { GridForecast, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
-
-interface MentorClassTable {
-  [key: string]: string | number | null | undefined;
-}
 
 interface MentorClassHeaders {
   label: string;
@@ -23,11 +19,11 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const mentorClass = useForecastStore((s) => s.mentorClass);
   const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
-  const [mentorClassData, setMentorClassData] = useState<MentorClassTable[]>([]);
+  const [mentorClassData, setMentorClassData] = useState<KeyStringTable[]>([]);
   const [subjectHeaders, setSubjectHeaders] = useState<MentorClassHeaders[]>([]);
 
   useEffect(() => {
-    const tableArr: MentorClassTable[] = [];
+    const tableArr: KeyStringTable[] = [];
     const subjectArr: MentorClassHeaders[] = [];
     if (mentor || headmaster) {
       if (mentorClassGrid.length !== 0) {
@@ -140,8 +136,8 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     );
   });
 
-  const mentorclassSearchFilter = (q: string, obj: Pupil) => {
-    if (obj.pupil?.toLowerCase().includes(q)) {
+  const mentorclassSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (obj.pupil == '' && obj.pupil?.toLowerCase().includes(q)) {
       return true; // pupil
     } else {
       return false;
@@ -152,7 +148,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     searchFilter(searchQuery ? searchQuery : '', mentorclassSearchFilter)
   );
 
-  const mentorClassListRendered: MentorClassTable[] | string[] = mentorClassListSearchFiltered;
+  const mentorClassListRendered: KeyStringTable[] | string[] = mentorClassListSearchFiltered;
 
   const iconType = (prop: number) => {
     if (prop === 1) {
@@ -196,12 +192,12 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                 {headmaster ? (
                   <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
                 ) : p.notFilledIn === undefined || p.notFilledIn === null ? (
-                  <span>{p.pupil} </span>
+                  <span>{typeof p.pupil === 'string' && p.pupil} </span>
                 ) : (
                   <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
                 )}
               </span>
-              <span>Närvaro: {p.presence}%</span>
+              <span>Närvaro: {typeof p.presence === 'number' && p.presence}%</span>
             </div>
           </Table.HeaderColumn>
           {subjectHeaders.map((s, index) => {
@@ -239,10 +235,10 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
               <Avatar
-                imageUrl={`${p?.image?.toString().length !== 0 || p.image ? p.image : ''}`}
+                imageUrl={`${(typeof p.image === 'string' && p?.image?.length !== 0) || p.image ? p.image : ''}`}
                 color="vattjom"
                 rounded
-                initials={initialsFunction(p.pupil)}
+                initials={initialsFunction(typeof p.pupil === 'string' && p.pupil ? p.pupil : '')}
                 size="sm"
                 accent
               />
@@ -272,7 +268,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     inverted
                     rounded
                     color={!p.approved || p.approved === 0 ? 'tertiary' : 'gronsta'}
-                    counter={!p.approved || p.approved == 0 ? 0 : p.approved}
+                    counter={!p.approved || p.approved == 0 || typeof p.approved !== 'number' ? 0 : p.approved}
                   />
                 )}
               </span>
@@ -288,7 +284,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.warnings || p.warnings === 0}
                     color={!p.warnings || p.warnings === 0 ? 'tertiary' : 'warning'}
-                    counter={!p.warnings || p.warnings == 0 ? 0 : p.warnings}
+                    counter={!p.warnings || p.warnings == 0 || typeof p.warnings !== 'number' ? 0 : p.warnings}
                   />
                 )}
               </span>
@@ -304,7 +300,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                     rounded
                     inverted={!p.unapproved || p.unapproved === 0}
                     color={!p.unapproved || p.unapproved === 0 ? 'tertiary' : 'error'}
-                    counter={!p.unapproved || p.unapproved == 0 ? 0 : p.unapproved}
+                    counter={!p.unapproved || p.unapproved == 0 || typeof p.unapproved !== 'number' ? 0 : p.unapproved}
                   />
                 )}
               </span>
@@ -319,7 +315,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
                   rounded
                   inverted={!p.notFilledIn}
                   color="tertiary"
-                  counter={!p.notFilledIn ? 0 : p.notFilledIn}
+                  counter={!p.notFilledIn || typeof p.notFilledIn !== 'number' ? 0 : p.notFilledIn}
                 />
               </span>
             </div>

@@ -5,13 +5,12 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 
 import router from 'next/router';
-import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 import { initialsFunction } from '@utils/initials';
 import { EditForecast } from '@components/edit-forecast/edit-forecast.component';
 import dayjs from 'dayjs';
-
-interface TablePupil {
+interface TablePupil extends Pupil {
   id?: string | null;
   pupil?: string | null;
   className?: string | null;
@@ -30,6 +29,7 @@ interface TablePupil {
   notFilledIn?: number | null;
   image?: string | null;
   forecastPeriod?: string | null;
+  groupName?: string | null;
 }
 
 interface TablePupilHeaders {
@@ -49,11 +49,11 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
   const groupWithPupilsIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const [pupilsInGroupData, setPupilsInGroupData] = useState<TablePupil[]>([]);
+  const [pupilsInGroupData, setPupilsInGroupData] = useState<KeyStringTable[]>([]);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
 
   useEffect(() => {
-    const tableArr: TablePupil[] = [];
+    const tableArr: KeyStringTable[] = [];
     if (isSinglePupil) {
       if (pupil.length !== 0) {
         pupil.map((p) => {
@@ -181,18 +181,18 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
     );
   });
 
-  const singlePupilSearchFilter = (q: string, obj: Pupil) => {
-    if (obj?.courseName?.toLowerCase().includes(q)) {
+  const singlePupilSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (obj?.courseName == '' && obj?.courseName?.toLowerCase().includes(q)) {
       return true; // subject/group
     } else {
       return false;
     }
   };
 
-  const manyPupilSearchFilter = (q: string, obj: Pupil) => {
-    if (obj.pupil?.toLowerCase().includes(q)) {
+  const manyPupilSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (obj.pupil == '' && obj.pupil?.toLowerCase().includes(q)) {
       return true; // pupil
-    } else if (obj.className?.toLowerCase().includes(q)) {
+    } else if (obj.className == '' && obj.className?.toLowerCase().includes(q)) {
       return true; //class
     } else {
       return false;
@@ -235,15 +235,15 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
               <Avatar
                 color="vattjom"
                 rounded
-                initials={`${p.courseName && p.courseName.split('').slice(0, 2).toString().replace(',', '')}`}
+                initials={`${p.courseName && typeof p.courseName === 'string' && p.courseName.split('').slice(0, 2).toString().replace(',', '')}`}
                 size="sm"
                 accent
               />
               <span className="ml-8 font-bold">
-                {p.teachers?.find((x) => x.personId === user.personId) || headmaster ? (
+                {(Array.isArray(p.teachers) && p.teachers?.find((x) => x.personId === user.personId)) || headmaster ? (
                   <Link href={`/amnen-grupper/amne-grupp/${p.groupId}`}>{p.courseName}</Link>
                 ) : (
-                  <>{p.courseName}</>
+                  <>{typeof p.courseName === 'string' && p.courseName}</>
                 )}
               </span>
             </div>
@@ -252,6 +252,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
             <div className="flex max-w-[300px] items-center gap-2">
               <span className="ml-8">
                 {p.teachers &&
+                  Array.isArray(p.teachers) &&
                   p.teachers.map((v, idx) => {
                     const fullName = `${v.givenname} ${v.lastname}`;
                     const nameArr = fullName.split('');
@@ -277,7 +278,9 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
               <span className="ml-8">{!p.presence ? '-' : `${p.presence}%`}</span>
             </div>
           </Table.Column>
-          <Table.Column colSpan={!p.teachers?.find((x) => x.personId === user.personId) ? 2 : 1}>
+          <Table.Column
+            colSpan={Array.isArray(p.teachers) && !p.teachers?.find((x) => x.personId === user.personId) ? 2 : 1}
+          >
             <div className="flex justify-between">
               {summerPeriod && (selectedPeriod === 'HT September' || selectedPeriod === 'HT') ? (
                 <Label inverted rounded color="juniskar">
@@ -310,7 +313,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
             </div>
           </Table.Column>
 
-          {!headmaster && p.teachers?.find((x) => x.personId === user.personId) ? (
+          {!headmaster && Array.isArray(p.teachers) && p.teachers?.find((x) => x.personId === user.personId) ? (
             <Table.Column>
               <div className="flex items-center gap-2">
                 <Button
@@ -334,7 +337,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
 
   // rows group with pupils
   const groupWithPupilsRows = manyPupilsListRendered
-    .sort((a: TablePupil, b: TablePupil) => {
+    .sort((a: KeyStringTable, b: KeyStringTable) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
       return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
@@ -357,7 +360,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
                 imageUrl={`${p.image}`}
                 color="vattjom"
                 rounded
-                initials={initialsFunction(p.pupil)}
+                initials={initialsFunction(typeof p.pupil === 'string' && p.pupil ? p.pupil : '')}
                 size="sm"
                 accent
               />
@@ -370,7 +373,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
                   {myClasses.find((x) => x.groupName === p.className) ? (
                     <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
                   ) : (
-                    p.pupil
+                    typeof p.pupil === 'string' && p?.pupil
                   )}
                 </span>
               )}
@@ -384,7 +387,7 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
                 {myClasses.find((x) => x.groupName === p.className) ? (
                   <Link href={`/min-mentorsklass/${p.classGroupId}`}>{p.className}</Link>
                 ) : (
-                  p.className
+                  typeof p?.className === 'string' && p?.className
                 )}
               </span>
             )}
@@ -436,13 +439,15 @@ export const CustomPupilTable = (user: User, isSinglePupil?: boolean, searchQuer
                   <EditForecast
                     pupil={
                       p && {
-                        pupilId: p.id ? p.id : '',
-                        groupId: p.groupId ? p.groupId : '',
-                        period: p.forecastPeriod ? p.forecastPeriod : selectedPeriod,
-                        schoolYear: p.schoolYear ? p.schoolYear : selectedSchoolYear,
+                        pupilId: p.id && typeof p.id === 'string' ? p.id : '',
+                        groupId: p.groupId && typeof p.groupId === 'string' ? p.groupId : '',
+                        period:
+                          p.forecastPeriod && typeof p.forecastPeriod === 'string' ? p.forecastPeriod : selectedPeriod,
+                        schoolYear:
+                          p.schoolYear && typeof p.schoolYear === 'number' ? p.schoolYear : selectedSchoolYear,
                       }
                     }
-                    forecast={p.forecast === null ? null : p.forecast}
+                    forecast={p.forecast === null || typeof p.forecast !== 'number' ? null : p.forecast}
                   />
                 )}
               </>

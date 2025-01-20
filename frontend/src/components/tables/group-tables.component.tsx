@@ -1,11 +1,10 @@
-import { ForecastMyGroupTeacher, MyGroup } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { User } from '@interfaces/user';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Badge, Link, Table, SortMode, Select, Pagination, Input } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { searchFilter } from '@utils/search';
 import { useEffect, useState } from 'react';
-//import { IsGradedForecast } from '@utils/is-grade-forecast';
 
 interface GroupTable {
   id?: string | null;
@@ -29,11 +28,11 @@ interface GroupHeaders {
 export const GroupTables = (groupType: string, user: User, searchQuery?: string) => {
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const { myClasses, mySubjects } = useForecastStore();
-  const [grouptable, setGrouptable] = useState<GroupTable[]>([]);
+  const [grouptable, setGrouptable] = useState<KeyStringTable[]>([]);
   const [pageSize] = useState<number>(10);
   // const {APPROVED, WARNINGS, UNNAPROVED, NOTFILLEDIN} = IsGradedForecast(groupType === "K" ? myClasses : mySubjects, Array);
   useEffect(() => {
-    const tableArr: GroupTable[] = [];
+    const tableArr: KeyStringTable[] = [];
     if (groupType === 'K') {
       if (myClasses.length !== 0) {
         myClasses.map((c) => {
@@ -146,8 +145,8 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
     );
   });
 
-  const groupSearchFilter = (q: string, obj: MyGroup) => {
-    if (obj?.groupName?.toLowerCase().includes(q)) {
+  const groupSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
+    if (obj?.groupName == '' && obj?.groupName?.toLowerCase().includes(q)) {
       return true; // Titel
     } else {
       return false;
@@ -160,7 +159,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
 
   //rows
   const groupRows = groupsListRendered
-    .sort((a: GroupTable, b: GroupTable) => {
+    .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
       return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
@@ -174,7 +173,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                 // imageUrl=""
                 color="vattjom"
                 rounded
-                initials={`${g.groupName && g.groupName.split('').slice(0, 2)}`}
+                initials={`${g.groupName && typeof g.groupName === 'string' && g.groupName.split('').slice(0, 2)}`}
                 size="sm"
                 accent
               />
@@ -196,6 +195,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
               <div className="flex max-w-[300px] items-center gap-2">
                 <span className="ml-8">
                   {g.teachers &&
+                    Array.isArray(g.teachers) &&
                     g.teachers.map((t) => {
                       const fullName = `${t.givenname} ${t.lastname}`;
                       const nameArr = fullName.split('');
@@ -205,7 +205,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
 
                       const secondletterInLastName = t.lastname && t.lastname.split('').slice(1, 2);
                       const abbreviation = `${initials.join('')}${secondletterInLastName}`;
-                      const lastObject = g.teachers && g.teachers[g.teachers.length - 1];
+                      const lastObject = g.teachers && Array.isArray(g.teachers) && g.teachers[g.teachers.length - 1];
                       return t ? (
                         <span key={`teacher-${t.personId}`}>
                           {groupType === 'K' ? (
@@ -215,7 +215,11 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                           ) : (
                             `${t?.givenname} ${t?.lastname} (${abbreviation})`
                           )}
-                          {g.teachers && g.teachers.length > 1 && t.personId !== lastObject?.personId && ','}
+                          {g.teachers &&
+                            Array.isArray(g.teachers) &&
+                            g.teachers.length > 1 &&
+                            t.personId !== lastObject?.personId &&
+                            ','}
                           {'  '}
                         </span>
                       ) : (
@@ -229,7 +233,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
             <></>
           )}
           <Table.Column>
-            <span>{g.totalPupils}</span>
+            <span>{g.totalPupils == '' && g.totalPupils}</span>
           </Table.Column>
           <Table.Column>
             <div className="flex items-center gap-2">
@@ -246,7 +250,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                     inverted
                     rounded
                     color={!g.approvedPupils ? 'tertiary' : 'gronsta'}
-                    counter={!g.approvedPupils ? 0 : g.approvedPupils}
+                    counter={!g.approvedPupils ? 0 : typeof g?.approvedPupils === 'number' ? g?.approvedPupils : 0}
                   />
                 )}
               </span>
@@ -262,7 +266,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                     rounded
                     inverted={!g.warningPupils}
                     color={!g.warningPupils ? 'tertiary' : 'warning'}
-                    counter={!g.warningPupils ? 0 : g.warningPupils}
+                    counter={!g.warningPupils ? 0 : typeof g.warningPupils === 'number' ? g.warningPupils : 0}
                   />
                 )}
               </span>
@@ -278,7 +282,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                     rounded
                     inverted={!g.unapprovedPupils}
                     color={!g.unapprovedPupils ? 'tertiary' : 'error'}
-                    counter={!g.unapprovedPupils ? 0 : g.unapprovedPupils}
+                    counter={!g.unapprovedPupils ? 0 : typeof g.unapprovedPupils === 'number' ? g.unapprovedPupils : 0}
                   />
                 )}
               </span>
@@ -291,7 +295,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
                   rounded
                   inverted={!g.notFilledIn}
                   color="tertiary"
-                  counter={!g.notFilledIn ? 0 : g.notFilledIn}
+                  counter={!g.notFilledIn ? 0 : typeof g.notFilledIn === 'number' ? g.notFilledIn : 0}
                 />
               </span>
             </div>

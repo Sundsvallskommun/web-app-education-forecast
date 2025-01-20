@@ -31,9 +31,9 @@ export interface Pupil {
   forecastPeriod?: string | null;
   schoolYear?: number | null;
   subjectsOpenToForecast?: number | null;
-  approved: number | null;
-  warnings: number | null;
-  unapproved: number | null;
+  approved?: number | null;
+  warnings?: number | null;
+  unapproved?: number | null;
   presence?: number | null;
   forecast?: number | null;
   previousForecast?: number | null;
@@ -47,6 +47,7 @@ export interface Pupil {
   teachers?: ForecastMyGroupTeacher[] | null;
   totalSubjects: number | null;
   image?: string | null;
+  groupName?: string | null;
 }
 
 export interface MentorClassPupil {
@@ -113,4 +114,8 @@ export interface clearGroupForecastsDto {
   groupId: string;
   period: string;
   schoolYear: number;
+}
+
+export interface KeyStringTable {
+  [key: string]: string | number | [] | object | null | undefined;
 }

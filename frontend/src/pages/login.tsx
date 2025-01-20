@@ -17,7 +17,7 @@ export default function Start() {
   // Turn on/off automatic login
   const autoLogin = true;
 
-  const initalFocus = useRef(null);
+  const initalFocus = useRef<HTMLButtonElement>(null);
   const setInitalFocus = () => {
     setTimeout(() => {
       initalFocus.current && initalFocus.current.focus();
