@@ -26,6 +26,7 @@ import { callbackType } from '@utils/callback-type';
 import { apiURL } from '@utils/api-url';
 import { User } from '@interfaces/user';
 import { hasRolePermission } from '@utils/has-role-permission';
+import dayjs from 'dayjs';
 
 const getMySubjects: (
   period: string,
@@ -254,7 +255,17 @@ const initialState: State = {
   classDetails: emptyMyGroup,
   allPupils: [],
   pupil: [],
-  selectedSchoolYear: new Date().getFullYear(),
+  selectedSchoolYear:
+    dayjs(new Date()).month() === 0 ||
+    dayjs(new Date()).month() === 1 ||
+    dayjs(new Date()).month() === 2 ||
+    dayjs(new Date()).month() === 3 ||
+    dayjs(new Date()).month() === 4 ||
+    dayjs(new Date()).month() === 5 ||
+    dayjs(new Date()).month() === 6 ||
+    dayjs(new Date()).month() === 7
+      ? dayjs(new Date()).year() - 1
+      : dayjs(new Date()).year(),
   selectedPeriod: '',
   selectedId: '',
 };

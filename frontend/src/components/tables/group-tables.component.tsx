@@ -102,6 +102,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
   ];
 
   const classesHeaderLabels: GroupHeaders[] = [
+    { label: 'Klass', property: 'groupName', isColumnSortable: true },
     { label: 'Mentor', property: 'teachers', isColumnSortable: true },
     { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true },
@@ -231,7 +232,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
             <></>
           )}
           <Table.Column>
-            <span>{g.totalPupils == '' && g.totalPupils}</span>
+            <span>{typeof g.totalPupils === 'number' && g.totalPupils}</span>
           </Table.Column>
           <Table.Column>
             <div className="flex items-center gap-2">
@@ -241,7 +242,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -257,7 +258,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -273,7 +274,7 @@ export const GroupTables = (groupType: string, user: User, searchQuery?: string)
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {g.totalPupils === g.notFilledIn || !g.notFilledIn ? (
+                {g.totalPupils === g.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge

@@ -187,7 +187,7 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -203,7 +203,7 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
@@ -219,7 +219,7 @@ export const PupilTables = (searchQuery?: string) => {
           <Table.Column>
             <div className="flex items-center gap-2">
               <span className="ml-8">
-                {p.totalSubjects === p.notFilledIn || !p.notFilledIn ? (
+                {p.totalSubjects === p.notFilledIn ? (
                   '-'
                 ) : (
                   <Badge
