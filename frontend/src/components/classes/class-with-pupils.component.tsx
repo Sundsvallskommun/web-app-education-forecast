@@ -7,6 +7,7 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useState } from 'react';
 import { MentorClassTable } from '@components/tables/mentor-class-table.component';
 import { Spinner } from '@sk-web-gui/react';
+import Main from '@layouts/main/main.component';
 
 export const ClassWithPupils: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
@@ -34,28 +35,32 @@ export const ClassWithPupils: React.FC = () => {
     );
   return (
     <div>
-      <HeadingMenu
-        pageTitle={fullTitle}
-        GeneralInformation={generalInformation}
-        teachers={
-          mentor || headmaster
-            ? [
-                {
-                  givenname: user.name.split(' ')[0],
-                  lastname: user.name.split(' ')[1],
-                  personId: user.personId,
-                  email: user.username,
-                },
-              ]
-            : mentorClass[0]?.teachers
-        }
-        callback="mentorclass"
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchPlaceholder="Sök på elev..."
-      />
+      <Main>
+        <HeadingMenu
+          pageTitle={fullTitle}
+          GeneralInformation={generalInformation}
+          teachers={
+            mentor || headmaster
+              ? [
+                  {
+                    givenname: user.name.split(' ')[0],
+                    lastname: user.name.split(' ')[1],
+                    personId: user.personId,
+                    email: user.username,
+                  },
+                ]
+              : mentorClass[0]?.teachers
+          }
+          callback="mentorclass"
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchPlaceholder="Sök på elev..."
+        />
+      </Main>
       {!mentorClassIsLoading && !listByPeriodIsLoading && mentorClassData.length !== 0 ? (
-        <>{mentorClassListRendered.length !== 0 ? mentorclassTable : <p>Inga sökresultat att visa</p>}</>
+        <div className="max-w-[4000px] w-full">
+          {mentorClassListRendered.length !== 0 ? mentorclassTable : <p>Inga sökresultat att visa</p>}
+        </div>
       ) : (
         <div className="h-[500px] flex justify-center items-center">
           <Loader />

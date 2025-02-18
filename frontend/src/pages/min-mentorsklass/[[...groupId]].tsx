@@ -2,7 +2,6 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { ClassWithPupils } from '@components/classes/class-with-pupils.component';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
-import Main from '@layouts/main/main.component';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { QueriesDto } from '@interfaces/forecast/forecast';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
@@ -52,9 +51,7 @@ export const Index: React.FC = () => {
 
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - Klass ${mentorClass[0]?.className}`}>
-      <Main>
-        <ClassWithPupils />
-      </Main>
+      <ClassWithPupils />
     </DefaultLayout>
   );
 };
