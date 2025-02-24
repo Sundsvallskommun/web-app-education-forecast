@@ -1,6 +1,6 @@
 import Menu from '@components/menu/menu.component';
 import { useUserStore } from '@services/user-service/user-service';
-import { CookieConsent, Footer, Header, Link, Logo, Spinner } from '@sk-web-gui/react';
+import { CookieConsent, Header, Link, Spinner } from '@sk-web-gui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
@@ -101,27 +101,6 @@ export default function DefaultLayout({
       </div>
 
       {postContent && postContent}
-
-      <Footer className="pt-xl pb-0 bg-black mt-80 [&_.sk-logo]:text-white [&_.sk-footer-innerwrapper]:pb-xl">
-        <Footer.Content className="flex justify-between">
-          <Footer.LogoWrapper>
-            <Logo aria-label="Sundsvalls kommun logotyp" />
-          </Footer.LogoWrapper>
-          <Footer.ListWrapper className="flex-grow-0">
-            <Footer.List className="flex flex-row gap-16 text-white p-0">
-              <Footer.ListItem className="flex-col items-start">
-                <label>Kontakt</label>
-                <span className="flex flex-col">
-                  <Link className="text-white hover:text-white hover:no-underline" href={`mailto:support@sundsvall.se`}>
-                    support@sundsvall.se
-                  </Link>
-                  <span>060-19 15 00</span>
-                </span>
-              </Footer.ListItem>
-            </Footer.List>
-          </Footer.ListWrapper>
-        </Footer.Content>
-      </Footer>
 
       <CookieConsent
         title={`Kakor på ${process.env.NEXT_PUBLIC_APP_NAME}`}

@@ -1,5 +1,6 @@
 import { Button, Icon, Spinner } from '@sk-web-gui/react';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
+import { useUserStore } from '@services/user-service/user-service';
 
 interface RiffleProps {
   callback: 'classes' | 'pupils' | 'subjects' | 'mentorclass' | 'pupil' | 'subject';
@@ -16,6 +17,7 @@ interface RiffleProps {
 export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsLoading, callback, dataId }) => {
   const selectedId = useForecastStore((s) => s.selectedId) || dataId;
   const setObjectWithPeriod = useForecastStore((s) => s.setSelectedPeriod);
+  const user = useUserStore((s) => s.user);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
 
@@ -30,7 +32,7 @@ export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsL
       : riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0]) + 1];
 
   const riffleHandler = (id: string) => {
-    setObjectWithPeriod(selectedPeriod, selectedSchoolYear, callback, id);
+    setObjectWithPeriod(selectedPeriod, selectedSchoolYear, callback, id, user);
   };
 
   return !riffleIsLoading ? (

@@ -15,7 +15,7 @@ interface MentorClassHeaders {
 
 export const MentorClassTable = (user: User, searchQuery?: string) => {
   const { headmaster, mentor } = hasRolePermission(user);
-  const [pageSize] = useState<number>(mentor || headmaster ? 8 : 10);
+  const [pageSize] = useState<number>(mentor || headmaster ? 100 : 10);
   const mentorClass = useForecastStore((s) => s.mentorClass);
   const mentorClassGrid = useForecastStore((s) => s.mentorClassGrid);
   const mentorClassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
@@ -92,12 +92,12 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
   const mentorclassHeaderLabels: MentorClassHeaders[] = [
-    { label: 'Namn', property: 'pupil', isColumnSortable: true },
-    { label: 'Närvaro', property: 'presence', isColumnSortable: true },
-    { label: 'Når målen', property: 'approved', isColumnSortable: true },
-    { label: 'Varning', property: 'warnings', isColumnSortable: true },
-    { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
-    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
+    { label: 'Namn', property: 'pupil', isColumnSortable: false },
+    { label: 'Närvaro', property: 'presence', isColumnSortable: false },
+    { label: 'Når målen', property: 'approved', isColumnSortable: false },
+    { label: 'Varning', property: 'warnings', isColumnSortable: false },
+    { label: 'Når ej målen', property: 'unapproved', isColumnSortable: false },
+    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false },
   ];
 
   const [sortColumn, setSortColumn] = useState<string>('pupil');
@@ -118,20 +118,27 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
     return (
       <Table.HeaderColumn
         sticky={h.label === 'Namn'}
-        className={`${mentor && 'border-r-1 !border-gray-200 !pr-0 py-0 pl-8'}`}
+        className={`${idx !== 0 && (mentor || headmaster) ? 'flex justify-center border-r-1 !border-gray-200 !pl-4 !pr-4 !py-0' : null}`}
         key={`headercol-${idx}`}
         aria-sort={sortColumn === h.property ? sortOrder : 'none'}
       >
-        <div className={`${idx === 0 && mentor && 'min-w-[174px]'}`}>
-          <Table.SortButton
-            isActive={sortColumn === h.property}
-            aria-description={sortColumn === h.property ? undefined : 'sortera'}
-            sortOrder={sortOrder}
-            onClick={() => handleSort(h.property)}
-          >
-            {h.label}
-          </Table.SortButton>
-        </div>
+        {idx === 0 ? (
+          <div className={`${mentor || (headmaster && 'min-w-[174px]')}`}>
+            <Table.SortButton
+              isActive={sortColumn === h.property}
+              aria-description={sortColumn === h.property ? undefined : 'sortera'}
+              sortOrder={sortOrder}
+              onClick={() => handleSort(h.property)}
+            >
+              {h.label}
+            </Table.SortButton>
+          </div>
+        ) : (
+          <div>
+            <span className="block">{h.label.slice(0, 4)}</span>
+            <span>{h.label.slice(4)}</span>
+          </div>
+        )}
       </Table.HeaderColumn>
     );
   });
@@ -187,7 +194,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           } ${p.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
         >
           <Table.HeaderColumn scope="row" sticky>
-            <div className="flex flex-col py-16 gap-6 min-w-[177px]">
+            <div className="flex flex-col py-2 gap-6 min-w-[177px]">
               <span>
                 {headmaster ? (
                   <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
@@ -202,7 +209,7 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
           </Table.HeaderColumn>
           {subjectHeaders.map((s, index) => {
             return (
-              <Table.Column key={index} className="border-r-1">
+              <Table.Column key={index} className={`${index === 0 ? 'border-l-1' : null} border-r-1 !p-0`}>
                 <div className="w-full flex justify-center items-center">
                   {s.label in p ? (
                     p[s.label] !== null ? (
@@ -372,9 +379,10 @@ export const MentorClassTable = (user: User, searchQuery?: string) => {
 
   const mentorclassTable = (
     <Table
+      scrollable
       dense={rowHeight === 'dense'}
       background={true}
-      className={`${mentorclassRows.length > pageSize && 'h-[689px] rounded-b-0 border-b-0 mb-28'}`}
+      className={`${mentorclassRows.length > 10 && 'h-[800px] rounded-b-0 border-b-0 mb-28'}`}
     >
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
         {mentorClassHeaders}
