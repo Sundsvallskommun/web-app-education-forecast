@@ -96,24 +96,33 @@ const samlStrategy = new Strategy(
 
     try {
       let personId = '';
-      let unitid = '';
-      let unitName = '';
+      let schools: [{ schoolId: string; schoolName: string }];
+      let roles: [{ role: string; typeOfSchool: string }];
 
       const employeeDetails = await apiService.get<any>({ url: `employee/1.0/portalpersondata/PERSONAL/${username}` });
       const { personid } = employeeDetails.data;
       personId = personid;
-      const userRole = await apiService.get<[{ role: string; typeOfSchool: string; unitId: string }]>({
+      const userRole = await apiService.get<[{ role: string; typeOfSchool: string; schoolId: string; schoolName: string }]>({
         url: 'education/1.0/forecast/userroles',
         params: { teacherId: personId },
       });
-      unitid = userRole.data[0]?.unitId;
-      if (unitid) {
-        const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
-        unitName = employeeSchool.data.unitCode;
+
+      if (userRole.data.length > 0) {
+        userRole.data.forEach(user => {
+          schools.push({
+            schoolId: user.schoolId,
+            schoolName: user.schoolName,
+          });
+
+          roles.push({
+            role: user.role,
+            typeOfSchool: user.typeOfSchool,
+          });
+        });
       } else {
         return done({
           name: 'SAML_MISSING_PERMISSIONS',
-          message: 'Failed to fetch user roles from education API, missing unitId',
+          message: 'Failed to fetch user roles from education API, missing schoolId',
         });
       }
 
@@ -130,8 +139,8 @@ const samlStrategy = new Strategy(
         name: `${givenName} ${surname}`,
         givenName: givenName,
         surname: surname,
-        roles: userRole.data,
-        school: unitName,
+        roles: roles,
+        schools: schools,
       };
 
       done(null, findUser);

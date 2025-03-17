@@ -1,10 +1,28 @@
+export type Period = {
+  periodName: string;
+  schoolYear: number;
+  periodId: number;
+  startDate: Date;
+  endDate: Date;
+};
+
+export type ForecastMetaGroups = {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  data: ForecastMyGroup[];
+};
+
 export type ForecastMyGroup = {
   groupId: string;
   coursePeriod?: string | null;
   groupName?: string | null;
   courseId?: string | null;
+  syllabusId?: string | null;
   groupType: string;
   forecastPeriod?: string | null;
+  unitId?: string | null;
   totalPupils: number;
   approvedPupils: number;
   warningPupils: number;
@@ -21,11 +39,22 @@ export type ForecastMyGroupTeacher = {
   email: string | null;
 };
 
+export type ForecastMetaPupils = {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  data: Pupil[];
+};
+
 export type Pupil = {
   pupil?: string | null;
+  givenname?: string | null;
+  lastname?: string | null;
+  className?: string | null;
   groupId?: string | null;
-  forecastPeriod?: string | null;
   schoolYear?: number | null;
+  forecastPeriod?: string | null;
   subjectsOpenToForecast?: number | null;
   approved?: number | null;
   warnings?: number | null;
@@ -33,16 +62,22 @@ export type Pupil = {
   presence?: number | null;
   forecast?: number | null;
   previousForecast?: number | null;
+  totalSubjects: number;
   forecastTeacher?: string | null;
-  givenname?: string | null;
-  lastname?: string | null;
-  className?: string | null;
   classGroupId?: string | null;
   courseName?: string | null;
   courseId?: string | null;
+  unitId?: string | null;
   typeOfSchool?: string | null;
   teachers?: ForecastMyGroupTeacher[] | null;
-  totalSubjects: number;
+};
+
+export type ForecastMetaMentorClass = {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  data: MyMentorClassPupilGrid[];
 };
 
 export type MyMentorClassPupil = {
@@ -66,6 +101,7 @@ export type GridForecast = {
   groupId: string;
   courseName: string;
   courseId: string;
+  syllabusId: string;
   forecast: number;
   previousForecast: number;
   schoolYear: number;
@@ -79,6 +115,7 @@ export type MyMentorClassPupilGrid = {
   lastname?: string | null;
   className?: string | null;
   presence?: number | null;
+  unitId?: string | null;
   typeOfSchool?: string | null;
   forecasts: GridForecast[];
 };

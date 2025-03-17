@@ -5,7 +5,7 @@ export type User = {
   givenName: string;
   surname: string;
   roles: [{ role: string; typeOfSchool: string }];
-  school: string;
+  schools: [{ schoolId: string; schoolName: string }];
 };
 
 export type ClientUser = {
@@ -13,5 +13,5 @@ export type ClientUser = {
   name: string;
   username: string;
   roles: [{ role: string; typeOfSchool: string }];
-  school: string;
+  schools: [{ schoolId: string; schoolName: string }];
 };
