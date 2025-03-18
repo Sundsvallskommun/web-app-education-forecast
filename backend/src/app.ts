@@ -44,7 +44,6 @@ import { HttpException } from './exceptions/HttpException';
 import { join } from 'path';
 import { isValidUrl } from './utils/util';
 import { additionalConverters } from './utils/custom-validation-classes';
-import { User } from './interfaces/users.interface';
 import ApiService from './services/api.service';
 import QueryString from 'qs';
 
@@ -96,28 +95,30 @@ const samlStrategy = new Strategy(
 
     try {
       let personId = '';
-      let schools: [{ schoolId: string; schoolName: string }];
-      let roles: [{ role: string; typeOfSchool: string }];
+      const schools: {}[] = [];
+      const roles: {}[] = [];
 
       const employeeDetails = await apiService.get<any>({ url: `employee/1.0/portalpersondata/PERSONAL/${username}` });
       const { personid } = employeeDetails.data;
       personId = personid;
       const userRole = await apiService.get<[{ role: string; typeOfSchool: string; schoolId: string; schoolName: string }]>({
-        url: 'education/1.0/forecast/userroles',
+        url: 'pupilforecast/1.0/2281/forecast/userroles',
         params: { teacherId: personId },
       });
 
-      if (userRole.data.length > 0) {
+      if (userRole.data) {
         userRole.data.forEach(user => {
-          schools.push({
-            schoolId: user.schoolId,
-            schoolName: user.schoolName,
-          });
+          user &&
+            schools.push({
+              schoolId: user.schoolId,
+              schoolName: user.schoolName,
+            });
 
-          roles.push({
-            role: user.role,
-            typeOfSchool: user.typeOfSchool,
-          });
+          user &&
+            roles.push({
+              role: user.role,
+              typeOfSchool: user.typeOfSchool,
+            });
         });
       } else {
         return done({
@@ -133,7 +134,7 @@ const samlStrategy = new Strategy(
         });
       }
 
-      const findUser: User = {
+      const findUser = {
         personId: personId,
         username: username,
         name: `${givenName} ${surname}`,

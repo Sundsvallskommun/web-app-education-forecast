@@ -1,5 +1,5 @@
 const apiConfig = {
-  API_PREFIX: '/forecast',
+  API_PREFIX: '/pupilforecast',
   API_URL: 'pupilforecast/1.0',
 };
 

@@ -129,7 +129,7 @@ export class ForecastMetaGroups implements _ForecastMetaGroups {
 
 export class ForecastMetaGroupsApiResponse implements ApiResponse<ForecastMetaGroups> {
   @ValidateNested()
-  @Type(() => Period)
+  @Type(() => ForecastMetaGroups)
   data: ForecastMetaGroups;
   @IsString()
   message: string;
@@ -222,6 +222,10 @@ export class Pupil implements _Pupil {
   @IsOptional()
   @IsNullable()
   unitId?: string | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  syllabusId?: string | null;
   @IsArray()
   @IsOptional()
   @IsNullable()

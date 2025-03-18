@@ -156,13 +156,9 @@ const copyPreviousForecast: (forecast: CopyPreviousForecastDto) => Promise<Servi
     }));
 };
 
-const clearGroupForecasts: (groupId: string, period: string, schoolYear: number) => Promise<ServiceResponse<object>> = (
-  groupId,
-  period,
-  schoolYear
-) => {
+const clearGroupForecasts: (groupId: string) => Promise<ServiceResponse<object>> = (groupId) => {
   return apiService
-    .delete<ApiResponse<object>>(`/forecast/cleargroupforecasts/${groupId}`, { params: { period, schoolYear } })
+    .delete<ApiResponse<object>>(`/forecast/cleargroupforecasts/${groupId}`)
     .then((res) => ({ data: res.data }))
     .catch((e) => ({
       message: e.response?.data.message,
@@ -586,7 +582,7 @@ export const useForecastStore = createWithEqualityFn<
           return { data: res.data, message: res.message };
         },
         clearGroupForecasts: async (forecast: clearGroupForecastsDto) => {
-          const res = await clearGroupForecasts(forecast.groupId, forecast.period, forecast.schoolYear);
+          const res = await clearGroupForecasts(forecast.groupId);
           const subject = get().group;
           if (!res.error) {
             await get().getGroupWithPupils(subject.groupId, {

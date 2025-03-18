@@ -1,15 +1,32 @@
+export type Period = {
+  periodName: string;
+  schoolYear: number;
+  periodId: number;
+  startDate: Date;
+  endDate: Date;
+};
+export interface MetaGroup {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  data: MyGroup[];
+}
 export interface MyGroup {
   groupId: string;
   coursePeriod?: string | null;
   groupName?: string | null;
   courseId?: string | null;
+  syllabusId?: string | null;
   groupType: string;
   forecastPeriod?: string | null;
+  unitId?: string | null;
   totalPupils: number | null;
   approvedPupils: number | null;
   warningPupils: number | null;
   unapprovedPupils: number | null;
   presence?: number | null;
+  typeOfSchool?: string | null;
   teachers?: ForecastMyGroupTeacher[] | null;
 }
 
@@ -25,6 +42,14 @@ export interface ForecastMyGroupTeacher {
   email: string | null;
 }
 
+export interface MetaPupils {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  data: Pupil[];
+}
+
 export interface Pupil {
   pupil?: string | null;
   groupId?: string | null;
@@ -37,6 +62,7 @@ export interface Pupil {
   presence?: number | null;
   forecast?: number | null;
   previousForecast?: number | null;
+  totalSubjects: number | null;
   forecastTeacher?: string | null;
   givenname?: string | null;
   lastname?: string | null;
@@ -45,7 +71,9 @@ export interface Pupil {
   courseName?: string | null;
   courseId?: string | null;
   teachers?: ForecastMyGroupTeacher[] | null;
-  totalSubjects: number | null;
+  syllabusId?: string | null;
+  unitId?: string | null;
+  typeOfSchool?: string | null;
   image?: string | null;
   groupName?: string | null;
 }
@@ -67,6 +95,14 @@ export interface MentorClassPupil {
   image?: string | null;
 }
 
+export interface MetaMentorClass {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  data: MentorClassPupilGrid[];
+}
+
 export type GridForecast = {
   groupId: string;
   courseName: string;
@@ -84,6 +120,7 @@ export type MentorClassPupilGrid = {
   lastname?: string | null;
   className?: string | null;
   presence?: number | null;
+  unitId?: string | null;
   typeOfSchool?: string | null;
   forecasts: GridForecast[];
 };
@@ -97,23 +134,18 @@ export interface Riffle {
 export interface SetForecastDto {
   pupilId: string;
   groupId: string;
-  period: string;
-  schoolYear: number;
   forecast: number;
+  syllabusId: string;
 }
 
 export interface CopyPreviousForecastDto {
   groupId: string;
-  period: string;
-  previusPeriod: string;
-  schoolYear: number;
-  previusSchoolYear: number;
+  syllabusId: string;
 }
 
 export interface clearGroupForecastsDto {
   groupId: string;
-  period: string;
-  schoolYear: number;
+  syllabusId: string;
 }
 
 export interface KeyStringTable {

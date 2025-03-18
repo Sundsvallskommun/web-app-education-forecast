@@ -6,6 +6,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { shallow } from 'zustand/shallow';
 import { Breadcrumb } from '@sk-web-gui/react';
+import { hasRolePermission } from '@utils/has-role-permission';
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -37,7 +38,14 @@ export default function DefaultLayout({
 }: DefaultLayoutProps) {
   const router = useRouter();
   const user = useUserStore((s) => s.user, shallow);
-  const headerSubtitle = user.school;
+  const { headmaster } = hasRolePermission(user);
+  const headerSubtitle = () => {
+    if (headmaster) {
+      return user.schools.every((s) => s.schoolName === user.schools[0].schoolName) ? user.schools[0].schoolName : '';
+    } else {
+      return user.schools[0].schoolName;
+    }
+  };
   const layoutTitle = `${process.env.NEXT_PUBLIC_APP_NAME}${headerSubtitle ? ` - ${headerSubtitle}` : ''}`;
   const fullTitle = postTitle ? `${layoutTitle} - ${postTitle}` : `${layoutTitle}`;
 
@@ -67,7 +75,7 @@ export default function DefaultLayout({
         data-cy="nav-header"
         className="flex flex-wrap"
         title={headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME}
-        subtitle={headerSubtitle ? headerSubtitle : ''}
+        subtitle={headerSubtitle() || ''}
         aria-label={`${headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME} ${headerSubtitle}`}
         logoLinkOnClick={handleLogoClick}
         userMenu={<Menu user={user} />}

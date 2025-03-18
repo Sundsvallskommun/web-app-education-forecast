@@ -67,6 +67,7 @@ export type Pupil = {
   classGroupId?: string | null;
   courseName?: string | null;
   courseId?: string | null;
+  syllabusId?: string | null;
   unitId?: string | null;
   typeOfSchool?: string | null;
   teachers?: ForecastMyGroupTeacher[] | null;

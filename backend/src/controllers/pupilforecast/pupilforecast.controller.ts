@@ -15,13 +15,13 @@ import {
   PeriodsApiResponse,
   ForecastMetaGroupsApiResponse,
 } from '@/responses/forecast.response';
-import { ForecastMyGroup, MyMentorClassPupilGrid, Pupil } from '@/interfaces/forecast.interface';
+import { ForecastMetaGroups, MyMentorClassPupilGrid, Pupil } from '@/interfaces/forecast.interface';
 import { copyPreviousForecastDto, setForecastDto } from '@/dtos/forecast.dto';
 
 const municipalityId: string = '2281';
 
 @Controller()
-export class ForecastController {
+export class PupilForecastController {
   private apiService = new ApiService();
 
   @Get(`${API_PREFIX}/currentperiod/:schoolType`)
@@ -48,36 +48,36 @@ export class ForecastController {
     });
   }
 
-  @Get(`${API_PREFIX}/mygroups`)
+  @Get(`${API_PREFIX}/mygroups/:schoolId`)
   @OpenAPI({ summary: 'Returns a teachers groups' })
   @UseBefore(authMiddleware)
   @ResponseSchema(ForecastMetaGroupsApiResponse)
   async getMyGroups(
     @Req() req: RequestWithUser,
-    @QueryParam('schoolId') schoolId: number,
-    @QueryParam('periodId') periodId: number,
-    @QueryParam('searchFilter') searchFilter: string,
+    @Param('schoolId') schoolId: string,
+    @QueryParam('OrderBy') OrderBy: string,
+    @QueryParam('OrderDirection') OrderDirection: string,
     @QueryParam('groupType') groupType: string,
-    @QueryParam('PageNumber') PageNumber: number,
-    @QueryParam('PageSize') PageSize: number,
-    @QueryParam('OrderBy ') OrderBy: string,
-    @QueryParam('OrderDirection ') OrderDirection: string,
-  ): Promise<ApiResponse<ForecastMyGroup[]>> {
+    @QueryParam('periodId') periodId?: number | null,
+    @QueryParam('searchFilter') searchFilter?: string | null,
+    @QueryParam('PageNumber') PageNumber?: number | null,
+    @QueryParam('PageSize') PageSize?: number | null,
+  ): Promise<ApiResponse<ForecastMetaGroups>> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user; //CHANGE TO AS TEACHERID WHEN EMPLOYMENT IS FIXED
     const url = `${API_URL}/${municipalityId}/forecast/${schoolId}`;
 
-    return await this.apiService.get<ForecastMyGroup[]>({
+    return await this.apiService.get<ForecastMetaGroups>({
       url,
       params: {
-        teacherId: personId,
+        OrderBy,
+        OrderDirection,
         periodId: periodId,
-        searchFilter: searchFilter,
         groupType: groupType,
+        searchFilter: searchFilter,
         PageNumber: PageNumber,
         PageSize: PageSize,
-        OrderBy: OrderBy,
-        OrderDirection: OrderDirection,
+        teacherId: personId,
       },
     });
   }
@@ -87,16 +87,15 @@ export class ForecastController {
   @UseBefore(authMiddleware)
   @ResponseSchema(PupilsApiResponse)
   async getAllPupils(
-    @Param('schoolId') schoolId: number,
+    @Param('schoolId') schoolId: string,
     @QueryParam('periodId') periodId: number,
     @QueryParam('searchFilter') searchFilter: string,
     @QueryParam('PageNumber') PageNumber: number,
     @QueryParam('PageSize') PageSize: number,
-    @QueryParam('OrderBy ') OrderBy: string,
-    @QueryParam('OrderDirection ') OrderDirection: string,
+    @QueryParam('OrderBy') OrderBy: string,
+    @QueryParam('OrderDirection') OrderDirection: string,
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<Pupil[]>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast/${schoolId}/pupils`;
     return await this.apiService.get<Pupil[]>({
@@ -119,7 +118,7 @@ export class ForecastController {
   @ResponseSchema(PupilsApiResponse)
   async getPupilsByGroup(
     @Param('groupId') groupId: string,
-    @Param('syllabusId ') syllabusId: string,
+    @Param('syllabusId') syllabusId: string,
     @QueryParam('periodId') periodId: number,
 
     @Req() req: RequestWithUser,
@@ -197,7 +196,7 @@ export class ForecastController {
   async clearGroupForecasts(
     @Req() req: RequestWithUser,
     @Param('groupId') groupId: string,
-    @Param('syllabusId ') syllabusId: string,
+    @Param('syllabusId') syllabusId: string,
   ): Promise<ApiResponse<{}>> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;

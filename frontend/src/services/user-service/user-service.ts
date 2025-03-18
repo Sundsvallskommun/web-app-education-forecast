@@ -11,7 +11,7 @@ const handleSetUserResponse: (res: ApiResponse<User>) => User = (res) => ({
   name: res.data.name,
   username: res.data.username,
   roles: res.data.roles,
-  school: res.data.school,
+  schools: res.data.schools,
   // permissions: res.data.permissions,
 });
 
