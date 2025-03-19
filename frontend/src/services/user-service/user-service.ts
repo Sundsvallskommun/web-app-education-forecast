@@ -27,15 +27,24 @@ const getMe: () => Promise<ServiceResponse<User>> = () => {
 
 interface State {
   user: User;
+  selectedSchool: {
+    schoolId: string;
+    schoolName: string;
+  };
 }
 interface Actions {
   setUser: (user: User) => void;
+  setSelectedShool: (selectedSchool: { schoolId: string; schoolName: string }) => void;
   getMe: () => Promise<ServiceResponse<User>>;
   reset: () => void;
 }
 
 const initialState: State = {
   user: emptyUser,
+  selectedSchool: {
+    schoolId: '',
+    schoolName: '',
+  },
 };
 
 export const useUserStore = createWithEqualityFn<State & Actions>()(
@@ -43,12 +52,15 @@ export const useUserStore = createWithEqualityFn<State & Actions>()(
     (set, get) => ({
       ...initialState,
       setUser: (user) => set(() => ({ user })),
+      setSelectedShool: (selectedSchool) => set(() => ({ selectedSchool })),
       getMe: async () => {
         let user = get().user;
         const res = await getMe();
         if (!res.error) {
           res.data ? (user = res.data) : (user = emptyUser);
-          set(() => ({ user: user }));
+          get().selectedSchool.schoolId && get().selectedSchool.schoolId !== ''
+            ? set(() => ({ user: user, selectedSchool: get().selectedSchool }))
+            : set(() => ({ user: user, selectedSchool: user.schools[0] }));
         }
         return { data: user };
       },

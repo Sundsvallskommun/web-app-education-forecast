@@ -6,35 +6,32 @@ import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { Classes } from '@components/classes/classes.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { QueriesDto } from '@interfaces/forecast/forecast';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
-  const { headmaster, GR } = hasRolePermission(user);
+  const { headmaster } = hasRolePermission(user);
   const pageTitle = 'Klasser';
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
+  //const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
+  const getClasses = usePupilForecastStore((s) => s.getMyClasses);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
 
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  //const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  const classQueries: ForeacastQueriesDto = {
+    schoolId: selectedSchool.schoolId,
+    OrderBy: 'GroupName',
+    OrderDirection: 'ASC',
+    PageSize: 10,
+  };
 
   useEffect(() => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
-    !headmaster
-      ? router.push('/mina-amnen-grupper')
-      : setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    !headmaster ? router.push('/mina-amnen-grupper') : getClasses(classQueries);
   }, []);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>
       <Main>
-        <Classes pageTitle={pageTitle} />
+        <Classes pageTitle={pageTitle} classQueries={classQueries} />
       </Main>
     </DefaultLayout>
   );

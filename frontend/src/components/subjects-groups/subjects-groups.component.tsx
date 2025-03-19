@@ -1,25 +1,70 @@
-import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
 import { HeadingMenu } from '@components/heading-menu/heading-menu.component';
-import { GroupTables } from '@components/tables/group-tables.component';
 import Loader from '@components/loader/loader';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
+import { useForm, FormProvider } from 'react-hook-form';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { SubjectsTable } from './components/subjects-table.components';
 
 interface SubjectsGroupsProps {
   pageTitle: string;
+  subjectsQueries: ForeacastQueriesDto;
 }
 
-export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle }) => {
+export interface SubjectsTableForm {
+  sortOrder: 'ASC' | 'DESC';
+  sortColumn: string;
+  page: number;
+  size: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+}
+
+export interface ISubjectsTable {
+  id: string | null;
+  groupName: string | null;
+  teachers: ForecastMyGroupTeacher[] | null;
+  totalPupils: number | null;
+  presence: number | null;
+  approvedPupils: number | null;
+  warningPupils: number | null;
+  unapprovedPupils: number | null;
+  notFilledIn: number | null;
+}
+
+export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subjectsQueries }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const user = useUserStore((s) => s.user, shallow);
-  const { mySubjects, grouplistTable, groupsListRendered, grouptable } = GroupTables('G', user, searchQuery);
-  const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
-  const subjectsIsLoading = useForecastStore((s) => s.subjectsIsLoading);
+  const { mySubjects, getMySubjects } = usePupilForecastStore();
+  //const { mySubjects, grouplistTable, groupsListRendered, grouptable } = GroupTables('G', user, searchQuery);
+  const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const fullTitle = mySubjects.totalRecords !== 0 ? `${pageTitle} (${mySubjects.totalRecords})` : pageTitle;
 
-  const fullTitle = mySubjects.length !== 0 ? `${pageTitle} (${mySubjects.length})` : pageTitle;
+  const tableForm = useForm<SubjectsTableForm>({
+    defaultValues: {
+      sortColumn: subjectsQueries.OrderBy,
+      sortOrder: subjectsQueries.OrderDirection,
+      pageSize: subjectsQueries.PageSize || 10,
+    },
+  });
 
+  const { watch: watchTable } = tableForm;
+  const { sortOrder, sortColumn, pageSize, page } = watchTable();
+
+  useEffect(() => {
+    getMySubjects({
+      schoolId: selectedSchool.schoolId,
+      PageNumber: page,
+      PageSize: pageSize,
+      OrderBy: sortColumn,
+      OrderDirection: sortOrder,
+    });
+
+    //eslint-disable-next-line
+  }, [sortOrder, sortColumn, pageSize, page]);
   return (
     <div>
       <HeadingMenu
@@ -29,8 +74,16 @@ export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle }) => 
         setSearchQuery={setSearchQuery}
         searchPlaceholder="Sök på ämne/grupp..."
       />
-      {!subjectsIsLoading && !listByPeriodIsLoading && grouptable.length !== 0 ? (
-        <>{groupsListRendered.length !== 0 ? grouplistTable : <p>Inga sökresultat att visa</p>}</>
+      {!subjectsIsLoading && mySubjects.totalRecords !== 0 ? (
+        <>
+          {mySubjects.totalRecords !== 0 ? (
+            <FormProvider {...tableForm}>
+              <SubjectsTable />
+            </FormProvider>
+          ) : (
+            <p>Inga sökresultat att visa</p>
+          )}
+        </>
       ) : (
         <div className="h-[500px] flex justify-center items-center">
           <Loader />

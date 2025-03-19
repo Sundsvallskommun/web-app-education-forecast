@@ -35,6 +35,16 @@ export interface QueriesDto {
   schoolYear: number;
 }
 
+export interface ForeacastQueriesDto {
+  schoolId: string;
+  periodId?: number | null;
+  searchFilter?: string | null;
+  PageNumber?: number | null | undefined;
+  PageSize?: number | null;
+  OrderBy: string;
+  OrderDirection: 'ASC' | 'DESC';
+}
+
 export interface ForecastMyGroupTeacher {
   givenname?: string | null;
   lastname?: string | null;
