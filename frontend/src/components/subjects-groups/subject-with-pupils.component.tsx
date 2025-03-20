@@ -5,8 +5,9 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Loader from '@components/loader/loader';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { CustomPupilTable } from '@components/tables/forecast-pupil-tables.component';
 import { Spinner } from '@sk-web-gui/react';
+import { SingleSubjectTable } from './components/single-subject-table.component';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 interface SubjectWithPupilsProps {
   setPageTitle: Dispatch<SetStateAction<string | undefined>>;
@@ -18,20 +19,17 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const user = useUserStore((s) => s.user, shallow);
   const { teacher } = hasRolePermission(user);
   const selectedId = useForecastStore((s) => s.selectedId);
-
-  const { pupilTable, groupWithPupilsIsLoading, manyPupilsListRendered, groupWithPupils, pupilsInGroupData } =
-    CustomPupilTable(user, false, searchQuery);
+  const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
+  const singleSubject = usePupilForecastStore((s) => s.subject);
 
   useEffect(() => {
-    !groupWithPupilsIsLoading
-      ? setPageTitle(groupWithPupils[0]?.courseName || 'Ämne/grupp')
-      : setPageTitle('Ämne/grupp');
+    !singleSubjectIsLoading ? setPageTitle(singleSubject[0]?.courseName || 'Ämne/grupp') : setPageTitle('Ämne/grupp');
   });
 
   const generalInformation =
-    groupWithPupils.length !== 0 ? (
+    singleSubject.length !== 0 ? (
       <span>
-        <strong>{groupWithPupils.length}</strong> elever
+        <strong>{singleSubject.length}</strong> elever
       </span>
     ) : (
       <Spinner size={2} />
@@ -40,10 +38,10 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   return (
     <div>
       <HeadingMenu
-        pageTitle={groupWithPupils.length !== 0 ? pageTitle : 'Ämne/grupp'}
+        pageTitle={singleSubject.length !== 0 ? pageTitle : 'Ämne/grupp'}
         GeneralInformation={generalInformation}
         teachers={
-          teacher && groupWithPupils[0]?.teachers?.find((x) => x.personId === user.personId)
+          teacher && singleSubject[0]?.teachers?.find((x) => x.personId === user.personId)
             ? [
                 {
                   givenname: user.name.split(' ')[0],
@@ -52,7 +50,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
                   email: user.username,
                 },
               ]
-            : groupWithPupils[0]?.teachers
+            : singleSubject[0]?.teachers
         }
         callback="subject"
         objectId={selectedId}
@@ -60,8 +58,14 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
         setSearchQuery={setSearchQuery}
         searchPlaceholder="Sök på elev eller klass..."
       />
-      {!groupWithPupilsIsLoading && pupilsInGroupData.length !== 0 ? (
-        <>{manyPupilsListRendered.length !== 0 ? pupilTable : <p>Inga sökresultat att visa</p>}</>
+      {!singleSubjectIsLoading ? (
+        <>
+          {singleSubject.length !== 0 ? (
+            <SingleSubjectTable user={user} searchQuery={searchQuery} />
+          ) : (
+            <p>Inga sökresultat att visa</p>
+          )}
+        </>
       ) : (
         <div className="h-[500px] flex justify-center items-center">
           <Loader />

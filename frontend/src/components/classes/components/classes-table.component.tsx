@@ -16,7 +16,7 @@ interface GroupHeaders {
 //Table structure for group type tables
 export const ClassesTable: React.FC = () => {
   const user = useUserStore((s) => s.user);
-  const { headmaster, mentor, teacher } = hasRolePermission(user);
+  const { mentor, teacher } = hasRolePermission(user);
   const { myClasses } = usePupilForecastStore();
   const [classTable, setClassTable] = useState<KeyStringTable[]>([]);
   //   const [pageSize] = useState<number>(myClasses.pageSize);
@@ -100,11 +100,7 @@ export const ClassesTable: React.FC = () => {
               accent
             />
             <span className="ml-8 font-bold">
-              <Link
-                href={`${headmaster ? `/amnen-grupper/amne-grupp/${g.id}` : `/mina-amnen-grupper/amne-grupp/${g.id}`}`}
-              >
-                {g.groupName}
-              </Link>
+              <Link href={`/klasser/klass/${g.id}`}>{g.groupName}</Link>
             </span>
           </div>
         </Table.HeaderColumn>

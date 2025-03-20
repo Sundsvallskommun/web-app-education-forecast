@@ -12,7 +12,6 @@ import {
   //   clearGroupForecastsDto,
   //   MentorClassPupilGrid,
   MetaGroup,
-  MetaMentorClass,
   MetaPupils,
   MyGroup,
   Pupil,
@@ -40,6 +39,7 @@ import {
 import { createWithEqualityFn } from 'zustand/traditional';
 import { devtools, persist } from 'zustand/middleware';
 import { __DEV__ } from '@sk-web-gui/react';
+import { apiURL } from '@utils/api-url';
 
 export const getSubjects: (
   schoolId: string,
@@ -105,22 +105,22 @@ export const getClasses: (
 };
 
 export const getAllPupils: (
-  periodId: number,
   schoolId: string,
-  searchFilter?: string,
-  PageNumber?: number,
-  PageSize?: number,
-  OrderBy?: string,
-  OrderDirection?: string,
+  OrderBy: string,
+  OrderDirection: string,
+  PageNumber?: number | null,
+  PageSize?: number | null,
+  periodId?: number | null,
+  searchFilter?: string | null,
   signal?: AbortSignal
 ) => Promise<ServiceResponse<MetaPupils>> = (
   schoolId,
-  periodId,
-  searchFilter,
-  PageNumber,
-  PageSize,
   OrderBy,
   OrderDirection,
+  PageNumber,
+  PageSize,
+  periodId,
+  searchFilter,
   signal
 ) => {
   return apiService
@@ -137,13 +137,11 @@ export const getAllPupils: (
 
 export const getMentorClass: (
   groupId: string,
-  periodId?: number,
-  signal?: AbortSignal
-) => Promise<ServiceResponse<MentorClassPupilGrid[]>> = (groupId, periodId, signal) => {
+  periodId?: number | null
+) => Promise<ServiceResponse<MentorClassPupilGrid[]>> = (groupId, periodId) => {
   return apiService
     .get<ApiResponse<MentorClassPupilGrid[]>>(`/pupilforecast/mentorclass/${groupId}/grid`, {
       params: { periodId },
-      signal,
     })
     .then((res) => ({ data: handleGetMentorClassGrid(res.data) }))
     .catch((e) => ({
@@ -154,12 +152,11 @@ export const getMentorClass: (
 
 export const getPupil: (
   pupilId: string,
-  periodId: string,
   unitId: string,
-  signal?: AbortSignal
-) => Promise<ServiceResponse<Pupil[]>> = (pupilId, periodId, unitId, signal) => {
+  periodId?: number | null
+) => Promise<ServiceResponse<Pupil[]>> = (pupilId, unitId, periodId) => {
   return apiService
-    .get<ApiResponse<Pupil[]>>(`/pupilforecast/${unitId}pupil/${pupilId}`, { params: { periodId }, signal })
+    .get<ApiResponse<Pupil[]>>(`/pupilforecast/${unitId}/pupil/${pupilId}`, { params: { periodId } })
     .then((res) => ({ data: handleGetManyPupils(res.data) }))
     .catch((e) => ({
       message: e.response?.data.message,
@@ -170,13 +167,11 @@ export const getPupil: (
 export const getSubjectWithPupils: (
   groupId: string,
   syllabusId: string,
-  periodId: string,
-  signal?: AbortSignal
-) => Promise<ServiceResponse<Pupil[]>> = (groupId, syllabusId, periodId, signal) => {
+  periodId?: number | null
+) => Promise<ServiceResponse<Pupil[]>> = (groupId, syllabusId, periodId) => {
   return apiService
     .get<ApiResponse<Pupil[]>>(`/pupilforecast/pupilsbygroup/${groupId}/${syllabusId}`, {
       params: { periodId },
-      signal,
     })
     .then((res) => ({ data: handleGetManyPupils(res.data) }))
     .catch((e) => ({
@@ -226,46 +221,55 @@ interface State {
   mentorClassIsLoading: boolean;
   pupilsIsLoading: boolean;
   singlePupilIsLoading: boolean;
+  singleSubjectIsLoading: boolean;
   mySubjects: MetaGroup;
   subject: Pupil[];
   myClasses: MetaGroup;
-  mentorClass: MetaMentorClass;
+  mentorClass: MentorClassPupilGrid[];
   classDetails: MyGroup;
   allPupils: MetaPupils;
   pupil: Pupil[];
   selectedPeriod: number | null;
   selectedId?: string | null;
+  selectedUnit: string;
 }
 
 interface Actions {
   setSubjects: (mySubjects: MetaGroup | ((prevState: MetaGroup) => MetaGroup)) => Promise<void>;
   setClasses: (myClasses: MetaGroup | ((prevState: MetaGroup) => MetaGroup) | undefined) => Promise<void>;
   //   setGroup: (classes: MyGroup) => void;
-  //   setSingleSubject: (groupWithPupils: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
+  setSingleSubject: (subject: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
   //   //setPreviousPeriodGroup: (groupWithPupils: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
-  //   setMentorClass: (mentorClass: MetaMentorClass | ((prevState: MetaMentorClass) => MetaMentorClass)) => Promise<void>;
+  setMentorClass: (
+    mentorClass: MentorClassPupilGrid[] | ((prevState: MentorClassPupilGrid[]) => MentorClassPupilGrid[])
+  ) => Promise<void>;
   //   setClassDetails: (classDetails: MyGroup) => void;
-  //   setAllPupils: (allPupils: MetaPupils | ((prevState: MetaPupils) => MetaPupils)) => Promise<void>;
-  //   setPupil: (pupil: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
-  //   //   setSelectedPeriod: (
-  //   //     selectedPeriod: string,
-  //   //     selectedSchoolYear: number,
-  //   //     callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil',
-  //   //     objectId?: string | null,
-  //   //     user?: User
-  //   //   ) => Promise<void>;
+  setAllPupils: (allPupils: MetaPupils | ((prevState: MetaPupils) => MetaPupils)) => Promise<void>;
+  setPupil: (pupil: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
+  //   setSelectedPeriod: (
+  //     selectedPeriod: string,
+  //     selectedSchoolYear: number,
+  //     callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil',
+  //     objectId?: string | null,
+  //     user?: User
+  //   ) => Promise<void>;
   getMySubjects: (body: ForeacastQueriesDto) => Promise<ServiceResponse<MetaGroup>>;
   //   // getGroup: (groupId: string) => Promise<ServiceResponse<MyGroup>>;
-  //   getSubjectWithPupils: (groupId: string, queries: ForeacastQueriesDto) => Promise<ServiceResponse<Pupil[]>>;
+  getSubjectWithPupils: (
+    groupId: string,
+    syllabusId: string,
+    periodId?: number | null
+  ) => Promise<ServiceResponse<Pupil[]>>;
   //   getPreviousPeriodGroup: (groupId: string, queries: ForeacastQueriesDto) => Promise<ServiceResponse<Pupil[]>>;
   getMyClasses: (body: ForeacastQueriesDto) => Promise<ServiceResponse<MetaGroup>>;
   //   getClassDetails: (groupId: string, period: string) => Promise<ServiceResponse<MyGroup>>;
-  //   getMentorClass: (groupId: string, queries: ForeacastQueriesDto) => Promise<ServiceResponse<MetaMentorClass>>;
-  //   getAllPupils: (queries: ForeacastQueriesDto) => Promise<ServiceResponse<MetaPupils>>;
-  //   getPupil: (pupilId: string, period: string, schoolYear: number) => Promise<ServiceResponse<Pupil[]>>;
+  getMentorClass: (groupId: string, periodId?: number | null) => Promise<ServiceResponse<MentorClassPupilGrid[]>>;
+  getAllPupils: (queries: ForeacastQueriesDto) => Promise<ServiceResponse<MetaPupils>>;
+  getPupil: (pupilId: string, unitId: string, periodId?: number | null) => Promise<ServiceResponse<Pupil[]>>;
   //   setForecast: (forecast: SetForecastDto) => Promise<ServiceResponse<object>>;
   //   copyPreviousForecast: (forecast: CopyPreviousForecastDto) => Promise<ServiceResponse<object>>;
   //   clearGroupForecasts: (forecast: clearGroupForecastsDto) => Promise<ServiceResponse<object>>;
+  setSelectedUnit: (selectedUnit: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -275,6 +279,7 @@ const initialState: State = {
   mentorClassIsLoading: true,
   pupilsIsLoading: true,
   singlePupilIsLoading: true,
+  singleSubjectIsLoading: true,
   mySubjects: {
     pageNumber: 0,
     pageSize: 0,
@@ -290,13 +295,7 @@ const initialState: State = {
     totalPages: 0,
     data: [],
   },
-  mentorClass: {
-    pageNumber: 0,
-    pageSize: 0,
-    totalRecords: 0,
-    totalPages: 0,
-    data: [],
-  },
+  mentorClass: [],
   classDetails: {
     groupId: '',
     groupType: '',
@@ -315,6 +314,7 @@ const initialState: State = {
   pupil: [],
   selectedPeriod: null,
   selectedId: '',
+  selectedUnit: '',
 };
 
 export const usePupilForecastStore = createWithEqualityFn<
@@ -393,6 +393,127 @@ export const usePupilForecastStore = createWithEqualityFn<
           }));
           return { data, error: res.error };
         },
+        setAllPupils: async (allPupils) =>
+          await set((s) => ({
+            allPupils: typeof allPupils === 'function' ? allPupils(s.allPupils) : allPupils,
+          })),
+        getAllPupils: async (queries: ForeacastQueriesDto) => {
+          const fPeriod = queries.periodId || get().selectedPeriod;
+          const dataArr: Pupil[] = [];
+          if (fPeriod == null) {
+            await set(() => ({
+              allPupils: initialState.allPupils,
+            }));
+            await get().reset();
+          }
+          await set(() => ({ pupilsIsLoading: true }));
+          const res = await getAllPupils(
+            queries.schoolId,
+            queries.OrderBy,
+            queries.OrderDirection,
+            queries.PageNumber,
+            queries.PageSize,
+            queries.periodId,
+            queries.searchFilter
+          );
+          const data = (res.data && res.data) || initialState.allPupils;
+
+          data.data.map((d) => {
+            const img = apiURL(`/education/${d.pupil}/personimage?width=${68}`);
+            dataArr.push({
+              ...d,
+              image: img.length === 0 || !img ? null : img,
+            });
+          });
+
+          await set(() => ({
+            allPupils: {
+              pageNumber: data.pageNumber,
+              pageSize: data.pageNumber,
+              totalPages: data.totalPages,
+              totalRecords: data.totalRecords,
+              data: dataArr,
+            },
+            pupilsIsLoading: false,
+          }));
+          return { data, error: res.error };
+        },
+        setMentorClass: async (mentorClass) =>
+          await set((s) => ({
+            mentorClass: typeof mentorClass === 'function' ? mentorClass(s.mentorClass) : mentorClass,
+          })),
+        getMentorClass: async (groupId: string, periodId?: number | null) => {
+          const fPeriod = periodId || get().selectedPeriod;
+
+          if (fPeriod == null) {
+            await set(() => ({
+              mentorClass: initialState.mentorClass,
+            }));
+            await get().reset();
+          }
+          await set(() => ({ mentorClassIsLoading: true }));
+          const res = await getMentorClass(groupId, periodId);
+          const data = (res.data && res.data) || initialState.mentorClass;
+          await set(() => ({ mentorClass: data, mentorClassIsLoading: false }));
+
+          await set(() => ({
+            mentorClassIsLoading: false,
+          }));
+          return { data, error: res.error };
+        },
+        setSingleSubject: async (subject) =>
+          await set((s) => ({
+            subject: typeof subject === 'function' ? subject(s.subject) : subject,
+          })),
+        getSubjectWithPupils: async (groupId: string, syllabusId: string, periodId?: number | null) => {
+          const dataArr: Pupil[] = [];
+          if (groupId == null) {
+            await set(() => ({
+              subject: initialState.subject,
+            }));
+            await get().reset();
+          }
+          await set(() => ({ singleSubjectIsLoading: true }));
+          const res = await getSubjectWithPupils(
+            groupId ? groupId : get().subject[0].groupId ?? '',
+            syllabusId,
+            periodId
+          );
+
+          const data = (res.data && res.data) || initialState.subject;
+          data.map((d) => {
+            const img = apiURL(`/education/${d.pupil}/personimage?width=${68}`);
+            dataArr.push({
+              ...d,
+              image: img.length === 0 || !img ? null : img,
+            });
+          });
+          await set(() => ({ subject: dataArr, singleSubjectIsLoading: false }));
+          return { data, error: res.error };
+        },
+        setPupil: async (pupil) =>
+          await set((s) => ({
+            pupil: typeof pupil === 'function' ? pupil(s.pupil) : pupil,
+          })),
+        getPupil: async (pupilId: string, unitId: string, periodId?: number | null) => {
+          if (pupilId == null) {
+            await set(() => ({
+              pupil: initialState.pupil,
+            }));
+            await get().reset();
+          }
+          await set(() => ({ singlePupilIsLoading: true }));
+          const res = await getPupil(pupilId, unitId, periodId);
+          const data = (res.data && res.data) || initialState.pupil;
+          await set(() => ({ pupil: data, singlePupilIsLoading: false }));
+          // await get().getMentorClass(data[0].classGroupId, {
+          //   period: get().selectedPeriod,
+          //   schoolYear: get().selectedSchoolYear,
+          // });
+          return { data, error: res.error };
+        },
+        setSelectedUnit: async (selectedUnit) => set(() => ({ selectedUnit })),
+
         reset: () => {
           set(initialState);
         },

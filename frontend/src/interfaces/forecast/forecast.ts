@@ -105,14 +105,6 @@ export interface MentorClassPupil {
   image?: string | null;
 }
 
-export interface MetaMentorClass {
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  data: MentorClassPupilGrid[];
-}
-
 export type GridForecast = {
   groupId: string;
   courseName: string;

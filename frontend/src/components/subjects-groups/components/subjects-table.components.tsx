@@ -49,6 +49,7 @@ export const SubjectsTable: React.FC = () => {
           approvedPupils: s.approvedPupils,
           warningPupils: s.warningPupils,
           unapprovedPupils: s.unapprovedPupils,
+          syllabusId: s.syllabusId,
           notFilledIn: numberNotFilledIn,
         });
       });
@@ -106,7 +107,7 @@ export const SubjectsTable: React.FC = () => {
             />
             <span className="ml-8 font-bold">
               <Link
-                href={`${headmaster ? `/amnen-grupper/amne-grupp/${g.id}` : `/mina-amnen-grupper/amne-grupp/${g.id}`}`}
+                href={`${headmaster ? `/amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}/` : `/mina-amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}`}`}
               >
                 {g.groupName}
               </Link>

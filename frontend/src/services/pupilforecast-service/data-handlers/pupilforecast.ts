@@ -162,6 +162,7 @@ export const handleGetMentorClassGrid: (res: ApiResponse<MentorClassPupilGrid[]>
     className: data.className,
     presence: data.presence,
     typeOfSchool: data.typeOfSchool,
+    unitId: data.unitId,
     forecasts: data.forecasts,
   }));
 };
