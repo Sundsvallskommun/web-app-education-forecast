@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsArray, ValidateNested, IsDate } from 'class-validator';
 import {
   ForecastMyGroupTeacher,
   ForecastMyGroup,
@@ -6,10 +6,45 @@ import {
   MyMentorClassPupil as _MyMentorClassPupil,
   MyMentorClassPupilGrid,
   GridForecast,
+  Period as _Period,
+  ForecastMetaGroups as _ForecastMetaGroups,
+  ForecastMetaPupils as _ForecastMetaPupils,
+  ForecastMetaMentorClass as _ForecastMetaMentorClass,
 } from '@/interfaces/forecast.interface';
 import { IsNullable } from '@/utils/custom-validation-classes';
 import ApiResponse from '@/interfaces/api-service.interface';
 import { Type } from 'class-transformer';
+
+export class Period implements _Period {
+  @IsString()
+  periodName: string;
+  @IsNumber()
+  /** @format int32 */
+  schoolYear: number;
+  @IsNumber()
+  /** @format int32 */
+  periodId: number;
+  @IsDate()
+  startDate: Date;
+  @IsDate()
+  endDate: Date;
+}
+
+export class PeriodApiResponse implements ApiResponse<Period> {
+  @ValidateNested()
+  @Type(() => Period)
+  data: Period;
+  @IsString()
+  message: string;
+}
+
+export class PeriodsApiResponse implements ApiResponse<Period[]> {
+  @ValidateNested()
+  @Type(() => Period)
+  data: Period[];
+  @IsString()
+  message: string;
+}
 
 export class MyGroup implements ForecastMyGroup {
   @IsString()
@@ -25,6 +60,10 @@ export class MyGroup implements ForecastMyGroup {
   @IsString()
   @IsOptional()
   @IsNullable()
+  syllabusId?: string | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
   courseId?: string | null;
   @IsString()
   groupType: string;
@@ -32,6 +71,10 @@ export class MyGroup implements ForecastMyGroup {
   @IsOptional()
   @IsNullable()
   forecastPeriod?: string | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  unitId?: string | null;
   @IsNumber()
   /** @format int32 */
   totalPupils: number;
@@ -49,6 +92,10 @@ export class MyGroup implements ForecastMyGroup {
   @IsNullable()
   /** @format int32 */
   presence?: number | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  typeOfSchool?: string | null;
   @IsArray()
   @IsOptional()
   @IsNullable()
@@ -59,6 +106,31 @@ export class MyGroupApiResponse implements ApiResponse<MyGroup> {
   @ValidateNested()
   @Type(() => MyGroup)
   data: MyGroup;
+  @IsString()
+  message: string;
+}
+
+export class ForecastMetaGroups implements _ForecastMetaGroups {
+  @IsNumber()
+  /** @format int32 */
+  pageNumber: number;
+  @IsNumber()
+  /** @format int32 */
+  pageSize: number;
+  @IsNumber()
+  /** @format int32 */
+  totalRecords: number;
+  @IsNumber()
+  /** @format int32 */
+  totalPages: number;
+  @IsArray()
+  data: MyGroup[];
+}
+
+export class ForecastMetaGroupsApiResponse implements ApiResponse<ForecastMetaGroups> {
+  @ValidateNested()
+  @Type(() => ForecastMetaGroups)
+  data: ForecastMetaGroups;
   @IsString()
   message: string;
 }
@@ -146,10 +218,22 @@ export class Pupil implements _Pupil {
   @IsOptional()
   @IsNullable()
   courseId?: string | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  unitId?: string | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  syllabusId?: string | null;
   @IsArray()
   @IsOptional()
   @IsNullable()
   teachers?: ForecastMyGroupTeacher[] | null;
+  @IsString()
+  @IsOptional()
+  @IsNullable()
+  typeOfSchool?: string | null;
   @IsNumber()
   totalSubjects: number;
 }
@@ -170,6 +254,30 @@ export class PupilsApiResponse implements ApiResponse<Pupil[]> {
   message: string;
 }
 
+export class ForecastMetaPupils implements _ForecastMetaPupils {
+  @IsNumber()
+  /** @format int32 */
+  pageNumber: number;
+  @IsNumber()
+  /** @format int32 */
+  pageSize: number;
+  @IsNumber()
+  /** @format int32 */
+  totalRecords: number;
+  @IsNumber()
+  /** @format int32 */
+  totalPages: number;
+  @IsArray()
+  data: Pupil[];
+}
+
+export class ForecastMetaPupilsApiResponse implements ApiResponse<ForecastMetaPupils> {
+  @ValidateNested({ each: true })
+  @Type(() => ForecastMetaPupils)
+  data: ForecastMetaPupils;
+  @IsString()
+  message: string;
+}
 export class MyMentorClassPupil implements _MyMentorClassPupil {
   pupil: string;
   @IsString()
@@ -262,6 +370,31 @@ export class MentorClassPupilGridApiResponse implements ApiResponse<MentorClassP
   @ValidateNested({ each: true })
   @Type(() => MentorClassPupilGrid)
   data: MentorClassPupilGrid[];
+  @IsString()
+  message: string;
+}
+
+export class ForecastMetaMentorClass implements _ForecastMetaMentorClass {
+  @IsNumber()
+  /** @format int32 */
+  pageNumber: number;
+  @IsNumber()
+  /** @format int32 */
+  pageSize: number;
+  @IsNumber()
+  /** @format int32 */
+  totalRecords: number;
+  @IsNumber()
+  /** @format int32 */
+  totalPages: number;
+  @IsArray()
+  data: MentorClassPupilGrid[];
+}
+
+export class ForecastMetaMentorClassApiResponse implements ApiResponse<ForecastMetaMentorClass> {
+  @ValidateNested({ each: true })
+  @Type(() => ForecastMetaMentorClass)
+  data: ForecastMetaMentorClass;
   @IsString()
   message: string;
 }

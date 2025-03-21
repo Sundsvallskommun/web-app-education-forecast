@@ -3,22 +3,27 @@ import { useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import router from 'next/router';
 import { User } from '@interfaces/user';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { QueriesDto } from '@interfaces/forecast/forecast';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useUserStore } from '@services/user-service/user-service';
 
 interface MenuProps {
   user: User;
 }
 
 export const Menu: React.FC<MenuProps> = ({ user }) => {
-  const { getMyClasses, myClasses } = useForecastStore();
+  const { getMyClasses, myClasses } = usePupilForecastStore();
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const [activeURL, setActiveURL] = useState('/');
-  const { schoolYear, currentMonthPeriod } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+
+  const classesQueries: ForeacastQueriesDto = {
+    schoolId: selectedSchool.schoolId,
+    OrderBy: 'GroupName',
+    OrderDirection: 'ASC',
+    PageSize: 10,
+  };
 
   useEffect(() => {
     setActiveURL(router.pathname);
@@ -27,11 +32,7 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
 
   useEffect(() => {
     if (mentor) {
-      const period: QueriesDto = {
-        period: selectedPeriod ? selectedPeriod : currentMonthPeriod,
-        schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-      };
-      getMyClasses(period);
+      getMyClasses(classesQueries);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -105,7 +106,7 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
           <PopupMenu>
             <PopupMenu.Button rightIcon={<Icon name="chevron-down" />}>Klasser</PopupMenu.Button>
             <PopupMenu.Panel className="w-full">
-              {myClasses.map((classlink) => {
+              {myClasses.data.map((classlink) => {
                 return (
                   <PopupMenu.Item key={`popupmenyitem-${classlink.groupName}`}>
                     <NextLink href={`/min-mentorsklass/${classlink.groupId}`}>{classlink.groupName}</NextLink>

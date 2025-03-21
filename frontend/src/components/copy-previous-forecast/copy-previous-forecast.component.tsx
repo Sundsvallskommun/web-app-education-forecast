@@ -1,55 +1,19 @@
 import { Button, Icon, Modal, useSnackbar } from '@sk-web-gui/react';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { hasRolePermission } from '@utils/has-role-permission';
-import { useUserStore } from '@services/user-service/user-service';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 export const CopyPreviousForecast: React.FC = () => {
-  const user = useUserStore((s) => s.user);
-  const subject = useForecastStore((s) => s.groupWithPupils);
+  const subject = usePupilForecastStore((s) => s.subject);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const selectedId = useForecastStore((s) => s.selectedId);
   const copyPreviousForecast = useForecastStore((s) => s.copyPreviousForecast);
-  const { GR, GY } = hasRolePermission(user);
   const [isOpen, setisOpen] = useState(false);
   const [summerPeriod, setSummerPeriod] = useState(false);
 
   const message = useSnackbar();
-
-  const monthPeriods = [
-    'VT Januari',
-    'VT Februari',
-    'VT Mars',
-    'VT April',
-    'VT Maj',
-    'HT September',
-    'HT Oktober',
-    'HT November',
-    'HT December',
-  ];
-
-  const termPeriods = ['HT', 'VT'];
-  let previousPeriod: string;
-  let previousSchoolYear: number;
-
-  if (GY) {
-    monthPeriods[monthPeriods.indexOf(selectedPeriod)] === monthPeriods[0]
-      ? (previousPeriod = monthPeriods[monthPeriods.length - 1])
-      : (previousPeriod = monthPeriods[monthPeriods.indexOf(selectedPeriod) - 1]);
-
-    monthPeriods.indexOf(previousPeriod) === monthPeriods.indexOf('VT Maj')
-      ? (previousSchoolYear = selectedSchoolYear - 1)
-      : (previousSchoolYear = selectedSchoolYear);
-  } else if (GR) {
-    termPeriods[termPeriods.indexOf(selectedPeriod)] === termPeriods[0]
-      ? (previousPeriod = termPeriods[termPeriods.length - 1])
-      : (previousPeriod = termPeriods[termPeriods.indexOf(selectedPeriod) - 1]);
-
-    previousPeriod === 'VT' ? (previousSchoolYear = selectedSchoolYear - 1) : (previousSchoolYear = selectedSchoolYear);
-  }
 
   const openModalhandler = async () => {
     await setisOpen(true);
@@ -63,10 +27,7 @@ export const CopyPreviousForecast: React.FC = () => {
     if (selectedId) {
       const body: CopyPreviousForecastDto = {
         groupId: selectedId,
-        period: selectedPeriod,
-        previusPeriod: previousPeriod,
-        schoolYear: selectedSchoolYear,
-        previusSchoolYear: previousSchoolYear,
+        syllabusId: subject[0].syllabusId,
       };
       await copyPreviousForecast(body).then((res) => {
         if (!res.error) {

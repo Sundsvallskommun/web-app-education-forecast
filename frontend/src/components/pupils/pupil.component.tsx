@@ -1,29 +1,20 @@
 import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
 import { HeadingMenu } from '@components/heading-menu/heading-menu.component';
-import { CustomPupilTable } from '@components/tables/forecast-pupil-tables.component';
 import { Spinner } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import Loader from '@components/loader/loader';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useState } from 'react';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { SinglePupilTable } from './components/single-pupil-table.component';
 
-interface PupilProps {
-  isSinglePupil: boolean;
-}
-
-export const Pupil: React.FC<PupilProps> = ({ isSinglePupil }) => {
+export const Pupil: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const user = useUserStore((s) => s.user, shallow);
-  const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
+  const singlePupilIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
+  const pupil = usePupilForecastStore((s) => s.pupil);
   const { headmaster } = hasRolePermission(user);
-
-  const { singlepPupilListRendered, pupilTable, singlePupilIsLoading, pupil, pupilsInGroupData } = CustomPupilTable(
-    user,
-    isSinglePupil,
-    searchQuery
-  );
 
   const pageTitle = pupil.length !== 0 ? `${pupil[0].givenname} ${pupil[0].lastname}` : 'Elev';
 
@@ -59,8 +50,15 @@ export const Pupil: React.FC<PupilProps> = ({ isSinglePupil }) => {
         setSearchQuery={setSearchQuery}
         searchPlaceholder="Sök på ämne eller lärare..."
       />
-      {!singlePupilIsLoading && !listByPeriodIsLoading && pupilsInGroupData.length !== 0 ? (
-        <> {singlepPupilListRendered.length !== 0 ? pupilTable : <p>Inga sökresultat att visa</p>}</>
+      {!singlePupilIsLoading && pupil.length !== 0 ? (
+        <>
+          {' '}
+          {pupil.length !== 0 ? (
+            <SinglePupilTable user={user} searchQuery={searchQuery} />
+          ) : (
+            <p>Inga sökresultat att visa</p>
+          )}
+        </>
       ) : (
         <div className="h-[500px] flex justify-center items-center">
           <Loader />

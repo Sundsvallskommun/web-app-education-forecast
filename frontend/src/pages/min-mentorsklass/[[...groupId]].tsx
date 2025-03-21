@@ -2,35 +2,22 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { ClassWithPupils } from '@components/classes/class-with-pupils.component';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { QueriesDto } from '@interfaces/forecast/forecast';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { hasRolePermission } from '@utils/has-role-permission';
-import { useUserStore } from '@services/user-service/user-service';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 export const Index: React.FC = () => {
   const router = useRouter();
-  const user = useUserStore((s) => s.user);
-  const { GR, mentor } = hasRolePermission(user);
   const routerclassId = router.query['groupId'];
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;
-  const mentorClass = useForecastStore((s) => (mentor ? s.mentorClassGrid : s.mentorClass));
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
+  const getMentorClass = usePupilForecastStore((s) => s.getMentorClass);
+  const mentorClass = usePupilForecastStore((s) => s.mentorClass);
 
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  console.log('id', classId);
 
   useEffect(() => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
     const loadClass = async () => {
-      if (classId) {
-        if (router.pathname.includes(classId)) return;
-        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'mentorclass', classId, user);
+      if (classId && classId !== undefined) {
+        // if (router.pathname.includes(classId)) return;
+        await getMentorClass(classId);
       } else {
         if (!classId) {
           router.push('/mina-amnen-grupper');
