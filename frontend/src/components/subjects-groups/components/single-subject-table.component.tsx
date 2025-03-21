@@ -258,6 +258,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
                   <EditForecast
                     pupil={
                       p && {
+                        syllabusId: p.syllabusId && typeof p.syllabusId === 'string' ? p.syllabusId : '',
                         pupilId: p.id && typeof p.id === 'string' ? p.id : '',
                         groupId: p.groupId && typeof p.groupId === 'string' ? p.groupId : '',
                         period:

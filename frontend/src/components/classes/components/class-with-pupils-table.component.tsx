@@ -20,7 +20,6 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
   const { headmaster, mentor } = hasRolePermission(user);
   const [pageSize] = useState<number>(mentor || headmaster ? 100 : 10);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
-  const setSelectedUnit = usePupilForecastStore((s) => s.setSelectedUnit);
   const [mentorClassData, setMentorClassData] = useState<KeyStringTable[]>([]);
   const [subjectHeaders, setSubjectHeaders] = useState<MentorClassHeaders[]>([]);
 
@@ -172,21 +171,11 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
             <div className="flex flex-col py-2 gap-6 min-w-[177px]">
               <span>
                 {headmaster ? (
-                  <Link
-                    onClick={() => setSelectedUnit(p.unitId ? p.unitId.toString() : '')}
-                    href={`/klasser/klass/elev/${p.id}-unit-${p.unitId}`}
-                  >
-                    {p.pupil}
-                  </Link>
+                  <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
                 ) : p.notFilledIn === undefined || p.notFilledIn === null ? (
                   <span>{typeof p.pupil === 'string' && p.pupil} </span>
                 ) : (
-                  <Link
-                    onClick={() => setSelectedUnit(p.unitId ? p.unitId.toString() : '')}
-                    href={`/min-mentorsklass/elev/${p.id}-unit-${p.unitId}`}
-                  >
-                    {p.pupil}
-                  </Link>
+                  <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
                 )}
               </span>
               <span>Närvaro: {typeof p.presence === 'number' && p.presence}%</span>

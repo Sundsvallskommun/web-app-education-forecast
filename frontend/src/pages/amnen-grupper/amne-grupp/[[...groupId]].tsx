@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
 import { SubjectWithPupils } from '@components/subjects-groups/subject-with-pupils.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
@@ -19,17 +18,20 @@ export const Index: React.FC = () => {
   const router = useRouter();
   const routersubjectId = router.query['groupId'];
   const routeId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
-  const subjectId = routeId?.split('-syllabus-')[0];
+  const subId = routeId?.split('-syllabus-')[0];
   const syllabusId = routeId?.split('-syllabus-')[1];
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const getSubjectWithPupils = usePupilForecastStore((s) => s.getSubjectWithPupils);
   const getClasses = usePupilForecastStore((s) => s.getMyClasses);
+  // const setSelectedSyllabus = usePupilForecastStore((s) => s.setSelectedSyllabus);
   const [pageTitle, setPageTitle] = useState<string>();
 
-  const allSubjects = useForecastStore((s) => s.mySubjects);
+  const allSubjects = usePupilForecastStore((s) => s.mySubjects);
   const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
 
   const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const [syllabus] = useState<string>(syllabusId ? syllabusId : '');
+  const [subjectId] = useState(subId);
 
   //const currentPeriod = GR ? termPeriod : currentMonthPeriod;
   const classQueries: ForeacastQueriesDto = {
@@ -39,14 +41,12 @@ export const Index: React.FC = () => {
     PageSize: 10,
   };
 
-  console.log(subjectId);
-
   useEffect(() => {
     const loadClass = async () => {
       if (subjectId && syllabusId) {
-        if (router.pathname.includes(subjectId)) return;
+        if (router.pathname.includes(subjectId) && router.pathname.includes(syllabusId)) return;
         //await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
-        await getSubjectWithPupils(subjectId, syllabusId);
+        await getSubjectWithPupils(subjectId, syllabus);
         await getClasses(classQueries);
         // await getPreviousPeriodGroup(subjectId, {
         //   period: previousPeriod,
@@ -78,7 +78,7 @@ export const Index: React.FC = () => {
   useEffect(() => {
     const riffleArray: Riffle[] = [];
 
-    allSubjects.filter((s) => {
+    allSubjects.data.filter((s) => {
       riffleArray.push({
         id: s.groupId,
         link: `/amnen-grupper/amne-grupp/${s.groupId}`,

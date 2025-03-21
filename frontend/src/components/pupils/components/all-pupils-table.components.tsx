@@ -1,7 +1,7 @@
 import { Avatar, Link, Table, SortMode, Pagination, Select, Input, Badge } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import { initialsFunction } from '@utils/initials';
-import { KeyStringTable } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { IAllPupilsTable, PupilsTableForm } from '../all-pupils.component';
 import { useFormContext } from 'react-hook-form';
@@ -12,10 +12,26 @@ interface PupilHeaders {
   isColumnSortable: boolean;
 }
 
+interface IPupil {
+  id?: string | null;
+  pupil?: string | null;
+  className?: string | null;
+  unitId?: string | null;
+  groupId?: string | null;
+  teachers?: ForecastMyGroupTeacher[] | null;
+  presence?: number | null;
+  forecast?: number | null;
+  approved?: number | null;
+  warnings?: number | null;
+  unapproved?: number | null;
+  notFilledIn: number | null;
+  totalSubjects?: number | null;
+  image?: string | null;
+}
+
 export const AllPupilsTable: React.FC = () => {
   const allPupils = usePupilForecastStore((s) => s.allPupils);
-  const [allPupilsTable, setAllPupilTable] = useState<KeyStringTable[]>([]);
-  const setSelectedUnit = usePupilForecastStore((s) => s.setSelectedUnit);
+  const [allPupilsTable, setAllPupilTable] = useState<IPupil[]>([]);
 
   const { watch, setValue, register, formState } = useFormContext<PupilsTableForm>();
   const sortOrder = watch('sortOrder');
@@ -29,7 +45,7 @@ export const AllPupilsTable: React.FC = () => {
   const TableSortOrder = sortOrder === 'ASC' ? SortMode.ASC : SortMode.DESC;
 
   useEffect(() => {
-    const tableArr: KeyStringTable[] = [];
+    const tableArr: IPupil[] = [];
     if (allPupils.data.length !== 0) {
       allPupils.data.map((p) => {
         const numberNotFilledIn =
@@ -67,20 +83,37 @@ export const AllPupilsTable: React.FC = () => {
     { label: 'Når målen', property: 'approved', isColumnSortable: true },
     { label: 'Varning', property: 'warnings', isColumnSortable: true },
     { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
-    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
+    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false },
   ];
+
+  const handleSort = (h: PupilHeaders) => {
+    setValue('sortOrder', sortOrder === 'DESC' ? 'ASC' : 'DESC');
+
+    setValue(
+      'sortColumn',
+      h.property
+        ? h.property === 'pupil'
+          ? 'Givenname'
+          : h.property.charAt(0).toUpperCase() + h.property.slice(1)
+        : 'Givenname'
+    );
+  };
 
   const pupilHeaders = pupilHeaderLabels.map((h, idx) => {
     return (
       <Table.HeaderColumn key={`headercol-${idx}`} aria-sort={sortColumn === h.property ? TableSortOrder : 'none'}>
-        <Table.SortButton
-          isActive={sortColumn === h.property}
-          aria-description={sortColumn === h.property ? undefined : 'sortera'}
-          sortOrder={TableSortOrder}
-          onClick={() => setValue('sortColumn', h.property ? h.property : 'groupName')}
-        >
-          {h.label}
-        </Table.SortButton>
+        {h.isColumnSortable ? (
+          <Table.SortButton
+            isActive={sortColumn === h.property}
+            aria-description={sortColumn === h.property ? undefined : 'sortera'}
+            sortOrder={TableSortOrder}
+            onClick={() => handleSort(h)}
+          >
+            {h.label}
+          </Table.SortButton>
+        ) : (
+          <span>{h.label}</span>
+        )}
       </Table.HeaderColumn>
     );
   });
@@ -108,12 +141,7 @@ export const AllPupilsTable: React.FC = () => {
             />
             <span className="ml-8 font-bold">
               {p.totalSubjects !== 0 ? (
-                <Link
-                  onClick={() => setSelectedUnit(p.unitId ? p.unitId.toString() : '')}
-                  href={`/klasser/klass/elev/${p.id}-unit-${p.unitId}`}
-                >
-                  {p.pupil}
-                </Link>
+                <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
               ) : (
                 <>{typeof p.pupil === 'string' && p.pupil} </>
               )}

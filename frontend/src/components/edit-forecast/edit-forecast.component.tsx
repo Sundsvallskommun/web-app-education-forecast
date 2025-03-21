@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 interface EditForecastprops {
   pupil: {
+    syllabusId: string;
     pupilId: string;
     groupId: string;
     period: string;
@@ -17,7 +18,6 @@ interface EditForecastprops {
 export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) => {
   const setForecast = useForecastStore((s) => s.setForecast);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const [forecastLoading, setForecastLoading] = useState(false);
   const { APPROVED, WARNINGS, UNNAPROVED } = IsGradedForecast(forecast);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -30,8 +30,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
     const setForecastBody: SetForecastDto = {
       pupilId: pupil?.pupilId,
       groupId: pupil?.groupId,
-      period: selectedPeriod,
-      schoolYear: selectedSchoolYear,
+      syllabusId: pupil.syllabusId,
       forecast: Number(forecast),
     };
 

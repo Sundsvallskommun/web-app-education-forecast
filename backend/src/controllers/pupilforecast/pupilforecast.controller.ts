@@ -132,19 +132,19 @@ export class PupilForecastController {
     });
   }
 
-  @Get(`${API_PREFIX}/:unitId/pupil/:pupilId`)
+  @Get(`${API_PREFIX}/:schoolId/pupil/:pupilId`)
   @OpenAPI({ summary: 'Return specific pupil' })
   @UseBefore(authMiddleware)
   @ResponseSchema(PupilApiResponse)
   async getPupil(
+    @Param('schoolId') schoolId: string,
     @Param('pupilId') pupilId: string,
-    @Param('unitId') unitId: string,
     @QueryParam('periodId') periodId: number,
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<Pupil[]>> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/${unitId}/pupil/${pupilId}`;
+    const url = `${API_URL}/${municipalityId}/forecast/${schoolId}/pupil/${pupilId}`;
     return await this.apiService.get<Pupil[]>({
       url,
       params: { teacherId: personId, periodId: periodId },

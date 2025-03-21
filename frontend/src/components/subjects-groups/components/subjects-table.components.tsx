@@ -4,7 +4,7 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 
 import { useFormContext } from 'react-hook-form';
-import { KeyStringTable } from '@interfaces/forecast/forecast';
+import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
 import { ISubjectsTable, SubjectsTableForm } from '../subjects-groups.component';
 
@@ -14,12 +14,25 @@ interface GroupHeaders {
   isColumnSortable: boolean;
 }
 
+interface ISubjects {
+  id?: string | null;
+  groupName?: string | null;
+  teachers?: ForecastMyGroupTeacher[] | null;
+  totalPupils?: number | null;
+  presence?: number | null;
+  approvedPupils?: number | null;
+  warningPupils?: number | null;
+  unapprovedPupils?: number | null;
+  syllabusId?: string | null;
+  notFilledIn?: number;
+}
+
 //Table structure for group type tables
 export const SubjectsTable: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const { mySubjects } = usePupilForecastStore();
-  const [subjectsTable, setSubjectsTable] = useState<KeyStringTable[]>([]);
+  const [subjectsTable, setSubjectsTable] = useState<ISubjects[]>([]);
   //   const [pageSize] = useState<number>(myClasses.pageSize);
 
   const { watch, setValue, register, formState } = useFormContext<SubjectsTableForm>();
@@ -34,7 +47,7 @@ export const SubjectsTable: React.FC = () => {
   const TableSortOrder = sortOrder === 'ASC' ? SortMode.ASC : SortMode.DESC;
 
   useEffect(() => {
-    const tableArr: KeyStringTable[] = [];
+    const tableArr: ISubjects[] = [];
 
     if (mySubjects.data.length !== 0) {
       mySubjects.data.map((s) => {
@@ -71,21 +84,31 @@ export const SubjectsTable: React.FC = () => {
     { label: 'Når målen', property: 'approvedPupils', isColumnSortable: true },
     { label: 'Varning', property: 'warningPupils', isColumnSortable: true },
     { label: 'Når ej målen', property: 'unapprovedPupils', isColumnSortable: true },
-    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: true },
+    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false },
   ];
+
+  const handleSort = (h: GroupHeaders) => {
+    setValue('sortOrder', sortOrder === 'DESC' ? 'ASC' : 'DESC');
+
+    setValue('sortColumn', h.property ? h.property.charAt(0).toUpperCase() + h.property.slice(1) : 'GroupName');
+  };
 
   const subjectsHeaders = subjectsHeaderLabels.map((h, idx) => {
     return (
       h.isColumnSortable && (
         <Table.HeaderColumn key={`headercol-${idx}`} aria-sort={sortColumn === h.property ? TableSortOrder : 'none'}>
-          <Table.SortButton
-            isActive={sortColumn === h.property}
-            aria-description={sortColumn === h.property ? undefined : 'sortera'}
-            sortOrder={TableSortOrder}
-            onClick={() => setValue('sortColumn', h.property ? h.property : 'groupName')}
-          >
-            {h.label}
-          </Table.SortButton>
+          {h.isColumnSortable ? (
+            <Table.SortButton
+              isActive={sortColumn === h.property}
+              aria-description={sortColumn === h.property ? undefined : 'sortera'}
+              sortOrder={TableSortOrder}
+              onClick={() => handleSort(h)}
+            >
+              {h.label}
+            </Table.SortButton>
+          ) : (
+            <span>{h.label}</span>
+          )}
         </Table.HeaderColumn>
       )
     );
@@ -118,7 +141,7 @@ export const SubjectsTable: React.FC = () => {
           <Table.Column>
             <div className="flex max-w-[300px] items-center gap-2">
               <span className="ml-8">
-                {g.teachers &&
+                {g.teachers && g.teachers.length > 0 ? (
                   Array.isArray(g.teachers) &&
                   g.teachers.map((t) => {
                     const fullName = `${t.givenname} ${t.lastname}`;
@@ -129,21 +152,23 @@ export const SubjectsTable: React.FC = () => {
 
                     const secondletterInLastName = t.lastname && t.lastname.split('').slice(1, 2);
                     const abbreviation = `${initials.join('')}${secondletterInLastName}`;
-                    const lastObject = g.teachers && Array.isArray(g.teachers) && g.teachers[g.teachers.length - 1];
                     return t ? (
                       <span key={`teacher-${t.personId}`}>
                         {t?.givenname} {t?.lastname} ({abbreviation})`
                         {g.teachers &&
                           Array.isArray(g.teachers) &&
                           g.teachers.length > 1 &&
-                          t.personId !== lastObject?.personId &&
+                          t.personId !== g.teachers[g.teachers.length - 1].personId &&
                           ','}
                         {'  '}
                       </span>
                     ) : (
                       '-'
                     );
-                  })}
+                  })
+                ) : (
+                  <span> - </span>
+                )}
               </span>
             </div>
           </Table.Column>

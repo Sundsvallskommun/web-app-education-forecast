@@ -19,10 +19,7 @@ export const Index: React.FC = () => {
   const router = useRouter();
   const routerpupilId = router.query['pupil'];
 
-  const routeId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
-
-  const pupilId = routeId?.split('-unit-')[0];
-  const unitId = routeId?.split('-unit-')[1];
+  const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
 
   console.log(routerpupilId);
   const pupil = useForecastStore((s) => s.pupil);
@@ -43,14 +40,12 @@ export const Index: React.FC = () => {
     PageSize: 500,
   };
 
-  console.log(pupilId);
-
   useEffect(() => {
     const loadClass = async () => {
-      if (pupilId && unitId) {
-        if (router.pathname.includes(pupilId) && router.pathname.includes(unitId)) return;
+      if (pupilId) {
+        if (router.pathname.includes(pupilId)) return;
         await getAllPupils(classQueries);
-        await getPupil(pupilId, unitId);
+        await getPupil(selectedSchool.schoolId, pupilId);
       } else {
         if (!pupilId) {
           router.push('/klasser');

@@ -24,7 +24,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
 
   useEffect(() => {
     !singleSubjectIsLoading ? setPageTitle(singleSubject[0]?.courseName || 'Ämne/grupp') : setPageTitle('Ämne/grupp');
-  });
+  }, []);
 
   const generalInformation =
     singleSubject.length !== 0 ? (
@@ -34,6 +34,8 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
     ) : (
       <Spinner size={2} />
     );
+
+  console.log(singleSubjectIsLoading);
 
   return (
     <div>

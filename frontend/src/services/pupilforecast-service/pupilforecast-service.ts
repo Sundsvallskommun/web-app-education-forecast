@@ -1,4 +1,5 @@
 import {
+  clearGroupForecastsDto,
   //   clearGroupForecastsDto,
   CopyPreviousForecastDto,
   ForeacastQueriesDto,
@@ -151,12 +152,12 @@ export const getMentorClass: (
 };
 
 export const getPupil: (
+  schoolId: string,
   pupilId: string,
-  unitId: string,
   periodId?: number | null
-) => Promise<ServiceResponse<Pupil[]>> = (pupilId, unitId, periodId) => {
+) => Promise<ServiceResponse<Pupil[]>> = (schoolId, pupilId, periodId) => {
   return apiService
-    .get<ApiResponse<Pupil[]>>(`/pupilforecast/${unitId}/pupil/${pupilId}`, { params: { periodId } })
+    .get<ApiResponse<Pupil[]>>(`/pupilforecast/${schoolId}/pupil/${pupilId}`, { params: { periodId } })
     .then((res) => ({ data: handleGetManyPupils(res.data) }))
     .catch((e) => ({
       message: e.response?.data.message,
@@ -231,7 +232,6 @@ interface State {
   pupil: Pupil[];
   selectedPeriod: number | null;
   selectedId?: string | null;
-  selectedUnit: string;
 }
 
 interface Actions {
@@ -266,10 +266,9 @@ interface Actions {
   getMentorClass: (groupId: string, periodId?: number | null) => Promise<ServiceResponse<MentorClassPupilGrid[]>>;
   getAllPupils: (queries: ForeacastQueriesDto) => Promise<ServiceResponse<MetaPupils>>;
   getPupil: (pupilId: string, unitId: string, periodId?: number | null) => Promise<ServiceResponse<Pupil[]>>;
-  //   setForecast: (forecast: SetForecastDto) => Promise<ServiceResponse<object>>;
-  //   copyPreviousForecast: (forecast: CopyPreviousForecastDto) => Promise<ServiceResponse<object>>;
-  //   clearGroupForecasts: (forecast: clearGroupForecastsDto) => Promise<ServiceResponse<object>>;
-  setSelectedUnit: (selectedUnit: string) => Promise<void>;
+  setForecast: (forecast: SetForecastDto) => Promise<ServiceResponse<object>>;
+  copyPreviousForecast: (forecast: CopyPreviousForecastDto) => Promise<ServiceResponse<object>>;
+  clearGroupForecasts: (forecast: clearGroupForecastsDto) => Promise<ServiceResponse<object>>;
   reset: () => void;
 }
 
@@ -314,7 +313,6 @@ const initialState: State = {
   pupil: [],
   selectedPeriod: null,
   selectedId: '',
-  selectedUnit: '',
 };
 
 export const usePupilForecastStore = createWithEqualityFn<
@@ -489,13 +487,18 @@ export const usePupilForecastStore = createWithEqualityFn<
             });
           });
           await set(() => ({ subject: dataArr, singleSubjectIsLoading: false }));
+
+          await set(() => ({
+            singleSubjectIsLoading: false,
+          }));
+
           return { data, error: res.error };
         },
         setPupil: async (pupil) =>
           await set((s) => ({
             pupil: typeof pupil === 'function' ? pupil(s.pupil) : pupil,
           })),
-        getPupil: async (pupilId: string, unitId: string, periodId?: number | null) => {
+        getPupil: async (schoolId: string, pupilId: string, periodId?: number | null) => {
           if (pupilId == null) {
             await set(() => ({
               pupil: initialState.pupil,
@@ -503,7 +506,7 @@ export const usePupilForecastStore = createWithEqualityFn<
             await get().reset();
           }
           await set(() => ({ singlePupilIsLoading: true }));
-          const res = await getPupil(pupilId, unitId, periodId);
+          const res = await getPupil(schoolId, pupilId, periodId);
           const data = (res.data && res.data) || initialState.pupil;
           await set(() => ({ pupil: data, singlePupilIsLoading: false }));
           // await get().getMentorClass(data[0].classGroupId, {
@@ -512,8 +515,37 @@ export const usePupilForecastStore = createWithEqualityFn<
           // });
           return { data, error: res.error };
         },
-        setSelectedUnit: async (selectedUnit) => set(() => ({ selectedUnit })),
-
+        setForecast: async (forecast: SetForecastDto) => {
+          const res = await setForecast(forecast);
+          if (!res.error) {
+            await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod);
+          }
+          return { data: res.data };
+        },
+        copyPreviousForecast: async (forecast: CopyPreviousForecastDto) => {
+          const res = await copyPreviousForecast(forecast);
+          const subject = get().subject;
+          if (!res.error) {
+            await get().getSubjectWithPupils(
+              subject[0].groupId ? subject[0].groupId : '',
+              subject[0].syllabusId ? subject[0].syllabusId : '',
+              get().selectedPeriod
+            );
+          }
+          return { data: res.data, message: res.message };
+        },
+        clearGroupForecasts: async (forecast: clearGroupForecastsDto) => {
+          const res = await clearGroupForecasts(forecast.groupId, forecast.syllabusId);
+          const subject = get().subject;
+          if (!res.error) {
+            await get().getSubjectWithPupils(
+              subject[0].groupId ? subject[0].groupId : '',
+              subject[0].syllabusId ? subject[0].syllabusId : '',
+              get().selectedPeriod
+            );
+          }
+          return { data: res.data };
+        },
         reset: () => {
           set(initialState);
         },
