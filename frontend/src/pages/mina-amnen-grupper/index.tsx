@@ -16,11 +16,15 @@ export const Index: React.FC = () => {
   const { teacher, mentor, headmaster } = hasRolePermission(user);
   const pageTitle = 'Mina ämnen/grupper';
   const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const getSubjects = usePupilForecastStore((s) => s.getMySubjects);
   const getMyClasses = usePupilForecastStore((s) => s.getMyClasses);
+  const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
+  console.log(selectedPeriod);
 
   const myGroup: ForeacastQueriesDto = {
-    schoolId: selectedSchool.schoolId,
+    schoolId: selectedSchool?.schoolId,
+    periodId: selectedPeriod?.periodId !== 0 ? selectedPeriod?.periodId : currentPeriod.periodId,
     OrderBy: 'GroupName',
     OrderDirection: 'ASC',
     PageSize: 10,
@@ -37,7 +41,7 @@ export const Index: React.FC = () => {
       router.push('/amnen-grupper');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedPeriod.periodId]);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>
       <Main>

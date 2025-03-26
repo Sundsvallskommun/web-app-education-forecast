@@ -2,13 +2,11 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Pupil } from '@components/pupils/pupil.component';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { QueriesDto } from '@interfaces/forecast/forecast';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
-import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 interface Riffle {
   id: string;
@@ -20,30 +18,35 @@ export const Index: React.FC = () => {
   const router = useRouter();
   const routerpupilId = router.query['pupil'];
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
-  const user = useUserStore((s) => s.user);
-  const { GR, teacher } = hasRolePermission(user);
-  const pupil = useForecastStore((s) => s.pupil);
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const singlePupilIsLoading = useForecastStore((s) => s.singlePupilIsLoading);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
+  const pupil = usePupilForecastStore((s) => s.pupil);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const getPupil = usePupilForecastStore((s) => s.getPupil);
+  const getMentorClass = usePupilForecastStore((s) => s.getMentorClass);
 
-  const mentorclass = useForecastStore((s) => s.mentorClass);
-  const mentorclassIsLoading = useForecastStore((s) => s.mentorClassIsLoading);
+  const mentorclass = usePupilForecastStore((s) => s.mentorClass);
+  const mentorclassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
+  const [selectedId, setSelectedId] = useState<string>();
 
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  const classQueries: ForeacastQueriesDto = {
+    schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
+    OrderBy: 'GroupName',
+    OrderDirection: 'ASC',
+    PageSize: 500,
+  };
   useEffect(() => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        teacher && (await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects'));
-        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'pupil', pupilId);
+        if (router.pathname.includes(pupilId)) return;
+        await getPupil(selectedSchool.schoolId, pupilId, selectedPeriod.periodId).then(async (p) => {
+          p.data && (await getMentorClass(p.data[0].classGroupId || '', selectedPeriod.periodId));
+        });
+
+        setSelectedId(pupilId);
       } else {
         if (!pupilId) {
           router.push('/mina-amnen-grupper');
@@ -61,6 +64,13 @@ export const Index: React.FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query, router.isReady]);
+
+  useEffect(() => {
+    if (selectedId && selectedPeriod) {
+      getMentorClass(pupil[0].classGroupId || '', selectedPeriod.periodId);
+      getPupil(selectedSchool.schoolId, selectedId, selectedPeriod.periodId);
+    }
+  }, [selectedId, selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
     { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className ?? 'Klass', currentPage: false },
@@ -87,10 +97,10 @@ export const Index: React.FC = () => {
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - Elev ${pupil[0]?.givenname} ${pupil[0]?.lastname}}`}
     >
       <Main>
-        <Pupil isSinglePupil />
+        <Pupil />
         <RifflePrevNext
+          currentId={selectedId}
           riffleIsLoading={mentorclassIsLoading}
-          dataId={pupil[0]?.pupil ?? pupilId ?? ''}
           riffleObjects={rifflePupils}
           callback="pupil"
         />

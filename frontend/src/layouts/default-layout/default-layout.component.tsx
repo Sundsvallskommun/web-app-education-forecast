@@ -37,8 +37,10 @@ export default function DefaultLayout({
   breadcrumbsIsLoading,
 }: DefaultLayoutProps) {
   const router = useRouter();
+
   const user = useUserStore((s) => s.user, shallow);
   const { headmaster } = hasRolePermission(user);
+
   const headerSubtitle = () => {
     if (headmaster) {
       return user.schools.every((s) => s.schoolName === user.schools[0].schoolName) ? user.schools[0].schoolName : '';

@@ -12,9 +12,10 @@ import { usePupilForecastStore } from '@services/pupilforecast-service/pupilfore
 interface SubjectWithPupilsProps {
   setPageTitle: Dispatch<SetStateAction<string | undefined>>;
   pageTitle: string;
+  selectedSyllabus: string | undefined;
 }
 
-export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTitle, pageTitle }) => {
+export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTitle, pageTitle, selectedSyllabus }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const user = useUserStore((s) => s.user, shallow);
   const { teacher } = hasRolePermission(user);
@@ -22,9 +23,13 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const singleSubject = usePupilForecastStore((s) => s.subject);
 
+  console.log(singleSubjectIsLoading);
+
   useEffect(() => {
-    !singleSubjectIsLoading ? setPageTitle(singleSubject[0]?.courseName || 'Ämne/grupp') : setPageTitle('Ämne/grupp');
-  }, []);
+    !singleSubjectIsLoading
+      ? setPageTitle(singleSubject[0]?.courseName ? singleSubject[0]?.courseName : '')
+      : setPageTitle('Ämne/grupp');
+  }, [singleSubjectIsLoading, singleSubject]);
 
   const generalInformation =
     singleSubject.length !== 0 ? (
@@ -34,8 +39,6 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
     ) : (
       <Spinner size={2} />
     );
-
-  console.log(singleSubjectIsLoading);
 
   return (
     <div>
@@ -63,7 +66,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
       {!singleSubjectIsLoading ? (
         <>
           {singleSubject.length !== 0 ? (
-            <SingleSubjectTable user={user} searchQuery={searchQuery} />
+            <SingleSubjectTable user={user} searchQuery={searchQuery} selectedSyllabus={selectedSyllabus} />
           ) : (
             <p>Inga sökresultat att visa</p>
           )}

@@ -41,9 +41,10 @@ interface TablePupilHeaders {
 interface ISingleSubjectTable {
   user: User;
   searchQuery?: string;
+  selectedSyllabus: string | undefined;
 }
 
-export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, searchQuery }) => {
+export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, searchQuery, selectedSyllabus }) => {
   const { headmaster } = hasRolePermission(user);
   const [pageSize] = useState<number>(60);
   const subject = usePupilForecastStore((s) => s.subject);
@@ -77,6 +78,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
           schoolYear: p.schoolYear,
           notFilledIn: numberNotFilledIn,
           teachers: p.teachers,
+          syllabusId: selectedSyllabus,
           hasNotFilledIn: p.forecast === null || p.forecast === undefined ? 1 : 0,
           image: p.image,
         });

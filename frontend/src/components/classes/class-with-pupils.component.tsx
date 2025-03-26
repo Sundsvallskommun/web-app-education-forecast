@@ -14,8 +14,6 @@ export const ClassWithPupils: React.FC = () => {
   const mentorClassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
 
-  console.log(mentorClass);
-
   const fullTitle = !mentorClassIsLoading ? `Klass ${mentorClass[0]?.className}` : 'Klass';
 
   const generalInformation =

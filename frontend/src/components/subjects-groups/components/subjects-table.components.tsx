@@ -7,11 +7,13 @@ import { useFormContext } from 'react-hook-form';
 import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
 import { ISubjectsTable, SubjectsTableForm } from '../subjects-groups.component';
+import { useRouter } from 'next/router';
 
 interface GroupHeaders {
   label?: string;
   property?: keyof ISubjectsTable;
   isColumnSortable: boolean;
+  isColumnVisible: boolean;
 }
 
 interface ISubjects {
@@ -29,6 +31,7 @@ interface ISubjects {
 
 //Table structure for group type tables
 export const SubjectsTable: React.FC = () => {
+  const router = useRouter();
   const user = useUserStore((s) => s.user);
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const { mySubjects } = usePupilForecastStore();
@@ -75,16 +78,16 @@ export const SubjectsTable: React.FC = () => {
   const [rowHeight, setRowHeight] = useState<string>('normal');
 
   const subjectsHeaderLabels: GroupHeaders[] = [
-    { label: 'Grupp', property: 'groupName', isColumnSortable: true },
+    { label: 'Grupp', property: 'groupName', isColumnSortable: true, isColumnVisible: true },
     !mentor && !teacher
-      ? { label: 'Lärare', property: 'teachers', isColumnSortable: true }
-      : { isColumnSortable: false },
-    { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true },
-    { label: 'Närvaro', property: 'presence', isColumnSortable: true },
-    { label: 'Når målen', property: 'approvedPupils', isColumnSortable: true },
-    { label: 'Varning', property: 'warningPupils', isColumnSortable: true },
-    { label: 'Når ej målen', property: 'unapprovedPupils', isColumnSortable: true },
-    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false },
+      ? { label: 'Lärare', property: 'teachers', isColumnSortable: true, isColumnVisible: true }
+      : { isColumnSortable: false, isColumnVisible: false },
+    { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true, isColumnVisible: true },
+    { label: 'Närvaro', property: 'presence', isColumnSortable: true, isColumnVisible: true },
+    { label: 'Når målen', property: 'approvedPupils', isColumnSortable: true, isColumnVisible: true },
+    { label: 'Varning', property: 'warningPupils', isColumnSortable: true, isColumnVisible: true },
+    { label: 'Når ej målen', property: 'unapprovedPupils', isColumnSortable: true, isColumnVisible: true },
+    { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false, isColumnVisible: true },
   ];
 
   const handleSort = (h: GroupHeaders) => {
@@ -95,7 +98,7 @@ export const SubjectsTable: React.FC = () => {
 
   const subjectsHeaders = subjectsHeaderLabels.map((h, idx) => {
     return (
-      h.isColumnSortable && (
+      h.isColumnVisible && (
         <Table.HeaderColumn key={`headercol-${idx}`} aria-sort={sortColumn === h.property ? TableSortOrder : 'none'}>
           {h.isColumnSortable ? (
             <Table.SortButton
@@ -128,9 +131,14 @@ export const SubjectsTable: React.FC = () => {
               size="sm"
               accent
             />
-            <span className="ml-8 font-bold">
+            <span className="ml-8 font-bold cursor-pointer">
               <Link
-                href={`${headmaster ? `/amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}/` : `/mina-amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}`}`}
+                onClick={() =>
+                  router.push(
+                    `${headmaster ? `/amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}/` : `/mina-amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}`}`
+                  )
+                }
+                // to={`${headmaster ? `/amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}/` : `/mina-amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}`}`}
               >
                 {g.groupName}
               </Link>
@@ -246,8 +254,6 @@ export const SubjectsTable: React.FC = () => {
       </Table.Row>
     );
   });
-
-  console.log(mySubjects.pageNumber);
 
   const footer = (
     <Table.Footer className={groupRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>

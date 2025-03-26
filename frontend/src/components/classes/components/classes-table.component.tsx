@@ -6,6 +6,7 @@ import { ClassesTableForm, IClassesTable } from '../classes.component';
 import { useFormContext } from 'react-hook-form';
 import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
+import { useRouter } from 'next/router';
 
 interface GroupHeaders {
   label?: string;
@@ -27,6 +28,7 @@ interface IClasses {
 
 //Table structure for group type tables
 export const ClassesTable: React.FC = () => {
+  const router = useRouter();
   const user = useUserStore((s) => s.user);
   const { mentor, teacher } = hasRolePermission(user);
   const { myClasses } = usePupilForecastStore();
@@ -121,8 +123,8 @@ export const ClassesTable: React.FC = () => {
               size="sm"
               accent
             />
-            <span className="ml-8 font-bold">
-              <Link href={`/klasser/klass/${g.id}`}>{g.groupName}</Link>
+            <span className="ml-8 font-bold cursor-pointer">
+              <Link onClick={() => router.push(`/klasser/klass/${g.id}`)}>{g.groupName}</Link>
             </span>
           </div>
         </Table.HeaderColumn>
@@ -233,8 +235,6 @@ export const ClassesTable: React.FC = () => {
       </Table.Row>
     );
   });
-
-  console.log(myClasses.pageNumber);
 
   const footer = (
     <Table.Footer className={groupRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>

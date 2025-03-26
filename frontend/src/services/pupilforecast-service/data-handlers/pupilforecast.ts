@@ -5,10 +5,29 @@ import {
   MetaGroup,
   MetaPupils,
   MyGroup,
+  Period,
   Pupil,
   SetForecastDto,
 } from '@interfaces/forecast/forecast';
 import { ApiResponse } from '@services/api-service';
+
+export const handleGetPeriod: (res: ApiResponse<Period>) => Period = (res) => ({
+  periodName: res.data.periodName,
+  schoolYear: res.data.schoolYear,
+  periodId: res.data.periodId,
+  startDate: res.data.startDate,
+  endDate: res.data.endDate,
+});
+
+export const handleGetAllPeriods: (res: ApiResponse<Period[]>) => Period[] = (res) => {
+  return res.data.map((data) => ({
+    periodName: data.periodName,
+    schoolYear: data.schoolYear,
+    periodId: data.periodId,
+    startDate: data.startDate,
+    endDate: data.endDate,
+  }));
+};
 
 export const handleGetMyGroupResponse: (res: ApiResponse<MyGroup>) => MyGroup = (res) => ({
   groupId: res.data.groupId,
@@ -69,6 +88,7 @@ export const handleGetPupil: (res: ApiResponse<Pupil>) => Pupil = (res) => ({
   courseName: res.data.courseName,
   courseId: res.data.courseId,
   teachers: res.data.teachers,
+  syllabusId: res.data.syllabusId,
   totalSubjects: res.data.totalSubjects,
 });
 

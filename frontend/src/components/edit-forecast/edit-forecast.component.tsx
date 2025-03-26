@@ -36,24 +36,25 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
 
     if (pupil.pupilId && forecast) {
       setForecastLoading(true);
-      await setForecast(setForecastBody).then((res) => {
-        if (res.data) {
-          message({
-            message: `Prognosen sparades`,
-            status: 'success',
-          });
-          setForecastLoading(false);
-          document
-            .querySelectorAll('.sk-table-wrapper-inside')[0]
-            .scrollTo(0, Number(sessionStorage.getItem('scrollposition')));
-        } else {
-          message({
-            message: 'Prognosen kunde inte sparas',
-            status: 'error',
-          });
-          setForecastLoading(false);
-        }
-      });
+      // await setForecast(setForecastBody).then((res) => {
+      //   if (res.data) {
+      //     message({
+      //       message: `Prognosen sparades`,
+      //       status: 'success',
+      //     });
+      //     setForecastLoading(false);
+      //     document
+      //       .querySelectorAll('.sk-table-wrapper-inside')[0]
+      //       .scrollTo(0, Number(sessionStorage.getItem('scrollposition')));
+      //   } else {
+      //     message({
+      //       message: 'Prognosen kunde inte sparas',
+      //       status: 'error',
+      //     });
+      //     setForecastLoading(false);
+      //   }
+      // });
+      console.log(setForecastBody);
     }
   };
 

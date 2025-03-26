@@ -12,7 +12,9 @@ export const Pupil: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const user = useUserStore((s) => s.user, shallow);
-  const singlePupilIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
+  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
+  const mentorClassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
+  const pupilsIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
   const pupil = usePupilForecastStore((s) => s.pupil);
   const { headmaster } = hasRolePermission(user);
 
@@ -50,7 +52,8 @@ export const Pupil: React.FC = () => {
         setSearchQuery={setSearchQuery}
         searchPlaceholder="Sök på ämne eller lärare..."
       />
-      {!singlePupilIsLoading && pupil.length !== 0 ? (
+      {(!headmaster && !mentorClassIsLoading && !singlePupilIsLoading && pupil.length !== 0) ||
+      (headmaster && !pupilsIsLoading && !singlePupilIsLoading && pupil.length !== 0) ? (
         <>
           {' '}
           {pupil.length !== 0 ? (

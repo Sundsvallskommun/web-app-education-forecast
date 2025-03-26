@@ -1,22 +1,15 @@
-import { GroupTables } from '@components/tables/group-tables.component';
-import { PupilTables } from '@components/tables/all-pupils-table.component';
-import { CustomPupilTable } from '@components/tables/forecast-pupil-tables.component';
-import { MentorClassTable } from '@components/tables/mentor-class-table.component';
 import { callbackType } from '@utils/callback-type';
 import { useUserStore } from '@services/user-service/user-service';
 import { Label, Spinner } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { hasRolePermission } from '@utils/has-role-permission';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 interface GeneralForecastInfoProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
 
 export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callback }) => {
   const user = useUserStore((s) => s.user);
-  const { GY, GR } = hasRolePermission(user);
   const { CLASSES, MENTORCLASS, PUPIL, PUPILS, SUBJECTS, SUBJECT } = callbackType(callback);
   let grouptype = 'G';
   if (SUBJECTS) {
@@ -24,42 +17,28 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
   } else if (CLASSES) {
     grouptype = 'K';
   }
-  const { grouptable } = GroupTables(grouptype, user);
-  const { pupilsInGroupData } = CustomPupilTable(user, PUPIL && true);
-  const { mentorClassData } = MentorClassTable(user);
-  const { allPupilsTable } = PupilTables();
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
+  const {
+    mySubjects,
+    myClasses,
+    subject,
+    pupil,
+    allPupils,
+    mentorClass,
+    subjectsIsLoading,
+    classesIsLoading,
+    mentorClassIsLoading,
+    pupilsIsLoading,
+    singleSubjectIsLoading,
+    singlePupilIsLoading,
+  } = usePupilForecastStore();
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const allPeriods = usePupilForecastStore((s) => s.allPeriods);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
-  const { currentMonthPeriod } = thisSchoolYearPeriod();
 
-  const months = [
-    'januari',
-    'februari',
-    'mars',
-    'april',
-    'maj',
-    'juni',
-    'juli',
-    'augusti',
-    'september',
-    'oktober',
-    'november',
-    'december',
-  ];
-
-  const selectedMonth = selectedPeriod?.toLowerCase().split(' ').slice(1)[0];
-
-  const date = new Date(
-    new Date().getFullYear(),
-    months.findIndex((x) => x === selectedMonth)
-  );
-
-  const year = selectedMonth === 'december' ? selectedSchoolYear : date.getFullYear();
-  const month = date.getMonth();
-
-  const lastDay = new Date(year, month + 1, 0);
+  const endDate = new Date(selectedPeriod?.endDate);
   const currentDate = new Date();
+
+  //const year = endDate === 'december' ? selectedSchoolYear : date.getFullYear();
 
   let forecastStatus;
 
@@ -67,151 +46,140 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     return Math.round((dat1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
   };
 
-  if (GY) {
-    if (currentDate.toLocaleString() <= lastDay.toLocaleString()) {
-      forecastStatus = (
-        <span className="ml-6">
-          <strong>
-            Prognoser att fylla i senast {lastDay.getDate()}/{lastDay.getMonth() + 1} (
-            {currentDate === lastDay ? 'idag' : `om ${daysLeft(lastDay, currentDate)} dagar`}){' '}
-          </strong>
-        </span>
-      );
-    } else if (currentDate.toLocaleString() > lastDay.toLocaleString()) {
-      forecastStatus = (
-        <span className="text-error ml-6">
-          <strong>
-            Prognoser skulle ha fyllts i {lastDay.getDate()}/{lastDay.getMonth() + 1}
-          </strong>{' '}
-        </span>
-      );
-    }
-  } else if (GR) {
-    const april = dayjs(new Date(new Date().getFullYear(), 3, 12)).toDate();
-    const december = dayjs(
-      new Date(currentMonthPeriod === 'HT September' ? new Date().getFullYear() : selectedSchoolYear, 11, 31)
-    ).toDate();
-    if (selectedPeriod === 'VT') {
-      if (currentDate <= april) {
-        forecastStatus = (
-          <span className="ml-6">
-            <strong>
-              Prognoser att fylla i senast {dayjs(april).format('DD/M')} (
-              {currentDate === april ? 'idag' : `om ${daysLeft(april, currentDate)} dagar`}){' '}
-            </strong>
-          </span>
-        );
-      } else if (currentDate > april) {
-        forecastStatus = (
-          <span className="text-error ml-6">
-            <strong>Prognoser skulle ha fyllts i {dayjs(april).format('DD/M')}</strong>{' '}
-          </span>
-        );
-      }
-    } else if (selectedPeriod === 'HT') {
-      if (currentDate <= december) {
-        forecastStatus = (
-          <span className="ml-6">
-            <strong>
-              Prognoser att fylla i senast {dayjs(december).format('DD/M')} (
-              {currentDate === december ? 'idag' : `om ${daysLeft(december, currentDate)} dagar`}){' '}
-            </strong>
-          </span>
-        );
-      } else if (currentDate > december) {
-        forecastStatus = (
-          <span className="text-error ml-6">
-            <strong>Prognoser skulle ha fyllts i {dayjs(december).format('DD/M')}</strong>{' '}
-          </span>
-        );
-      }
-    }
+  if (currentDate.toLocaleString() <= endDate.toLocaleString()) {
+    forecastStatus = (
+      <span className="ml-6">
+        <strong>
+          Prognoser att fylla i senast {dayjs(endDate).format('DD/MM')} (
+          {currentDate === endDate ? 'idag' : `om ${daysLeft(endDate, currentDate)} dagar`}){' '}
+        </strong>
+      </span>
+    );
+  } else if (currentDate.toLocaleString() > endDate.toLocaleString()) {
+    forecastStatus = (
+      <span className="text-error ml-6">
+        <strong>Prognoser skulle ha fyllts i {dayjs(endDate).format('DD/MM')}</strong>{' '}
+      </span>
+    );
   }
 
   let isLoading;
   let numberOfNotFilledIn = 0;
-  if (SUBJECTS || CLASSES) {
-    grouptable.forEach((g) => {
-      numberOfNotFilledIn += typeof g.notFilledIn === 'number' && g.notFilledIn ? g.notFilledIn : 0;
+  if (SUBJECTS) {
+    mySubjects.data.forEach((g) => {
+      const notFilledIn =
+        (g?.totalPupils || 0) - (g?.approvedPupils || 0) - (g?.warningPupils || 0) - (g?.unapprovedPupils || 0);
+      numberOfNotFilledIn += notFilledIn;
     });
 
-    isLoading = grouptable.length === 0;
+    isLoading = subjectsIsLoading;
+  }
+
+  if (CLASSES) {
+    myClasses.data.forEach((g) => {
+      const notFilledIn =
+        (g?.totalPupils || 0) - (g?.approvedPupils || 0) - (g?.warningPupils || 0) - (g?.unapprovedPupils || 0);
+      numberOfNotFilledIn += notFilledIn;
+    });
+
+    isLoading = classesIsLoading;
   }
 
   if (PUPILS) {
-    allPupilsTable.forEach((g) => {
-      numberOfNotFilledIn += typeof g.notFilledIn === 'number' && g.notFilledIn ? g.notFilledIn : 0;
+    allPupils.data.forEach((p) => {
+      const notFilledIn =
+        p.totalSubjects !== 0 && p.totalSubjects !== null
+          ? p.totalSubjects - (p?.approved || 0) - (p?.warnings || 0) - (p?.unapproved || 0)
+          : 0;
+      numberOfNotFilledIn += notFilledIn;
     });
 
-    isLoading = allPupilsTable.length === 0;
+    isLoading = pupilsIsLoading;
   }
 
   if (SUBJECT) {
-    pupilsInGroupData.forEach((g) => {
-      numberOfNotFilledIn += typeof g.hasNotFilledIn === 'number' && g.hasNotFilledIn ? g.hasNotFilledIn : 0;
+    subject.forEach((p) => {
+      const notFilledIn = subject.length - (p.forecast !== null ? 1 : 0);
+      numberOfNotFilledIn = notFilledIn;
     });
-    isLoading = pupilsInGroupData.length === 0;
+    isLoading = singleSubjectIsLoading;
   }
 
   if (MENTORCLASS) {
-    mentorClassData.forEach((g) => {
-      numberOfNotFilledIn += typeof g.notFilledIn === 'number' && g.notFilledIn ? g.notFilledIn : 0;
+    mentorClass.forEach((p) => {
+      const notFilledIn = p.forecasts?.filter((x) => x.forecast === null).length;
+      numberOfNotFilledIn += notFilledIn;
     });
-    isLoading = mentorClassData.length === 0;
+    isLoading = mentorClassIsLoading;
   }
 
   if (PUPIL) {
-    pupilsInGroupData.forEach((g) => {
-      numberOfNotFilledIn += typeof g.hasNotFilledIn === 'number' && g.hasNotFilledIn ? g.hasNotFilledIn : 0;
+    pupil.forEach((p) => {
+      const notFilledIn = pupil.length - (p.forecast !== null ? 1 : 0);
+      numberOfNotFilledIn = notFilledIn;
     });
-    isLoading = pupilsInGroupData.length === 0;
+    isLoading = singlePupilIsLoading;
   }
 
   useEffect(() => {
-    if (GR) {
-      if (
-        selectedPeriod === 'HT' &&
-        dayjs(new Date()).month() >= dayjs(new Date(year, 5, 1)).month() &&
-        dayjs(new Date()).month() < dayjs(new Date(year, 7, 1)).month()
-      ) {
-        setSummerPeriod(true);
-      } else {
-        setSummerPeriod(false);
-      }
+    if (
+      currentDate >= new Date(`${new Date().getFullYear()}-07-01`) &&
+      currentDate < new Date(allPeriods[allPeriods.length - 1].startDate) &&
+      currentDate < new Date(selectedPeriod.startDate)
+    ) {
+      setSummerPeriod(true);
+    } else {
+      setSummerPeriod(false);
     }
 
-    if (GY) {
-      if (
-        selectedPeriod === 'HT September' &&
-        dayjs(date).month() >= dayjs(new Date(year, 5, 1)).month() &&
-        dayjs(date).month() < dayjs(new Date(year, 7, 1)).month()
-      ) {
-        setSummerPeriod(true);
-      } else {
-        setSummerPeriod(false);
-      }
-    }
+    // if (GR) {
+    //   if (
+    //     selectedPeriod === 'HT' &&
+    //     dayjs(new Date()).month() >= dayjs(new Date(year, 5, 1)).month() &&
+    //     dayjs(new Date()).month() < dayjs(new Date(year, 7, 1)).month()
+    //   ) {
+    //     setSummerPeriod(true);
+    //   } else {
+    //     setSummerPeriod(false);
+    //   }
+    // }
+
+    // if (GY) {
+    //   if (
+    //     selectedPeriod === 'HT September' &&
+    //     dayjs(date).month() >= dayjs(new Date(year, 5, 1)).month() &&
+    //     dayjs(date).month() < dayjs(new Date(year, 7, 1)).month()
+    //   ) {
+    //     setSummerPeriod(true);
+    //   } else {
+    //     setSummerPeriod(false);
+    //   }
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedPeriod]);
 
-  return numberOfNotFilledIn !== 0 ? (
+  return (
     <div className="flex gap-10">
       {!isLoading ? (
         <span>
-          <Label rounded inverted={summerPeriod} color={summerPeriod ? 'juniskar' : 'tertiary'}>
-            {summerPeriod
-              ? 'Prognoser till hösten är låsta under sommarperioden'
-              : numberOfNotFilledIn
-                ? numberOfNotFilledIn
-                : 'Saknar'}
-          </Label>
-          {!summerPeriod && forecastStatus}
+          {numberOfNotFilledIn !== 0 ? (
+            <>
+              <Label rounded inverted={summerPeriod} color={summerPeriod ? 'juniskar' : 'tertiary'}>
+                {summerPeriod
+                  ? 'Prognoser till hösten är låsta under sommarperioden'
+                  : numberOfNotFilledIn
+                    ? numberOfNotFilledIn
+                    : 'Saknar'}
+              </Label>
+              {!summerPeriod && forecastStatus}
+            </>
+          ) : (
+            <> Inga prognoser att fylla i den här perioden</>
+          )}
         </span>
       ) : (
         <Spinner size={3} />
       )}
     </div>
-  ) : (
-    <></>
   );
 };

@@ -23,6 +23,7 @@ export const Index: React.FC = () => {
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const getSubjectWithPupils = usePupilForecastStore((s) => s.getSubjectWithPupils);
   const getClasses = usePupilForecastStore((s) => s.getMyClasses);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   // const setSelectedSyllabus = usePupilForecastStore((s) => s.setSelectedSyllabus);
   const [pageTitle, setPageTitle] = useState<string>();
 
@@ -33,9 +34,13 @@ export const Index: React.FC = () => {
   const [syllabus] = useState<string>(syllabusId ? syllabusId : '');
   const [subjectId] = useState(subId);
 
+  const [selectedId, setSelectedId] = useState<string>();
+  const [selectedSyllabus, setSelectedSyllabus] = useState<string>();
+
   //const currentPeriod = GR ? termPeriod : currentMonthPeriod;
-  const classQueries: ForeacastQueriesDto = {
+  const subjectQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
     OrderBy: 'GroupName',
     OrderDirection: 'ASC',
     PageSize: 10,
@@ -46,8 +51,10 @@ export const Index: React.FC = () => {
       if (subjectId && syllabusId) {
         if (router.pathname.includes(subjectId) && router.pathname.includes(syllabusId)) return;
         //await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
-        await getSubjectWithPupils(subjectId, syllabus);
-        await getClasses(classQueries);
+        await getSubjectWithPupils(subjectId, syllabus, selectedPeriod.periodId);
+        await getClasses(subjectQueries);
+        setSelectedId(subjectId);
+        setSelectedSyllabus(syllabusId);
         // await getPreviousPeriodGroup(subjectId, {
         //   period: previousPeriod,
         //   schoolYear: previousSchoolYear ?? currentYear - 1,
@@ -68,7 +75,16 @@ export const Index: React.FC = () => {
       router.events.off('routeChangeComplete', loadClass);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.query, router.isReady]);
+  }, [router.query, router.isReady, selectedPeriod.periodId]);
+
+  console.log(selectedSyllabus);
+
+  useEffect(() => {
+    if (selectedId && syllabus) {
+      getClasses(subjectQueries);
+      getSubjectWithPupils(selectedId, syllabus);
+    }
+  }, [selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
     { link: '/amnen-grupper', title: 'Ämnen/grupper', currentPage: false },
@@ -81,7 +97,7 @@ export const Index: React.FC = () => {
     allSubjects.data.filter((s) => {
       riffleArray.push({
         id: s.groupId,
-        link: `/amnen-grupper/amne-grupp/${s.groupId}`,
+        link: `/amnen-grupper/amne-grupp/${s.groupId}-syllabus-${selectedSyllabus}`,
         title: `${s.groupName}`,
       });
     });
@@ -97,7 +113,12 @@ export const Index: React.FC = () => {
     >
       <Main>
         <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle ?? '...'} />
-        <RifflePrevNext riffleIsLoading={singleSubjectIsLoading} riffleObjects={riffleSubjects} callback="subject" />
+        <RifflePrevNext
+          currentId={selectedId}
+          riffleIsLoading={singleSubjectIsLoading}
+          riffleObjects={riffleSubjects}
+          callback="subject"
+        />
       </Main>
     </DefaultLayout>
   );

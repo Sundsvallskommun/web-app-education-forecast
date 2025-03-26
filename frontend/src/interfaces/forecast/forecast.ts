@@ -2,8 +2,8 @@ export type Period = {
   periodName: string;
   schoolYear: number;
   periodId: number;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
 };
 export interface MetaGroup {
   pageNumber: number;

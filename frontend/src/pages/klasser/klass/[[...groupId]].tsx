@@ -24,13 +24,16 @@ export const Index: React.FC = () => {
 
   const getMentorClass = usePupilForecastStore((s) => s.getMentorClass);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const classes = useForecastStore((s) => s.myClasses);
   const classesIsLoading = useForecastStore((s) => s.classesIsLoading);
   const [riffleClasses, setRiffleClasses] = useState<Riffle[]>([]);
+  const [selectedId, setSelectedId] = useState<string>();
 
   const classQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
     OrderBy: 'GroupName',
     OrderDirection: 'ASC',
     PageSize: 10,
@@ -40,8 +43,7 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (classId) {
         if (router.pathname.includes(classId)) return;
-        await getClasses(classQueries);
-        await getMentorClass(classId);
+        setSelectedId(classId);
       } else {
         if (!classId) {
           router.push('/klasser');
@@ -61,6 +63,13 @@ export const Index: React.FC = () => {
   }, [router.query, router.isReady]);
 
   useEffect(() => {
+    if (selectedId) {
+      getClasses(classQueries);
+      getMentorClass(selectedId, selectedPeriod.periodId);
+    }
+  }, [selectedId, selectedPeriod.periodId]);
+
+  useEffect(() => {
     const riffleArray: Riffle[] = [];
 
     classes.filter((c) => {
@@ -72,7 +81,7 @@ export const Index: React.FC = () => {
     });
 
     setRiffleClasses(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
-  }, [classes]);
+  }, [classes, selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
     { link: '/klasser', title: 'Klasser', currentPage: false },
@@ -90,7 +99,12 @@ export const Index: React.FC = () => {
     >
       <ClassWithPupils />
       {riffleClasses.length > 1 ? (
-        <RifflePrevNext riffleIsLoading={classesIsLoading} riffleObjects={riffleClasses} callback="mentorclass" />
+        <RifflePrevNext
+          currentId={selectedId}
+          riffleIsLoading={classesIsLoading}
+          riffleObjects={riffleClasses}
+          callback="mentorclass"
+        />
       ) : (
         <></>
       )}

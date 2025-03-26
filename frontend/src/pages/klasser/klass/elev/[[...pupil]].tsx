@@ -28,13 +28,16 @@ export const Index: React.FC = () => {
   const getPupil = usePupilForecastStore((s) => s.getPupil);
   const getAllPupils = usePupilForecastStore((s) => s.getAllPupils);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const allPupils = useForecastStore((s) => s.allPupils);
   const pupilsIsLoading = useForecastStore((s) => s.pupilsIsLoading);
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
+  const [selectedId, setSelectedId] = useState<string>();
 
   const classQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
     OrderBy: 'GroupName',
     OrderDirection: 'ASC',
     PageSize: 500,
@@ -45,7 +48,8 @@ export const Index: React.FC = () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
         await getAllPupils(classQueries);
-        await getPupil(selectedSchool.schoolId, pupilId);
+        await getPupil(selectedSchool.schoolId, pupilId, selectedPeriod.periodId);
+        setSelectedId(pupilId);
       } else {
         if (!pupilId) {
           router.push('/klasser');
@@ -63,6 +67,13 @@ export const Index: React.FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query, router.isReady]);
+
+  useEffect(() => {
+    if (selectedId) {
+      getAllPupils(classQueries);
+      getPupil(selectedSchool.schoolId, selectedId, selectedPeriod.periodId);
+    }
+  }, [selectedId, selectedPeriod.periodId]);
 
   useEffect(() => {
     const riffleArray: Riffle[] = [];
@@ -101,7 +112,12 @@ export const Index: React.FC = () => {
     >
       <Main>
         <Pupil />
-        <RifflePrevNext riffleIsLoading={pupilsIsLoading} riffleObjects={rifflePupils} callback="pupil" />
+        <RifflePrevNext
+          currentId={selectedId}
+          riffleIsLoading={pupilsIsLoading}
+          riffleObjects={rifflePupils}
+          callback="pupil"
+        />
       </Main>
     </DefaultLayout>
   );

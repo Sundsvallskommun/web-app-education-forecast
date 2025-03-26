@@ -11,6 +11,8 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { ClearAllForecasts } from '@components/clear-all-forecasts/clear-all-forecasts.component';
 import { GeneralForecastInfo } from '@components/general-forecast-info/general-forecast-info.component';
 import { useDebouncedCallback } from '@react-hookz/web';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useRouter } from 'next/router';
 
 interface HeadingMenuProps {
   pageTitle: string;
@@ -39,14 +41,14 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   setSearchQuery,
   searchPlaceholder,
 }) => {
+  const router = useRouter();
   const user = useUserStore((s) => s.user);
   const [searchTerm, setSearchTerm] = useState(searchQuery ?? '');
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher } = hasRolePermission(user);
-  const subject = useForecastStore((s) => s.groupWithPupils);
-  const subjectIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
-  const singlePupilIsLoading = useForecastStore((s) => s.singlePupilIsLoading);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
+  const subject = usePupilForecastStore((s) => s.subject);
+  const subjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
+  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
   const previousGroup = useForecastStore((s) => s.previousPeriodGroup);
   const placeHolder = searchPlaceholder ? searchPlaceholder : 'Sök i listan...';
 
@@ -98,7 +100,10 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                   {imageWithTextProperties?.imageText && !singlePupilIsLoading ? (
                     <span className={imageWithTextProperties?.textLink ? 'font-bold' : ''}>
                       {imageWithTextProperties?.textLink ? (
-                        <Link href={imageWithTextProperties?.textLink}>
+                        <Link
+                          className="cursor-pointer"
+                          onClick={() => router.push(imageWithTextProperties?.textLink || '')}
+                        >
                           {PUPIL ? `Klass ${imageWithTextProperties?.imageText}` : imageWithTextProperties?.imageText}
                         </Link>
                       ) : (
@@ -137,11 +142,11 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
       <Divider />
 
       <div className="flex flex-wrap justify-between items-center mt-20 gap-24">
-        {selectedPeriod?.includes('Juni') || selectedPeriod?.includes('Juli') || selectedPeriod?.includes('Augusti') ? (
+        {/* {selectedPeriod?.includes('Juni') || selectedPeriod?.includes('Juli') || selectedPeriod?.includes('Augusti') ? (
           <span className="bold text-error"> Inga prognoser att fylla i under sommaren</span>
-        ) : (
-          <GeneralForecastInfo callback={callback} />
-        )}
+        ) : ( */}
+        <GeneralForecastInfo callback={callback} />
+        {/* )} */}
         {SUBJECT && teacher ? (
           <>
             {subject.find((x) => x.forecast !== null) ? (
