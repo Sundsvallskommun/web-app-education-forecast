@@ -5,6 +5,7 @@ import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { IAllPupilsTable, PupilsTableForm } from '../all-pupils.component';
 import { useFormContext } from 'react-hook-form';
+import { useRouter } from 'next/router';
 
 interface PupilHeaders {
   label: string;
@@ -30,6 +31,7 @@ interface IPupil {
 }
 
 export const AllPupilsTable: React.FC = () => {
+  const router = useRouter();
   const allPupils = usePupilForecastStore((s) => s.allPupils);
   const [allPupilsTable, setAllPupilTable] = useState<IPupil[]>([]);
 
@@ -139,9 +141,9 @@ export const AllPupilsTable: React.FC = () => {
               size="sm"
               accent
             />
-            <span className="ml-8 font-bold">
+            <span className="ml-8 font-bold cursor-pointer">
               {p.totalSubjects !== 0 ? (
-                <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
+                <Link onClick={() => router.push(`/klasser/klass/elev/${p.id}`)}>{p.pupil}</Link>
               ) : (
                 <>{typeof p.pupil === 'string' && p.pupil} </>
               )}
@@ -149,7 +151,9 @@ export const AllPupilsTable: React.FC = () => {
           </div>
         </Table.HeaderColumn>
         <Table.Column>
-          <Link href={`/klasser/klass/${p.groupId}`}>{p.className}</Link>
+          <Link className="cursor-pointer" onClick={() => router.push(`/klasser/klass/${p.groupId}`)}>
+            {p.className}
+          </Link>
         </Table.Column>
         <Table.Column>
           <div className="flex max-w-[300px] items-center gap-2">

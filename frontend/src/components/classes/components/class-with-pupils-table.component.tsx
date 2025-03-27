@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { GridForecast, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useRouter } from 'next/router';
 
 interface MentorClassHeaders {
   label: string;
@@ -17,6 +18,7 @@ interface IMentorClassTable {
 }
 
 export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuery }) => {
+  const router = useRouter();
   const { headmaster, mentor } = hasRolePermission(user);
   const [pageSize] = useState<number>(mentor || headmaster ? 100 : 10);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
@@ -149,8 +151,6 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     }
   };
 
-  console.log(mentorClass);
-
   const mentorclassRows = mentorClassListRendered
     .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
@@ -171,11 +171,15 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
             <div className="flex flex-col py-2 gap-6 min-w-[177px]">
               <span>
                 {headmaster ? (
-                  <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
+                  <Link className="cursor-pointer" onClick={() => router.push(`/klasser/klass/elev/${p.id}`)}>
+                    {p.pupil}
+                  </Link>
                 ) : p.notFilledIn === undefined || p.notFilledIn === null ? (
                   <span>{typeof p.pupil === 'string' && p.pupil} </span>
                 ) : (
-                  <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
+                  <Link className="cursor-pointer" onClick={() => router.push(`/min-mentorsklass/elev/${p.id}`)}>
+                    {p.pupil}
+                  </Link>
                 )}
               </span>
               <span>Närvaro: {typeof p.presence === 'number' && p.presence}%</span>

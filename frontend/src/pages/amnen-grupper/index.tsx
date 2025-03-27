@@ -14,11 +14,13 @@ export const Index: React.FC = () => {
   const { headmaster } = hasRolePermission(user);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const getSubjects = usePupilForecastStore((s) => s.getMySubjects);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const pageTitle = 'Ämnen/grupper';
 
   const subjectsQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
     OrderBy: 'GroupName',
     OrderDirection: 'ASC',
     PageSize: 10,
@@ -26,7 +28,7 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     !headmaster ? router.push('/mina-amnen-grupper') : getSubjects(subjectsQueries);
-  }, []);
+  }, [selectedPeriod.periodId]);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>
       <Main>

@@ -15,6 +15,7 @@ import {
   MetaGroup,
   MetaPupils,
   MyGroup,
+  Period,
   Pupil,
   SetForecastDto,
 } from '@interfaces/forecast/forecast';
@@ -31,16 +32,38 @@ import { ServiceResponse } from '@interfaces/service';
 // import dayjs from 'dayjs';
 import {
   handleCopyForecast,
+  handleGetAllPeriods,
   handleGetManyPupils,
   handleGetMentorClassGrid,
   handleGetMetaGroupResponse,
   handleGetMetapupils,
+  handleGetPeriod,
   handleSendForecast,
 } from './data-handlers/pupilforecast';
 import { createWithEqualityFn } from 'zustand/traditional';
 import { devtools, persist } from 'zustand/middleware';
 import { __DEV__ } from '@sk-web-gui/react';
 import { apiURL } from '@utils/api-url';
+
+export const getCurrentPeriod: (schoolType: string) => Promise<ServiceResponse<Period>> = (schoolType) => {
+  return apiService
+    .get<ApiResponse<Period>>(`/pupilforecast/currentperiod/${schoolType}`)
+    .then((res) => ({ data: handleGetPeriod(res.data) }))
+    .catch((e) => ({
+      message: e.response?.data.message,
+      error: e.response?.status ?? 'UNKNOWN ERROR',
+    }));
+};
+
+export const getAllPeriods: (schoolType: string) => Promise<ServiceResponse<Period[]>> = (schoolType) => {
+  return apiService
+    .get<ApiResponse<Period[]>>(`/pupilforecast/allperiods/${schoolType}`)
+    .then((res) => ({ data: handleGetAllPeriods(res.data) }))
+    .catch((e) => ({
+      message: e.response?.data.message,
+      error: e.response?.status ?? 'UNKNOWN ERROR',
+    }));
+};
 
 export const getSubjects: (
   schoolId: string,
@@ -217,6 +240,8 @@ export const clearGroupForecasts: (groupId: string, syllabusId: string) => Promi
 };
 
 interface State {
+  currentPeriodIsLoading: boolean;
+  allPeriodsIsLoading: boolean;
   subjectsIsLoading: boolean;
   classesIsLoading: boolean;
   mentorClassIsLoading: boolean;
@@ -230,11 +255,15 @@ interface State {
   classDetails: MyGroup;
   allPupils: MetaPupils;
   pupil: Pupil[];
-  selectedPeriod: number | null;
+  selectedPeriod: Period;
+  currentPeriod: Period;
+  allPeriods: Period[];
   selectedId?: string | null;
 }
 
 interface Actions {
+  setCurrentPeriod: (currentPeriod: Period) => Promise<void>;
+  setSelectedPeriod: (selectedPeriod: Period) => Promise<void>;
   setSubjects: (mySubjects: MetaGroup | ((prevState: MetaGroup) => MetaGroup)) => Promise<void>;
   setClasses: (myClasses: MetaGroup | ((prevState: MetaGroup) => MetaGroup) | undefined) => Promise<void>;
   //   setGroup: (classes: MyGroup) => void;
@@ -246,13 +275,16 @@ interface Actions {
   //   setClassDetails: (classDetails: MyGroup) => void;
   setAllPupils: (allPupils: MetaPupils | ((prevState: MetaPupils) => MetaPupils)) => Promise<void>;
   setPupil: (pupil: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
-  //   setSelectedPeriod: (
+
   //     selectedPeriod: string,
   //     selectedSchoolYear: number,
   //     callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil',
   //     objectId?: string | null,
   //     user?: User
   //   ) => Promise<void>;
+  getCurrentPeriod: (schoolType: string) => Promise<ServiceResponse<Period>>;
+  getAllPeriods: (schoolType: string) => Promise<ServiceResponse<Period[]>>;
+
   getMySubjects: (body: ForeacastQueriesDto) => Promise<ServiceResponse<MetaGroup>>;
   //   // getGroup: (groupId: string) => Promise<ServiceResponse<MyGroup>>;
   getSubjectWithPupils: (
@@ -273,6 +305,8 @@ interface Actions {
 }
 
 const initialState: State = {
+  currentPeriodIsLoading: true,
+  allPeriodsIsLoading: true,
   subjectsIsLoading: true,
   classesIsLoading: true,
   mentorClassIsLoading: true,
@@ -311,7 +345,21 @@ const initialState: State = {
     data: [],
   },
   pupil: [],
-  selectedPeriod: null,
+  currentPeriod: {
+    periodName: '',
+    schoolYear: 0,
+    periodId: 0,
+    startDate: '',
+    endDate: '',
+  },
+  allPeriods: [],
+  selectedPeriod: {
+    periodName: '',
+    schoolYear: 0,
+    periodId: 0,
+    startDate: '',
+    endDate: '',
+  },
   selectedId: '',
 };
 
@@ -322,7 +370,7 @@ export const usePupilForecastStore = createWithEqualityFn<
     [
       'zustand/persist',
       {
-        selectedPeriod: number | null;
+        selectedPeriod: Period;
       },
     ],
   ]
@@ -331,6 +379,46 @@ export const usePupilForecastStore = createWithEqualityFn<
     persist(
       (set, get) => ({
         ...initialState,
+        setSelectedPeriod: async (selectedPeriod) => {
+          await set(() => ({
+            selectedPeriod: selectedPeriod,
+          }));
+        },
+        setCurrentPeriod: async (currentPeriod) => await set(() => ({ currentPeriod })),
+        getCurrentPeriod: async (schoolType) => {
+          if (schoolType == null) {
+            await set(() => ({
+              currentPeriod: initialState.currentPeriod,
+            }));
+            await get().reset();
+          }
+          await set(() => ({ currentPeriodIsLoading: true }));
+          const res = await getCurrentPeriod(schoolType);
+          const data = (res.data && res.data) || initialState.currentPeriod;
+          await set(() => ({ currentPeriod: data, currentPeriodIsLoading: false }));
+
+          await set(() => ({
+            currentPeriodIsLoading: false,
+          }));
+          return { data, error: res.error };
+        },
+        getAllPeriods: async (schoolType) => {
+          if (schoolType) {
+            await set(() => ({
+              allPeriods: initialState.allPeriods,
+            }));
+            await get().reset();
+          }
+          await set(() => ({ allPeriodsIsLoading: true }));
+          const res = await getAllPeriods(schoolType);
+          const data = (res.data && res.data) || initialState.allPeriods;
+          await set(() => ({ allPeriods: data, allPeriodsIsLoading: false }));
+
+          await set(() => ({
+            allPeriodsIsLoading: false,
+          }));
+          return { data, error: res.error };
+        },
         setClasses: async (myClasses) =>
           await set((s) => ({
             myClasses: typeof myClasses === 'function' ? myClasses(s.myClasses) : myClasses,
@@ -518,19 +606,17 @@ export const usePupilForecastStore = createWithEqualityFn<
         setForecast: async (forecast: SetForecastDto) => {
           const res = await setForecast(forecast);
           if (!res.error) {
-            await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod);
+            await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod.periodId);
           }
           return { data: res.data };
         },
         copyPreviousForecast: async (forecast: CopyPreviousForecastDto) => {
+          await set(() => ({ singleSubjectIsLoading: true }));
           const res = await copyPreviousForecast(forecast);
           const subject = get().subject;
           if (!res.error) {
-            await get().getSubjectWithPupils(
-              subject[0].groupId ? subject[0].groupId : '',
-              subject[0].syllabusId ? subject[0].syllabusId : '',
-              get().selectedPeriod
-            );
+            await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod.periodId);
+            await set(() => ({ singleSubjectIsLoading: false }));
           }
           return { data: res.data, message: res.message };
         },
@@ -541,7 +627,7 @@ export const usePupilForecastStore = createWithEqualityFn<
             await get().getSubjectWithPupils(
               subject[0].groupId ? subject[0].groupId : '',
               subject[0].syllabusId ? subject[0].syllabusId : '',
-              get().selectedPeriod
+              get().selectedPeriod.periodId
             );
           }
           return { data: res.data };

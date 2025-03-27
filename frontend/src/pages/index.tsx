@@ -4,13 +4,19 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
+import { ForeacastQueriesDto, Period } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useForm } from 'react-hook-form';
+
+export interface SelectedPeriodForm {
+  selectedPeriod: Period;
+}
 
 export default function Index() {
   const user = useUserStore((s) => s.user, shallow);
-  const { getMyClasses } = usePupilForecastStore();
-  const { headmaster, teacher, mentor } = hasRolePermission(user);
+  const { getMyClasses, getAllPeriods, getCurrentPeriod } = usePupilForecastStore();
+  const { headmaster, teacher, mentor, GR, GY } = hasRolePermission(user);
+  const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
   const router = useRouter();
 
   const selectedSchool = useUserStore((s) => s.selectedSchool);

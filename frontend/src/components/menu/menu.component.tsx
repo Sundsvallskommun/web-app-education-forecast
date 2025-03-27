@@ -1,7 +1,7 @@
-import { Icon, MenuBar, PopupMenu } from '@sk-web-gui/react';
+import { Icon, Link, MenuBar, PopupMenu } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import NextLink from 'next/link';
-import router from 'next/router';
+import { useRouter } from 'next/router';
 import { User } from '@interfaces/user';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
@@ -13,13 +13,16 @@ interface MenuProps {
 }
 
 export const Menu: React.FC<MenuProps> = ({ user }) => {
+  const router = useRouter();
   const { getMyClasses, myClasses } = usePupilForecastStore();
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const [activeURL, setActiveURL] = useState('/');
   const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const classesQueries: ForeacastQueriesDto = {
-    schoolId: selectedSchool.schoolId,
+    schoolId: selectedSchool?.schoolId,
+    periodId: selectedPeriod?.periodId,
     OrderBy: 'GroupName',
     OrderDirection: 'ASC',
     PageSize: 10,
@@ -35,7 +38,7 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
       getMyClasses(classesQueries);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedPeriod?.periodId]);
 
   const Usermenu = (
     <PopupMenu>
@@ -109,7 +112,9 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
               {myClasses.data.map((classlink) => {
                 return (
                   <PopupMenu.Item key={`popupmenyitem-${classlink.groupName}`}>
-                    <NextLink href={`/min-mentorsklass/${classlink.groupId}`}>{classlink.groupName}</NextLink>
+                    <Link onClick={() => router.push(`/min-mentorsklass/${classlink.groupId}`)}>
+                      {classlink.groupName}
+                    </Link>
                   </PopupMenu.Item>
                 );
               })}

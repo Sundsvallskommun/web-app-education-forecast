@@ -4,7 +4,7 @@ import { Avatar, Button, Icon, Label, Link, Table, SortMode, Input, Pagination, 
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 
-import router from 'next/router';
+import { useRouter } from 'next/router';
 import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
 import { searchFilter } from '@utils/search';
 import dayjs from 'dayjs';
@@ -42,6 +42,7 @@ interface ISinglePupilTable {
 }
 
 export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuery }) => {
+  const router = useRouter();
   const { headmaster } = hasRolePermission(user);
   const [pageSize] = useState<number>(10);
   const pupil = usePupilForecastStore((s) => s.pupil);
@@ -139,7 +140,12 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
               />
               <span className="ml-8 font-bold">
                 {(Array.isArray(p.teachers) && p.teachers?.find((x) => x.personId === user.personId)) || headmaster ? (
-                  <Link href={`/amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`}>{p.courseName}</Link>
+                  <Link
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`)}
+                  >
+                    {p.courseName}
+                  </Link>
                 ) : (
                   <>{typeof p.courseName === 'string' && p.courseName}</>
                 )}
@@ -220,7 +226,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
                   size="sm"
                   inverted
                   rightIcon={<Icon name="arrow-right" />}
-                  onClick={() => router.push(`/mina-amnen-grupper/amne-grupp/${p.groupId}`)}
+                  onClick={() => router.push(`/mina-amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`)}
                 >
                   Rapportera
                 </Button>

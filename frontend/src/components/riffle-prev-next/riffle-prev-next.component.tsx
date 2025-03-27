@@ -1,6 +1,8 @@
 import { Button, Icon, Spinner } from '@sk-web-gui/react';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useUserStore } from '@services/user-service/user-service';
+import { useRouter } from 'next/router';
+import { StringifyOptions } from 'node:querystring';
 
 interface RiffleProps {
   callback: 'classes' | 'pupils' | 'subjects' | 'mentorclass' | 'pupil' | 'subject';
@@ -11,15 +13,12 @@ interface RiffleProps {
     title: string;
   }>;
 
-  dataId?: string;
+  currentId?: string;
 }
 
-export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsLoading, callback, dataId }) => {
-  const selectedId = useForecastStore((s) => s.selectedId) || dataId;
-  const setObjectWithPeriod = useForecastStore((s) => s.setSelectedPeriod);
-  const user = useUserStore((s) => s.user);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
+export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsLoading, callback, currentId }) => {
+  const router = useRouter();
+  const selectedId = currentId;
 
   const currentRiffle = riffleObjects.find((f) => f.id === selectedId?.toLowerCase());
   const prevRiffle =
@@ -31,21 +30,29 @@ export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsL
       ? riffleObjects[0]
       : riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0]) + 1];
 
-  const riffleHandler = (id: string) => {
-    setObjectWithPeriod(selectedPeriod, selectedSchoolYear, callback, id, user);
+  const riffleHandler = (link: string) => {
+    router.push(link);
   };
 
   return !riffleIsLoading ? (
     <div className={`w-full flex ${riffleObjects.length > 2 ? 'justify-between' : 'justify-end'} mt-24`}>
       {riffleObjects.length > 2 ? (
-        <Button onClick={() => riffleHandler(prevRiffle.id)} leftIcon={<Icon name="arrow-left" />} variant="secondary">
+        <Button
+          onClick={() => riffleHandler(prevRiffle.link)}
+          leftIcon={<Icon name="arrow-left" />}
+          variant="secondary"
+        >
           {prevRiffle?.title}
         </Button>
       ) : (
         <></>
       )}
 
-      <Button onClick={() => riffleHandler(nextRiffle.id)} rightIcon={<Icon name="arrow-right" />} variant="secondary">
+      <Button
+        onClick={() => riffleHandler(nextRiffle.link)}
+        rightIcon={<Icon name="arrow-right" />}
+        variant="secondary"
+      >
         {nextRiffle?.title}
       </Button>
     </div>

@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ClassWithPupils } from '@components/classes/class-with-pupils.component';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
@@ -10,14 +10,15 @@ export const Index: React.FC = () => {
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;
   const getMentorClass = usePupilForecastStore((s) => s.getMentorClass);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
-
-  console.log('id', classId);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const [selectedId, setSelectedId] = useState<string>();
 
   useEffect(() => {
     const loadClass = async () => {
       if (classId && classId !== undefined) {
         // if (router.pathname.includes(classId)) return;
-        await getMentorClass(classId);
+        await getMentorClass(classId, selectedPeriod.periodId);
+        setSelectedId(classId);
       } else {
         if (!classId) {
           router.push('/mina-amnen-grupper');
@@ -35,6 +36,12 @@ export const Index: React.FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query, router.isReady]);
+
+  useEffect(() => {
+    if (selectedId) {
+      getMentorClass(selectedId, selectedPeriod.periodId);
+    }
+  }, [selectedId, selectedPeriod.periodId]);
 
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - Klass ${mentorClass[0]?.className}`}>

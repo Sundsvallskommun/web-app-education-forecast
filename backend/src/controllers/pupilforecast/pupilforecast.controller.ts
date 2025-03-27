@@ -25,10 +25,10 @@ export class PupilForecastController {
   private apiService = new ApiService();
 
   @Get(`${API_PREFIX}/currentperiod/:schoolType`)
-  @OpenAPI({ summary: 'Returns a teachers groups' })
+  @OpenAPI({ summary: 'Returns current period based on school type' })
   @UseBefore(authMiddleware)
   @ResponseSchema(PeriodApiResponse)
-  async getCurrentPeriod(@Param('schoolType') schoolType: number): Promise<ApiResponse<Period>> {
+  async getCurrentPeriod(@Param('schoolType') schoolType: string): Promise<ApiResponse<Period>> {
     const url = `${API_URL}/${municipalityId}/forecast/${schoolType}/period`;
 
     return await this.apiService.get<Period>({
@@ -36,11 +36,11 @@ export class PupilForecastController {
     });
   }
 
-  @Get(`${API_PREFIX}/currentperiod/:schoolType`)
-  @OpenAPI({ summary: 'Returns a teachers groups' })
+  @Get(`${API_PREFIX}/allperiods/:schoolType`)
+  @OpenAPI({ summary: 'Returns allperiods based on school type' })
   @UseBefore(authMiddleware)
   @ResponseSchema(PeriodsApiResponse)
-  async getPeriods(@Param('schoolType') schoolType: number): Promise<ApiResponse<Period[]>> {
+  async getPeriods(@Param('schoolType') schoolType: string): Promise<ApiResponse<Period[]>> {
     const url = `${API_URL}/${municipalityId}/forecast/${schoolType}/periods`;
 
     return await this.apiService.get<Period[]>({
