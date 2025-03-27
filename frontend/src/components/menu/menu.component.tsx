@@ -18,6 +18,7 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const [activeURL, setActiveURL] = useState('/');
   const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const setSelectedSchool = useUserStore((s) => s.setSelectedShool);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const classesQueries: ForeacastQueriesDto = {
@@ -82,7 +83,29 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
       {headMasterlinks.map((link) => {
         return (
           <MenuBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
-            <NextLink href={link.url}>{link.label}</NextLink>
+            {user.schools.length > 1 ? (
+              <PopupMenu>
+                <PopupMenu.Button rightIcon={<Icon name="chevron-down" />}>{link.label}</PopupMenu.Button>
+                <PopupMenu.Panel className="w-fit">
+                  {user.schools.map((s) => {
+                    return (
+                      <PopupMenu.Item key={`popupmenyitem-${s.schoolId}`}>
+                        <Link
+                          onClick={async () => {
+                            setSelectedSchool(s);
+                            await router.push(link.url);
+                          }}
+                        >
+                          {s.schoolName}
+                        </Link>
+                      </PopupMenu.Item>
+                    );
+                  })}
+                </PopupMenu.Panel>
+              </PopupMenu>
+            ) : (
+              <NextLink href={link.url}>{link.label}</NextLink>
+            )}
           </MenuBar.Item>
         );
       })}
