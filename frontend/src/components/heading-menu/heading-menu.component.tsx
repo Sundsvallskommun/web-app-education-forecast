@@ -43,6 +43,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
 }) => {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
   const [searchTerm, setSearchTerm] = useState(searchQuery ?? '');
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher } = hasRolePermission(user);
@@ -71,6 +72,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
     <div className="flex w-full flex-col mb-20">
       <div className="flex flex-wrap max-medium-device-max:gap-24 w-full justify-between items-center mb-20">
         <div className="large-device-min:w-[33%]">
+          <span className="text-h3-sm font-normal">{selectedSchool.schoolName}</span>
           <h1 className={GeneralInformation ? 'mb-xs' : 'mb-0'}>{pageTitle}</h1>
           <>{GeneralInformation}</>
         </div>
