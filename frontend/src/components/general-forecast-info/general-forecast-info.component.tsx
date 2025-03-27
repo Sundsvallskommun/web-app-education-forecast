@@ -99,11 +99,17 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   if (SUBJECT) {
     subject.forEach((p) => {
-      const notFilledIn = subject.length - (p.forecast !== null ? 1 : 0);
+      const totalPupils = mySubjects.data.find((s) => s.groupId === p.groupId)?.totalPupils;
+      const approved = mySubjects.data.find((s) => s.groupId === p.groupId)?.approvedPupils;
+      const warnings = mySubjects.data.find((s) => s.groupId === p.groupId)?.warningPupils;
+      const unapproved = mySubjects.data.find((s) => s.groupId === p.groupId)?.unapprovedPupils;
+      const notFilledIn = totalPupils ? totalPupils - (approved || 0) - (warnings || 0) - (unapproved || 0) : 0;
       numberOfNotFilledIn = notFilledIn;
     });
-    isLoading = singleSubjectIsLoading;
+    isLoading = singleSubjectIsLoading && subjectsIsLoading;
   }
+
+  console.log(numberOfNotFilledIn);
 
   if (MENTORCLASS) {
     mentorClass.forEach((p) => {
@@ -131,31 +137,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     } else {
       setSummerPeriod(false);
     }
-
-    // if (GR) {
-    //   if (
-    //     selectedPeriod === 'HT' &&
-    //     dayjs(new Date()).month() >= dayjs(new Date(year, 5, 1)).month() &&
-    //     dayjs(new Date()).month() < dayjs(new Date(year, 7, 1)).month()
-    //   ) {
-    //     setSummerPeriod(true);
-    //   } else {
-    //     setSummerPeriod(false);
-    //   }
-    // }
-
-    // if (GY) {
-    //   if (
-    //     selectedPeriod === 'HT September' &&
-    //     dayjs(date).month() >= dayjs(new Date(year, 5, 1)).month() &&
-    //     dayjs(date).month() < dayjs(new Date(year, 7, 1)).month()
-    //   ) {
-    //     setSummerPeriod(true);
-    //   } else {
-    //     setSummerPeriod(false);
-    //   }
-    // }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   return (

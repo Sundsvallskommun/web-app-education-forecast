@@ -3,6 +3,7 @@ import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { SetForecastDto } from '@interfaces/forecast/forecast';
 import { IsGradedForecast } from '@utils/is-grade-forecast';
 import { useState } from 'react';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 interface EditForecastprops {
   pupil: {
@@ -16,8 +17,8 @@ interface EditForecastprops {
 }
 
 export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) => {
-  const setForecast = useForecastStore((s) => s.setForecast);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
+  const setForecast = usePupilForecastStore((s) => s.setForecast);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const [forecastLoading, setForecastLoading] = useState(false);
   const { APPROVED, WARNINGS, UNNAPROVED } = IsGradedForecast(forecast);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -36,30 +37,28 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
 
     if (pupil.pupilId && forecast) {
       setForecastLoading(true);
-      // await setForecast(setForecastBody).then((res) => {
-      //   if (res.data) {
-      //     message({
-      //       message: `Prognosen sparades`,
-      //       status: 'success',
-      //     });
-      //     setForecastLoading(false);
-      //     document
-      //       .querySelectorAll('.sk-table-wrapper-inside')[0]
-      //       .scrollTo(0, Number(sessionStorage.getItem('scrollposition')));
-      //   } else {
-      //     message({
-      //       message: 'Prognosen kunde inte sparas',
-      //       status: 'error',
-      //     });
-      //     setForecastLoading(false);
-      //   }
-      // });
-      console.log(setForecastBody);
+      await setForecast(setForecastBody).then((res) => {
+        if (res.data) {
+          message({
+            message: `Prognosen sparades`,
+            status: 'success',
+          });
+          setForecastLoading(false);
+          document
+            .querySelectorAll('.sk-table-wrapper-inside')[0]
+            .scrollTo(0, Number(sessionStorage.getItem('scrollposition')));
+        } else {
+          message({
+            message: 'Prognosen kunde inte sparas',
+            status: 'error',
+          });
+          setForecastLoading(false);
+        }
+      });
     }
   };
 
-  const isSummer =
-    selectedPeriod.includes('Juni') || selectedPeriod.includes('Juli') || selectedPeriod.includes('Augusti');
+  const isSummer = new Date();
 
   return forecastLoading ? (
     <div className="flex w-[580px] justify-end">
@@ -76,8 +75,8 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
               ? 'p-6 border-4 bg-success border-white outline outline-offset-1 outline-2 outline-success'
               : 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
           } `}
-          disabled={APPROVED || isSummer}
-          aria-disabled={APPROVED || isSummer}
+          disabled={APPROVED}
+          aria-disabled={APPROVED}
           type="radio"
           name="forecast"
         ></input>
@@ -92,8 +91,8 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
               ? 'p-6 border-4 bg-warning border-white outline outline-offset-1 outline-2 outline-warning'
               : 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
           } `}
-          disabled={WARNINGS || isSummer}
-          aria-disabled={WARNINGS || isSummer}
+          disabled={WARNINGS}
+          aria-disabled={WARNINGS}
           type="radio"
           name="forecast"
         ></input>
@@ -108,8 +107,8 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
               ? 'p-6 border-4 bg-error border-white outline outline-offset-1 outline-2 outline-error'
               : 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
           } `}
-          disabled={UNNAPROVED || isSummer}
-          aria-disabled={UNNAPROVED || isSummer}
+          disabled={UNNAPROVED}
+          aria-disabled={UNNAPROVED}
           type="radio"
           name="forecast"
         ></input>

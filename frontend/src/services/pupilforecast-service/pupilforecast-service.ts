@@ -611,14 +611,12 @@ export const usePupilForecastStore = createWithEqualityFn<
           return { data: res.data };
         },
         copyPreviousForecast: async (forecast: CopyPreviousForecastDto) => {
+          await set(() => ({ singleSubjectIsLoading: true }));
           const res = await copyPreviousForecast(forecast);
           const subject = get().subject;
           if (!res.error) {
-            await get().getSubjectWithPupils(
-              subject[0].groupId ? subject[0].groupId : '',
-              subject[0].syllabusId ? subject[0].syllabusId : '',
-              get().selectedPeriod.periodId
-            );
+            await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod.periodId);
+            await set(() => ({ singleSubjectIsLoading: false }));
           }
           return { data: res.data, message: res.message };
         },

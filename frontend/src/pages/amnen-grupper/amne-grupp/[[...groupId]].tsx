@@ -112,7 +112,11 @@ export const Index: React.FC = () => {
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}
     >
       <Main>
-        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle ?? '...'} />
+        <SubjectWithPupils
+          selectedSyllabus={selectedSyllabus}
+          setPageTitle={setPageTitle}
+          pageTitle={pageTitle ?? '...'}
+        />
         <RifflePrevNext
           currentId={selectedId}
           riffleIsLoading={singleSubjectIsLoading}

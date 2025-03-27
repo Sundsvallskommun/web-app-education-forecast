@@ -46,6 +46,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     GR ? getAllPeriods(GR?.typeOfSchool) : GY && getAllPeriods(GY.typeOfSchool);
   }, [GR, GY]);
+
   return (
     <GuiProvider /** colorScheme="light"**/>
       <AppWrapper>
