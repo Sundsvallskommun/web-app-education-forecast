@@ -4,8 +4,7 @@ import { Avatar, Label, Link, Table, SortMode, Input, Pagination, Select } from 
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 
-import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
-import { searchFilter } from '@utils/search';
+import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { initialsFunction } from '@utils/initials';
 import { EditForecast } from '@components/edit-forecast/edit-forecast.component';
 import dayjs from 'dayjs';
@@ -29,6 +28,7 @@ interface TablePupil extends Pupil {
   notFilledIn?: number | null;
   image?: string | null;
   forecastPeriod?: string | null;
+  syllabusId: string;
   groupName?: string | null;
 }
 
@@ -41,7 +41,7 @@ interface TablePupilHeaders {
 interface ISingleSubjectTable {
   user: User;
   searchQuery?: string;
-  selectedSyllabus: string | undefined;
+  selectedSyllabus: string;
 }
 
 export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, searchQuery, selectedSyllabus }) => {
@@ -51,11 +51,11 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
   const myClasses = usePupilForecastStore((s) => s.myClasses);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const [pupilsInGroupData, setPupilsInGroupData] = useState<KeyStringTable[]>([]);
+  const [pupilsInGroupData, setPupilsInGroupData] = useState<TablePupil[]>([]);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
 
   useEffect(() => {
-    const tableArr: KeyStringTable[] = [];
+    const tableArr: TablePupil[] = [];
 
     if (subject.length !== 0) {
       subject.map((p) => {
@@ -79,6 +79,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
           notFilledIn: numberNotFilledIn,
           teachers: p.teachers,
           syllabusId: selectedSyllabus,
+          totalSubjects: null,
           hasNotFilledIn: p.forecast === null || p.forecast === undefined ? 1 : 0,
           image: p.image,
         });
@@ -140,25 +141,20 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
     );
   });
 
-  const manyPupilSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
-    if (obj.pupil == '' && obj.pupil?.toLowerCase().includes(q)) {
-      return true; // pupil
-    } else if (obj.className == '' && obj.className?.toLowerCase().includes(q)) {
-      return true; //class
-    } else {
-      return false;
-    }
-  };
-
-  const manyPupilsListSearchFiltered = pupilsInGroupData.filter(
-    searchFilter(searchQuery ? searchQuery : '', manyPupilSearchFilter)
-  );
+  const manyPupilsListSearchFiltered = pupilsInGroupData.filter((p) => {
+    if (searchQuery && searchQuery !== '') {
+      return (
+        p?.pupil?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+        p?.className?.toLowerCase().includes(searchQuery?.toLowerCase())
+      );
+    } else return p;
+  });
 
   const manyPupilsListRendered = manyPupilsListSearchFiltered;
 
   // rows subject with pupils
   const groupWithPupilsRows = manyPupilsListRendered
-    .sort((a: KeyStringTable, b: KeyStringTable) => {
+    .sort((a: TablePupil, b: TablePupil) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
       return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })

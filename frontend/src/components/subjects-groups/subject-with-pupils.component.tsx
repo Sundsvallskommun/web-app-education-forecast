@@ -1,13 +1,14 @@
 import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
-import { HeadingMenu } from '@components/heading-menu/heading-menu.component';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import Loader from '@components/loader/loader';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Spinner } from '@sk-web-gui/react';
 import { SingleSubjectTable } from './components/single-subject-table.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { FormProvider, useForm } from 'react-hook-form';
 
 interface SubjectWithPupilsProps {
   setPageTitle: Dispatch<SetStateAction<string | undefined>>;
@@ -16,7 +17,6 @@ interface SubjectWithPupilsProps {
 }
 
 export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTitle, pageTitle, selectedSyllabus }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const user = useUserStore((s) => s.user, shallow);
   const { teacher } = hasRolePermission(user);
   const selectedId = useForecastStore((s) => s.selectedId);
@@ -24,6 +24,14 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const singleSubject = usePupilForecastStore((s) => s.subject);
 
   console.log(singleSubjectIsLoading);
+  const searchForm = useForm<SearchTableForm>({
+    defaultValues: {
+      searchQuery: '',
+    },
+  });
+
+  const { watch: watchSearch } = searchForm;
+  const { searchQuery } = watchSearch();
 
   useEffect(() => {
     !singleSubjectIsLoading
@@ -42,31 +50,32 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
 
   return (
     <div>
-      <HeadingMenu
-        pageTitle={singleSubject.length !== 0 ? pageTitle : 'Ämne/grupp'}
-        GeneralInformation={generalInformation}
-        teachers={
-          teacher && singleSubject[0]?.teachers?.find((x) => x.personId === user.personId)
-            ? [
-                {
-                  givenname: user.name.split(' ')[0],
-                  lastname: user.name.split(' ')[1],
-                  personId: user.personId,
-                  email: user.username,
-                },
-              ]
-            : singleSubject[0]?.teachers
-        }
-        callback="subject"
-        objectId={selectedId}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchPlaceholder="Sök på elev eller klass..."
-      />
+      <FormProvider {...searchForm}>
+        <HeadingMenu
+          pageTitle={singleSubject.length !== 0 ? pageTitle : 'Ämne/grupp'}
+          GeneralInformation={generalInformation}
+          teachers={
+            teacher && singleSubject[0]?.teachers?.find((x) => x.personId === user.personId)
+              ? [
+                  {
+                    givenname: user.name.split(' ')[0],
+                    lastname: user.name.split(' ')[1],
+                    personId: user.personId,
+                    email: user.username,
+                  },
+                ]
+              : singleSubject[0]?.teachers
+          }
+          callback="subject"
+          objectId={selectedId}
+          searchQuery={searchQuery}
+          searchPlaceholder="Sök på elev eller klass..."
+        />
+      </FormProvider>
       {!singleSubjectIsLoading ? (
         <>
           {singleSubject.length !== 0 ? (
-            <SingleSubjectTable user={user} searchQuery={searchQuery} selectedSyllabus={selectedSyllabus} />
+            <SingleSubjectTable user={user} searchQuery={searchQuery} selectedSyllabus={selectedSyllabus || ''} />
           ) : (
             <p>Inga sökresultat att visa</p>
           )}

@@ -5,11 +5,10 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
-import { ForecastMyGroupTeacher, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
-import { searchFilter } from '@utils/search';
+import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import dayjs from 'dayjs';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-interface TablePupil extends Pupil {
+export interface TablePupil extends Pupil {
   id?: string | null;
   pupil?: string | null;
   className?: string | null;
@@ -38,7 +37,7 @@ interface TablePupilHeaders {
 }
 interface ISinglePupilTable {
   user: User;
-  searchQuery?: string;
+  searchQuery: string;
 }
 
 export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuery }) => {
@@ -48,6 +47,18 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
   const pupil = usePupilForecastStore((s) => s.pupil);
   const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
+  const [pupilTable, setPupilTable] = useState<TablePupil[]>([]);
+
+  useEffect(() => {
+    const pupilArr: TablePupil[] = [];
+    if (pupil && pupil.length > 0) {
+      pupil.map((p) => {
+        pupilArr.push(p);
+      });
+    }
+
+    setPupilTable(pupilArr);
+  }, [pupil]);
 
   useEffect(() => {
     if (
@@ -96,17 +107,11 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
     );
   });
 
-  const singlePupilSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
-    if (obj?.courseName == '' && obj?.courseName?.toLowerCase().includes(q)) {
-      return true; // subject/group
-    } else {
-      return false;
-    }
-  };
-
-  const singlePupilListSearchFiltered = pupil.filter(
-    searchFilter(searchQuery ? searchQuery : '', singlePupilSearchFilter)
-  );
+  const singlePupilListSearchFiltered = pupilTable.filter((p) => {
+    if (searchQuery && searchQuery !== '') {
+      return p?.courseName?.toLowerCase().includes(searchQuery?.toLowerCase());
+    } else return p;
+  });
 
   const singlepPupilListRendered = singlePupilListSearchFiltered;
 

@@ -2,7 +2,6 @@ import { PeriodPicker } from '@components/period-picker/period-picker.component'
 import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { Avatar, Divider, FormControl, Link, SearchField, Spinner } from '@sk-web-gui/react';
 import { initialsFunction } from '@utils/initials';
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react';
 import { callbackType } from '@utils/callback-type';
 import { CopyPreviousForecast } from '@components/copy-previous-forecast/copy-previous-forecast.component';
 import { hasRolePermission } from '@utils/has-role-permission';
@@ -10,9 +9,14 @@ import { useUserStore } from '@services/user-service/user-service';
 import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { ClearAllForecasts } from '@components/clear-all-forecasts/clear-all-forecasts.component';
 import { GeneralForecastInfo } from '@components/general-forecast-info/general-forecast-info.component';
-import { useDebouncedCallback } from '@react-hookz/web';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useRouter } from 'next/router';
+import { useFormContext } from 'react-hook-form';
+import { ReactNode } from 'react';
+
+export interface SearchTableForm {
+  searchQuery: string;
+}
 
 interface HeadingMenuProps {
   pageTitle: string;
@@ -27,7 +31,6 @@ interface HeadingMenuProps {
   objectId?: string;
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
   searchQuery?: string;
-  setSearchQuery?: Dispatch<SetStateAction<string>> | null | undefined;
   searchPlaceholder?: string;
 }
 
@@ -37,42 +40,43 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   imageWithTextProperties,
   teachers,
   callback,
-  searchQuery,
-  setSearchQuery,
   searchPlaceholder,
 }) => {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
-  const [searchTerm, setSearchTerm] = useState(searchQuery ?? '');
   const { SUBJECT, PUPIL } = callbackType(callback);
-  const { teacher } = hasRolePermission(user);
+  const { teacher, headmaster } = hasRolePermission(user);
   const subject = usePupilForecastStore((s) => s.subject);
   const subjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
   const previousGroup = useForecastStore((s) => s.previousPeriodGroup);
   const placeHolder = searchPlaceholder ? searchPlaceholder : 'Sök i listan...';
 
-  const setDelayQuery = useDebouncedCallback(
-    (query: string) => {
-      setSearchQuery && setSearchQuery(query);
-    },
-    [],
-    150,
-    500
-  );
+  const { watch: watchSearch, setValue } = useFormContext<SearchTableForm>();
 
-  const onSearchChangeHandler = (e: React.BaseSyntheticEvent) => {
-    setSearchTerm(e.target.value);
-    setDelayQuery(e.target.value);
-  };
+  const { searchQuery } = watchSearch();
 
   const onSearchHandler = () => ({});
+  const searchForm = (
+    <FormControl className="max-medium-device:w-full">
+      <SearchField
+        value={searchQuery}
+        onChange={(e) => setValue('searchQuery', e.target.value)}
+        onSearch={onSearchHandler}
+        placeholder={placeHolder}
+        onReset={() => setValue('searchQuery', '')}
+      />
+    </FormControl>
+  );
   return (
     <div className="flex w-full flex-col mb-20">
       <div className="flex flex-wrap max-medium-device-max:gap-24 w-full justify-between items-center mb-20">
         <div className="large-device-min:w-[33%]">
-          <span className="text-h3-sm font-normal">{selectedSchool.schoolName}</span>
+          {headmaster && user.schools.length > 1 ? (
+            <span className="text-h3-sm font-normal">{selectedSchool.schoolName}</span>
+          ) : null}
+
           <h1 className={GeneralInformation ? 'mb-xs' : 'mb-0'}>{pageTitle}</h1>
           <>{GeneralInformation}</>
         </div>
@@ -167,14 +171,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                 )}
                 <div className="flex flex-wrap justify-end items-center gap-24">
                   <ClearAllForecasts />
-                  <FormControl className="max-medium-device:w-full">
-                    <SearchField
-                      value={searchTerm}
-                      onChange={onSearchChangeHandler}
-                      onSearch={onSearchHandler}
-                      placeholder={placeHolder}
-                    />
-                  </FormControl>
+                  <FormControl className="max-medium-device:w-full">{searchForm}</FormControl>
                 </div>
               </>
             ) : (
@@ -189,28 +186,15 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                 ) : (
                   <Spinner size={3} />
                 )}
+
                 <div>
-                  <FormControl className="max-medium-device:w-full">
-                    <SearchField
-                      value={searchTerm}
-                      onChange={onSearchChangeHandler}
-                      onSearch={onSearchHandler}
-                      placeholder={placeHolder}
-                    />
-                  </FormControl>
+                  <FormControl className="max-medium-device:w-full">{searchForm}</FormControl>
                 </div>
               </>
             )}
           </>
         ) : (
-          <FormControl className="max-medium-device:w-full">
-            <SearchField
-              value={searchTerm}
-              onChange={onSearchChangeHandler}
-              onSearch={onSearchHandler}
-              placeholder={placeHolder}
-            />
-          </FormControl>
+          <FormControl className="max-medium-device:w-full">{searchForm}</FormControl>
         )}
       </div>
     </div>

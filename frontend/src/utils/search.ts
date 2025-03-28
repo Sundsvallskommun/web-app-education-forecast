@@ -1,4 +1,5 @@
-import { KeyStringTable, Pupil } from '@interfaces/forecast/forecast';
+import { TablePupil } from '@components/pupils/components/single-pupil-table.component';
+import { Pupil } from '@interfaces/forecast/forecast';
 
 /**
  *
@@ -7,8 +8,7 @@ import { KeyStringTable, Pupil } from '@interfaces/forecast/forecast';
  * @returns boolean
  */
 export const searchFilter =
-  (query: string, filterFunc: (query: string, obj: KeyStringTable | Pupil) => boolean) =>
-  (obj: KeyStringTable | Pupil) => {
+  (query: string, filterFunc: (query: string, obj: TablePupil) => boolean) => (obj: Pupil | TablePupil) => {
     if (!query) return true;
     const qList = query.split(',');
     const qResultList: boolean[] = [];

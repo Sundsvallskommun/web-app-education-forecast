@@ -29,7 +29,7 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     !headmaster ? router.push('/mina-amnen-grupper') : getClasses(classQueries);
-  }, [selectedPeriod.periodId, selectedSchool]);
+  }, []);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>
       <Main>

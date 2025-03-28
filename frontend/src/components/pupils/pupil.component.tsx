@@ -1,22 +1,29 @@
 import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
-import { HeadingMenu } from '@components/heading-menu/heading-menu.component';
+import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
 import { Spinner } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import Loader from '@components/loader/loader';
-import { useState } from 'react';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { SinglePupilTable } from './components/single-pupil-table.component';
+import { FormProvider, useForm } from 'react-hook-form';
 
 export const Pupil: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-
   const user = useUserStore((s) => s.user, shallow);
   const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
   const mentorClassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
   const pupilsIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
   const pupil = usePupilForecastStore((s) => s.pupil);
   const { headmaster } = hasRolePermission(user);
+
+  const searchForm = useForm<SearchTableForm>({
+    defaultValues: {
+      searchQuery: '',
+    },
+  });
+
+  const { watch: watchSearch } = searchForm;
+  const { searchQuery } = watchSearch();
 
   const pageTitle = pupil.length !== 0 ? `${pupil[0].givenname} ${pupil[0].lastname}` : 'Elev';
 
@@ -43,15 +50,16 @@ export const Pupil: React.FC = () => {
 
   return (
     <div>
-      <HeadingMenu
-        pageTitle={pageTitle}
-        imageWithTextProperties={imageWithText}
-        GeneralInformation={generalInformation}
-        callback="pupil"
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchPlaceholder="Sök på ämne eller lärare..."
-      />
+      <FormProvider {...searchForm}>
+        <HeadingMenu
+          pageTitle={pageTitle}
+          imageWithTextProperties={imageWithText}
+          GeneralInformation={generalInformation}
+          callback="pupil"
+          searchQuery={searchQuery}
+          searchPlaceholder="Sök på ämne eller lärare..."
+        />
+      </FormProvider>
       {(!headmaster && !mentorClassIsLoading && !singlePupilIsLoading && pupil.length !== 0) ||
       (headmaster && !pupilsIsLoading && !singlePupilIsLoading && pupil.length !== 0) ? (
         <>
