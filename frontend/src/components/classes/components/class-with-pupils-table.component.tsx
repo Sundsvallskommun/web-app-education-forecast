@@ -2,8 +2,7 @@ import { User } from '@interfaces/user';
 import { Link, SortMode, Table, Select, Pagination, Input, Icon } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
-import { GridForecast, Pupil, KeyStringTable } from '@interfaces/forecast/forecast';
-import { searchFilter } from '@utils/search';
+import { GridForecast, KeyStringTable } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useRouter } from 'next/router';
 
@@ -117,17 +116,11 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     );
   });
 
-  const mentorclassSearchFilter = (q: string, obj: KeyStringTable | Pupil) => {
-    if (obj.pupil == '' && obj.pupil?.toLowerCase().includes(q)) {
-      return true; // pupil
-    } else {
-      return false;
-    }
-  };
-
-  const mentorClassListSearchFiltered = mentorClassData.filter(
-    searchFilter(searchQuery ? searchQuery : '', mentorclassSearchFilter)
-  );
+  const mentorClassListSearchFiltered = mentorClassData.filter((p) => {
+    if (searchQuery && searchQuery !== '') {
+      return p?.pupil?.toString().toLowerCase().includes(searchQuery?.toLowerCase());
+    } else return p;
+  });
 
   const mentorClassListRendered: KeyStringTable[] | string[] = mentorClassListSearchFiltered;
 
@@ -257,7 +250,7 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     </Table.Footer>
   );
 
-  return (
+  return mentorClassListRendered.length > 0 ? (
     <Table
       scrollable
       dense={rowHeight === 'dense'}
@@ -270,5 +263,9 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
       <Table.Body>{mentorclassRows}</Table.Body>
       {footer}
     </Table>
+  ) : (
+    <div className="flex justify-center">
+      <p className="max-w-[1600px] w-full">Inga sökresultat att visa</p>
+    </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useUserStore } from '@services/user-service/user-service';
-import { HeadingMenu } from '@components/heading-menu/heading-menu.component';
+import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
 import Loader from '@components/loader/loader';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { useForm, FormProvider } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
@@ -35,11 +35,10 @@ export interface ISubjectsTable {
 }
 
 export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subjectsQueries }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-
   const { mySubjects, getMySubjects } = usePupilForecastStore();
   //const { mySubjects, grouplistTable, groupsListRendered, grouptable } = GroupTables('G', user, searchQuery);
   const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const fullTitle = mySubjects.totalRecords !== 0 ? `${pageTitle} (${mySubjects.totalRecords})` : pageTitle;
 
@@ -54,27 +53,39 @@ export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subje
   const { watch: watchTable } = tableForm;
   const { sortOrder, sortColumn, pageSize, page } = watchTable();
 
+  const searchForm = useForm<SearchTableForm>({
+    defaultValues: {
+      searchQuery: '',
+    },
+  });
+
+  const { watch: watchSearch } = searchForm;
+  const { searchQuery } = watchSearch();
+
   useEffect(() => {
     getMySubjects({
       schoolId: selectedSchool.schoolId,
+      periodId: selectedPeriod.periodId,
       PageNumber: page,
+      searchFilter: searchQuery,
       PageSize: pageSize,
       OrderBy: sortColumn,
       OrderDirection: sortOrder,
     });
 
     //eslint-disable-next-line
-  }, [sortOrder, sortColumn, pageSize, page]);
+  }, [sortOrder, sortColumn, pageSize, page, searchQuery, selectedPeriod.periodId, selectedSchool]);
   return (
     <div>
-      <HeadingMenu
-        pageTitle={fullTitle}
-        callback="subjects"
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchPlaceholder="Sök på ämne/grupp..."
-      />
-      {!subjectsIsLoading && mySubjects.totalRecords !== 0 ? (
+      <FormProvider {...searchForm}>
+        <HeadingMenu
+          pageTitle={fullTitle}
+          callback="subjects"
+          searchQuery={searchQuery}
+          searchPlaceholder="Sök på ämne/grupp..."
+        />
+      </FormProvider>
+      {!subjectsIsLoading ? (
         <>
           {mySubjects.totalRecords !== 0 ? (
             <FormProvider {...tableForm}>

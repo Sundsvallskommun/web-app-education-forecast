@@ -41,7 +41,7 @@ export const Index: React.FC = () => {
       router.push('/amnen-grupper');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPeriod.periodId]);
+  }, []);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>
       <Main>

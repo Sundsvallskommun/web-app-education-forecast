@@ -81,7 +81,7 @@ export interface Pupil {
   courseName?: string | null;
   courseId?: string | null;
   teachers?: ForecastMyGroupTeacher[] | null;
-  syllabusId: string;
+  syllabusId?: string;
   unitId?: string | null;
   typeOfSchool?: string | null;
   image?: string | null;
