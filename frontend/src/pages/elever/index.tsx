@@ -27,6 +27,7 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     !headmaster ? router.push('/mina-amnen-grupper') : getAllPupils(pupilsQueries);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

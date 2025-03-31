@@ -72,6 +72,7 @@ export const Index: React.FC = () => {
       getAllPupils(classQueries);
       getPupil(selectedSchool.schoolId, selectedId, selectedPeriod.periodId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedPeriod.periodId]);
 
   useEffect(() => {

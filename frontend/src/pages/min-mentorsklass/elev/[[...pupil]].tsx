@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
 import { Pupil } from '@components/pupils/pupil.component';
-import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { useUserStore } from '@services/user-service/user-service';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
@@ -30,13 +29,6 @@ export const Index: React.FC = () => {
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
 
-  const classQueries: ForeacastQueriesDto = {
-    schoolId: selectedSchool.schoolId,
-    periodId: selectedPeriod.periodId,
-    OrderBy: 'GroupName',
-    OrderDirection: 'ASC',
-    PageSize: 500,
-  };
   useEffect(() => {
     const loadClass = async () => {
       if (pupilId) {
@@ -70,6 +62,7 @@ export const Index: React.FC = () => {
       getMentorClass(pupil[0].classGroupId || '', selectedPeriod.periodId);
       getPupil(selectedSchool.schoolId, selectedId, selectedPeriod.periodId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
@@ -88,6 +81,7 @@ export const Index: React.FC = () => {
     });
 
     setRifflePupils(riffleArray);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mentorclass]);
 
   return (

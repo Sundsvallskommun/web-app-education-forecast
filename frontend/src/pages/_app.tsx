@@ -41,10 +41,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   const getAllPeriods = usePupilForecastStore((s) => s.getAllPeriods);
   useEffect(() => {
     GR ? getCurrentPeriod(GR?.typeOfSchool) : GY && getCurrentPeriod(GY.typeOfSchool);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [GR?.typeOfSchool, GY?.typeOfSchool]);
 
   useEffect(() => {
     GR ? getAllPeriods(GR?.typeOfSchool) : GY && getAllPeriods(GY.typeOfSchool);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [GR, GY]);
 
   return (

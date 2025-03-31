@@ -37,6 +37,7 @@ export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabus
     } else {
       setSummerPeriod(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const onCopyHandler = async () => {
@@ -78,6 +79,7 @@ export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabus
     } else {
       setSummerPeriod(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   return summerPeriod ? (

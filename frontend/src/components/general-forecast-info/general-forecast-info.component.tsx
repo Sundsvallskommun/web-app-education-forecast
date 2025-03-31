@@ -130,6 +130,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     } else {
       setSummerPeriod(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   return (

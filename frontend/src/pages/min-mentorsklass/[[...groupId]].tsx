@@ -41,6 +41,7 @@ export const Index: React.FC = () => {
     if (selectedId) {
       getMentorClass(selectedId, selectedPeriod.periodId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedPeriod.periodId]);
 
   return (

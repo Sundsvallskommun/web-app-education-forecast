@@ -35,6 +35,8 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
     !singleSubjectIsLoading
       ? setPageTitle(singleSubject[0]?.courseName ? singleSubject[0]?.courseName : '')
       : setPageTitle('Ämne/grupp');
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [singleSubjectIsLoading, singleSubject]);
 
   const generalInformation =

@@ -10,10 +10,10 @@ interface PeriodPickerProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
 
-export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
+export const PeriodPicker: React.FC<PeriodPickerProps> = () => {
   //stores
   const user = useUserStore((s) => s.user);
-  const { GR, GY } = hasRolePermission(user);
+  const { GY } = hasRolePermission(user);
   const setSelectedPeriod = usePupilForecastStore((s) => s.setSelectedPeriod);
   const allPeriods = usePupilForecastStore((s) => s.allPeriods);
   const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
@@ -28,6 +28,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
     if (selectedPeriod.periodId === 0) {
       setSelectedPeriod(currentPeriod);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPeriod]);
 
   const { currentMonthPeriod, termPeriod, previousMonthPeriod, previousTermPeriod } = thisSchoolYearPeriod();

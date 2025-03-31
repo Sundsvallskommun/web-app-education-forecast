@@ -77,13 +77,12 @@ export const Index: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query, router.isReady, selectedPeriod.periodId]);
 
-  console.log(selectedSyllabus);
-
   useEffect(() => {
     if (selectedId && syllabus) {
       getClasses(subjectQueries);
       getSubjectWithPupils(selectedId, syllabus);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
@@ -103,6 +102,7 @@ export const Index: React.FC = () => {
     });
 
     setRiffleSubjects(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSubjects]);
 
   return (

@@ -28,6 +28,7 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     !headmaster ? router.push('/mina-amnen-grupper') : getSubjects(subjectsQueries);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>

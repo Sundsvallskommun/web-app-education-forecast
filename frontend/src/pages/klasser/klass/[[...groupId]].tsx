@@ -66,6 +66,7 @@ export const Index: React.FC = () => {
       getClasses(classQueries);
       getMentorClass(selectedId, selectedPeriod.periodId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedPeriod.periodId]);
 
   useEffect(() => {
@@ -80,6 +81,7 @@ export const Index: React.FC = () => {
     });
 
     setRiffleClasses(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classes, selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
