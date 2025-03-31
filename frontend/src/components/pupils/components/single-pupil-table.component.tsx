@@ -1,5 +1,4 @@
 import { User } from '@interfaces/user';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Button, Icon, Label, Link, Table, SortMode, Input, Pagination, Select } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
@@ -45,7 +44,6 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
   const { headmaster } = hasRolePermission(user);
   const [pageSize] = useState<number>(10);
   const pupil = usePupilForecastStore((s) => s.pupil);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
   const [pupilTable, setPupilTable] = useState<TablePupil[]>([]);
 
@@ -191,7 +189,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
             colSpan={Array.isArray(p.teachers) && !p.teachers?.find((x) => x.personId === user.personId) ? 2 : 1}
           >
             <div className="flex justify-between">
-              {summerPeriod && (selectedPeriod === 'HT September' || selectedPeriod === 'HT') ? (
+              {summerPeriod ? (
                 <Label inverted rounded color="juniskar">
                   Inga prognoser under sommaren
                 </Label>

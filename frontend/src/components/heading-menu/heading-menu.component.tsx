@@ -6,7 +6,6 @@ import { callbackType } from '@utils/callback-type';
 import { CopyPreviousForecast } from '@components/copy-previous-forecast/copy-previous-forecast.component';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { ClearAllForecasts } from '@components/clear-all-forecasts/clear-all-forecasts.component';
 import { GeneralForecastInfo } from '@components/general-forecast-info/general-forecast-info.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
@@ -52,7 +51,6 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   const subject = usePupilForecastStore((s) => s.subject);
   const subjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
-  const previousGroup = useForecastStore((s) => s.previousPeriodGroup);
   const placeHolder = searchPlaceholder ? searchPlaceholder : 'Sök i listan...';
 
   const { watch: watchSearch, setValue } = useFormContext<SearchTableForm>();
@@ -161,8 +159,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
               <>
                 {!subjectIsLoading ? (
                   <div className="flex justify-center items-center">
-                    {(subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null)) ||
-                    (subject.find((x) => x.forecast === null) && previousGroup.find((x) => x.forecast !== null)) ? (
+                    {subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null) ? (
                       <CopyPreviousForecast syllabusId={syllabusId || ''} />
                     ) : (
                       <></>
@@ -180,8 +177,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
               <>
                 {!subjectIsLoading ? (
                   <div className="flex justify-center items-center">
-                    {((subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null)) ||
-                      (subject.find((x) => x.forecast === null) && previousGroup.find((x) => x.forecast !== null))) && (
+                    {subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null) && (
                       <CopyPreviousForecast syllabusId={syllabusId || ''} />
                     )}
                   </div>

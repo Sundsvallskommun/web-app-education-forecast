@@ -1,5 +1,4 @@
 import { Spinner, useSnackbar } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { SetForecastDto } from '@interfaces/forecast/forecast';
 import { IsGradedForecast } from '@utils/is-grade-forecast';
 import { useState } from 'react';
@@ -10,8 +9,6 @@ interface EditForecastprops {
     syllabusId: string;
     pupilId: string;
     groupId: string;
-    period: string;
-    schoolYear: number;
   };
   forecast?: number | null;
 }
@@ -57,8 +54,6 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
       });
     }
   };
-
-  const isSummer = new Date();
 
   return forecastLoading ? (
     <div className="flex w-[580px] justify-end">

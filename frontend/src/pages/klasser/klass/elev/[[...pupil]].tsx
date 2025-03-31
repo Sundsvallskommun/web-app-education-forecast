@@ -2,7 +2,6 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Pupil } from '@components/pupils/pupil.component';
 import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
@@ -22,16 +21,16 @@ export const Index: React.FC = () => {
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
 
   console.log(routerpupilId);
-  const pupil = useForecastStore((s) => s.pupil);
-  const singlePupilIsLoading = useForecastStore((s) => s.singlePupilIsLoading);
+  const pupil = usePupilForecastStore((s) => s.pupil);
+  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
 
   const getPupil = usePupilForecastStore((s) => s.getPupil);
   const getAllPupils = usePupilForecastStore((s) => s.getAllPupils);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
-  const allPupils = useForecastStore((s) => s.allPupils);
-  const pupilsIsLoading = useForecastStore((s) => s.pupilsIsLoading);
+  const allPupils = usePupilForecastStore((s) => s.allPupils);
+  const pupilsIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
 
@@ -78,7 +77,7 @@ export const Index: React.FC = () => {
   useEffect(() => {
     const riffleArray: Riffle[] = [];
 
-    allPupils.filter((p) => {
+    allPupils.data.filter((p) => {
       riffleArray.push({
         id: p.pupil ?? pupilId ?? '',
         link: `/klasser/klass/elev/${p.pupil}`,

@@ -1,8 +1,5 @@
 import { Button, Icon, Spinner } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { useUserStore } from '@services/user-service/user-service';
 import { useRouter } from 'next/router';
-import { StringifyOptions } from 'node:querystring';
 
 interface RiffleProps {
   callback: 'classes' | 'pupils' | 'subjects' | 'mentorclass' | 'pupil' | 'subject';
@@ -16,7 +13,7 @@ interface RiffleProps {
   currentId?: string;
 }
 
-export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsLoading, callback, currentId }) => {
+export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsLoading, currentId }) => {
   const router = useRouter();
   const selectedId = currentId;
 

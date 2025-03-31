@@ -2,7 +2,6 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { ClassWithPupils } from '@components/classes/class-with-pupils.component';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { useUserStore } from '@services/user-service/user-service';
@@ -26,8 +25,8 @@ export const Index: React.FC = () => {
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
-  const classes = useForecastStore((s) => s.myClasses);
-  const classesIsLoading = useForecastStore((s) => s.classesIsLoading);
+  const classes = usePupilForecastStore((s) => s.myClasses);
+  const classesIsLoading = usePupilForecastStore((s) => s.classesIsLoading);
   const [riffleClasses, setRiffleClasses] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
 
@@ -72,7 +71,7 @@ export const Index: React.FC = () => {
   useEffect(() => {
     const riffleArray: Riffle[] = [];
 
-    classes.filter((c) => {
+    classes.data.filter((c) => {
       riffleArray.push({
         id: c.groupId,
         link: `/klasser/klass/${c.groupId}`,

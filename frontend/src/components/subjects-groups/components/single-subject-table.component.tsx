@@ -1,5 +1,4 @@
 import { User } from '@interfaces/user';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Avatar, Label, Link, Table, SortMode, Input, Pagination, Select } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
@@ -49,8 +48,6 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
   const [pageSize] = useState<number>(60);
   const subject = usePupilForecastStore((s) => s.subject);
   const myClasses = usePupilForecastStore((s) => s.myClasses);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
   const [pupilsInGroupData, setPupilsInGroupData] = useState<TablePupil[]>([]);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
 
@@ -217,7 +214,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
           <Table.Column>
             {headmaster ? (
               <div className="flex items-center gap-2">
-                {summerPeriod && (selectedPeriod === 'HT September' || selectedPeriod === 'HT') ? (
+                {summerPeriod ? (
                   <Label inverted rounded color="juniskar">
                     Inga prognoser under sommaren
                   </Label>
@@ -248,7 +245,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
               </div>
             ) : (
               <>
-                {summerPeriod && (selectedPeriod === 'HT September' || selectedPeriod === 'HT') ? (
+                {summerPeriod ? (
                   <Label inverted rounded color="juniskar">
                     Inga prognoser under sommaren
                   </Label>
@@ -259,10 +256,6 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
                         syllabusId: p.syllabusId && typeof p.syllabusId === 'string' ? p.syllabusId : '',
                         pupilId: p.id && typeof p.id === 'string' ? p.id : '',
                         groupId: p.groupId && typeof p.groupId === 'string' ? p.groupId : '',
-                        period:
-                          p.forecastPeriod && typeof p.forecastPeriod === 'string' ? p.forecastPeriod : selectedPeriod,
-                        schoolYear:
-                          p.schoolYear && typeof p.schoolYear === 'number' ? p.schoolYear : selectedSchoolYear,
                       }
                     }
                     forecast={p.forecast === null || typeof p.forecast !== 'number' ? null : p.forecast}

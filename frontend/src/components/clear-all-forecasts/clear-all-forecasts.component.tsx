@@ -1,5 +1,4 @@
 import { Button, Icon, Modal, useSnackbar } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useState } from 'react';
 import { clearGroupForecastsDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';

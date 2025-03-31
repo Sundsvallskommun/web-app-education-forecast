@@ -4,7 +4,6 @@ import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-m
 import { Dispatch, SetStateAction, useEffect } from 'react';
 import Loader from '@components/loader/loader';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Spinner } from '@sk-web-gui/react';
 import { SingleSubjectTable } from './components/single-subject-table.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
@@ -19,7 +18,6 @@ interface SubjectWithPupilsProps {
 export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTitle, pageTitle, selectedSyllabus }) => {
   const user = useUserStore((s) => s.user, shallow);
   const { teacher } = hasRolePermission(user);
-  const selectedId = useForecastStore((s) => s.selectedId);
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const singleSubject = usePupilForecastStore((s) => s.subject);
 
@@ -68,7 +66,6 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
               : singleSubject[0]?.teachers
           }
           callback="subject"
-          objectId={selectedId}
           searchQuery={searchQuery}
           searchPlaceholder="Sök på elev eller klass..."
         />
