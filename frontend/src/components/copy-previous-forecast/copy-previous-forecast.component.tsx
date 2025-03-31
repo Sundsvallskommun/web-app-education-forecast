@@ -1,17 +1,21 @@
 import { Button, Icon, Modal, useSnackbar } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
+
 import { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
-export const CopyPreviousForecast: React.FC = () => {
+interface ICopyPreviousForecast {
+  syllabusId: string;
+}
+
+export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabusId }) => {
   const subject = usePupilForecastStore((s) => s.subject);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedId = useForecastStore((s) => s.selectedId);
-  const copyPreviousForecast = useForecastStore((s) => s.copyPreviousForecast);
+  const copyPreviousForecast = usePupilForecastStore((s) => s.copyPreviousForecast);
   const [isOpen, setisOpen] = useState(false);
   const [summerPeriod, setSummerPeriod] = useState(false);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const allPeriods = usePupilForecastStore((s) => s.allPeriods);
+  const currentDate = new Date();
 
   const message = useSnackbar();
 
@@ -23,11 +27,23 @@ export const CopyPreviousForecast: React.FC = () => {
     setisOpen(false);
   };
 
+  useEffect(() => {
+    if (
+      currentDate >= new Date(`${new Date().getFullYear()}-07-01`) &&
+      currentDate < new Date(allPeriods[allPeriods.length - 1].startDate) &&
+      currentDate < new Date(selectedPeriod.startDate)
+    ) {
+      setSummerPeriod(true);
+    } else {
+      setSummerPeriod(false);
+    }
+  }, [selectedPeriod]);
+
   const onCopyHandler = async () => {
-    if (selectedId) {
+    if (subject[0].groupId) {
       const body: CopyPreviousForecastDto = {
-        groupId: selectedId,
-        syllabusId: subject[0].syllabusId,
+        groupId: subject[0].groupId || '',
+        syllabusId: syllabusId,
       };
       await copyPreviousForecast(body).then((res) => {
         if (!res.error) {
@@ -54,16 +70,15 @@ export const CopyPreviousForecast: React.FC = () => {
 
   useEffect(() => {
     if (
-      (selectedPeriod === 'HT' || selectedPeriod === 'HT September') &&
-      dayjs(new Date()).month() >= dayjs(new Date(new Date().getFullYear(), 5, 1)).month() &&
-      dayjs(new Date()).month() < dayjs(new Date(new Date().getFullYear(), 7, 1)).month()
+      currentDate >= new Date(`${new Date().getFullYear()}-07-01`) &&
+      currentDate < new Date(allPeriods[allPeriods.length - 1].startDate) &&
+      currentDate < new Date(selectedPeriod.startDate)
     ) {
       setSummerPeriod(true);
     } else {
       setSummerPeriod(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedPeriod]);
 
   return summerPeriod ? (
     <></>

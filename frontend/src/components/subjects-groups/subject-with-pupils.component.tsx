@@ -52,6 +52,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
     <div>
       <FormProvider {...searchForm}>
         <HeadingMenu
+          syllabusId={selectedSyllabus}
           pageTitle={singleSubject.length !== 0 ? pageTitle : 'Ämne/grupp'}
           GeneralInformation={generalInformation}
           teachers={

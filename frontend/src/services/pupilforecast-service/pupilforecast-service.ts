@@ -613,7 +613,6 @@ export const usePupilForecastStore = createWithEqualityFn<
         copyPreviousForecast: async (forecast: CopyPreviousForecastDto) => {
           await set(() => ({ singleSubjectIsLoading: true }));
           const res = await copyPreviousForecast(forecast);
-          const subject = get().subject;
           if (!res.error) {
             await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod.periodId);
             await set(() => ({ singleSubjectIsLoading: false }));

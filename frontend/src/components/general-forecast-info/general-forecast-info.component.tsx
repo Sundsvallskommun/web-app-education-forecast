@@ -1,5 +1,4 @@
 import { callbackType } from '@utils/callback-type';
-import { useUserStore } from '@services/user-service/user-service';
 import { Label, Spinner } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
@@ -9,14 +8,8 @@ interface GeneralForecastInfoProps {
 }
 
 export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callback }) => {
-  const user = useUserStore((s) => s.user);
   const { CLASSES, MENTORCLASS, PUPIL, PUPILS, SUBJECTS, SUBJECT } = callbackType(callback);
-  let grouptype = 'G';
-  if (SUBJECTS) {
-    grouptype = 'G';
-  } else if (CLASSES) {
-    grouptype = 'K';
-  }
+
   const {
     mySubjects,
     myClasses,

@@ -32,6 +32,7 @@ interface HeadingMenuProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
   searchQuery?: string;
   searchPlaceholder?: string;
+  syllabusId?: string;
 }
 
 export const HeadingMenu: React.FC<HeadingMenuProps> = ({
@@ -41,6 +42,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   teachers,
   callback,
   searchPlaceholder,
+  syllabusId,
 }) => {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
@@ -161,7 +163,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                   <div className="flex justify-center items-center">
                     {(subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null)) ||
                     (subject.find((x) => x.forecast === null) && previousGroup.find((x) => x.forecast !== null)) ? (
-                      <CopyPreviousForecast />
+                      <CopyPreviousForecast syllabusId={syllabusId || ''} />
                     ) : (
                       <></>
                     )}
@@ -180,7 +182,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                   <div className="flex justify-center items-center">
                     {((subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null)) ||
                       (subject.find((x) => x.forecast === null) && previousGroup.find((x) => x.forecast !== null))) && (
-                      <CopyPreviousForecast />
+                      <CopyPreviousForecast syllabusId={syllabusId || ''} />
                     )}
                   </div>
                 ) : (
