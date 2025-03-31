@@ -79,7 +79,7 @@ export const ClassesTable: React.FC = () => {
     { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true },
     { label: 'Når målen', property: 'approvedPupils', isColumnSortable: true },
-    { label: 'Varning', property: 'warningPupils', isColumnSortable: true },
+    { label: 'Uppmärksammad', property: 'warningPupils', isColumnSortable: true },
     { label: 'Når ej målen', property: 'unapprovedPupils', isColumnSortable: true },
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false },
   ];

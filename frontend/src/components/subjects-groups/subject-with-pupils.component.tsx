@@ -21,7 +21,6 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const singleSubject = usePupilForecastStore((s) => s.subject);
 
-  console.log(singleSubjectIsLoading);
   const searchForm = useForm<SearchTableForm>({
     defaultValues: {
       searchQuery: '',

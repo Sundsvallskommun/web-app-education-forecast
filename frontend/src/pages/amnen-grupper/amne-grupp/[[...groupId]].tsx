@@ -22,9 +22,8 @@ export const Index: React.FC = () => {
   const syllabusId = routeId?.split('-syllabus-')[1];
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const getSubjectWithPupils = usePupilForecastStore((s) => s.getSubjectWithPupils);
-  const getClasses = usePupilForecastStore((s) => s.getMyClasses);
+  const geMySubjects = usePupilForecastStore((s) => s.getMySubjects);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
-  // const setSelectedSyllabus = usePupilForecastStore((s) => s.setSelectedSyllabus);
   const [pageTitle, setPageTitle] = useState<string>();
 
   const allSubjects = usePupilForecastStore((s) => s.mySubjects);
@@ -52,7 +51,7 @@ export const Index: React.FC = () => {
         if (router.pathname.includes(subjectId) && router.pathname.includes(syllabusId)) return;
         //await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
         await getSubjectWithPupils(subjectId, syllabus, selectedPeriod.periodId);
-        await getClasses(subjectQueries);
+        await geMySubjects(subjectQueries);
         setSelectedId(subjectId);
         setSelectedSyllabus(syllabusId);
         // await getPreviousPeriodGroup(subjectId, {
@@ -75,15 +74,15 @@ export const Index: React.FC = () => {
       router.events.off('routeChangeComplete', loadClass);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.query, router.isReady, selectedPeriod.periodId]);
+  }, [router.query, router.isReady]);
 
   useEffect(() => {
     if (selectedId && syllabus) {
-      getClasses(subjectQueries);
+      geMySubjects(subjectQueries);
       getSubjectWithPupils(selectedId, syllabus);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPeriod.periodId]);
+  }, [selectedPeriod.periodId, selectedSchool.schoolId]);
 
   const breadcrumbLinks = [
     { link: '/amnen-grupper', title: 'Ämnen/grupper', currentPage: false },
@@ -96,7 +95,7 @@ export const Index: React.FC = () => {
     allSubjects.data.filter((s) => {
       riffleArray.push({
         id: s.groupId,
-        link: `/amnen-grupper/amne-grupp/${s.groupId}-syllabus-${selectedSyllabus}`,
+        link: `/amnen-grupper/amne-grupp/${s.groupId}-syllabus-${s.syllabusId}`,
         title: `${s.groupName}`,
       });
     });

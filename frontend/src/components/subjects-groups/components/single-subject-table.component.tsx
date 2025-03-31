@@ -227,7 +227,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
                     )}
                     {p.forecast === 2 && (
                       <Label rounded color="warning">
-                        Varning
+                        Uppmärksammad
                       </Label>
                     )}
                     {p.forecast === 3 && (

@@ -27,8 +27,8 @@ export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsL
       ? riffleObjects[0]
       : riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0]) + 1];
 
-  const riffleHandler = (link: string) => {
-    router.push(link);
+  const riffleHandler = async (link: string) => {
+    await router.push(link);
   };
 
   return !riffleIsLoading ? (

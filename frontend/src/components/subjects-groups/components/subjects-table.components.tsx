@@ -85,7 +85,7 @@ export const SubjectsTable: React.FC = () => {
     { label: 'Antal elever', property: 'totalPupils', isColumnSortable: true, isColumnVisible: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true, isColumnVisible: true },
     { label: 'Når målen', property: 'approvedPupils', isColumnSortable: true, isColumnVisible: true },
-    { label: 'Varning', property: 'warningPupils', isColumnSortable: true, isColumnVisible: true },
+    { label: 'Uppmärksammad', property: 'warningPupils', isColumnSortable: true, isColumnVisible: true },
     { label: 'Når ej målen', property: 'unapprovedPupils', isColumnSortable: true, isColumnVisible: true },
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false, isColumnVisible: true },
   ];

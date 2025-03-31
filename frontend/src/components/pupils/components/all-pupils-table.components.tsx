@@ -83,7 +83,7 @@ export const AllPupilsTable: React.FC = () => {
     { label: 'mentor', property: 'teachers', isColumnSortable: true },
     { label: 'Närvaro', property: 'presence', isColumnSortable: true },
     { label: 'Når målen', property: 'approved', isColumnSortable: true },
-    { label: 'Varning', property: 'warnings', isColumnSortable: true },
+    { label: 'Uppmärksammad', property: 'warnings', isColumnSortable: true },
     { label: 'Når ej målen', property: 'unapproved', isColumnSortable: true },
     { label: 'Inte ifyllda', property: 'notFilledIn', isColumnSortable: false },
   ];

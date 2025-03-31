@@ -202,7 +202,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
                   )}
                   {p.forecast === 2 && (
                     <Label rounded color="warning">
-                      Varning
+                      Uppmärksammad
                     </Label>
                   )}
                   {p.forecast === 3 && (

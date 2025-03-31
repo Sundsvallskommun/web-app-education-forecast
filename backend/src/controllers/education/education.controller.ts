@@ -14,7 +14,7 @@ export class EducationController {
   @Header('Cross-Origin-Embedder-Policy', 'require-corp')
   @Header('Cross-Origin-Resource-Policy', 'cross-origin')
   async getEmployeeImage(@Param('pupilId') pupilId: string, @QueryParam('width') width): Promise<any> {
-    const url = `education/1.0/${pupilId}/personimage`;
+    const url = `education/2.0/2281/${pupilId}/personimage`;
     const res = await this.apiService.get<any>({
       url,
       responseType: 'arraybuffer',

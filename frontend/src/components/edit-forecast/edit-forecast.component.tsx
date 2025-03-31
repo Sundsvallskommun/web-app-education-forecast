@@ -106,7 +106,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
         <span
           className={`${WARNINGS ? (selectedPeriod.periodId === currentPeriod.periodId ? 'text-black font-semibold' : 'text-gray-400 font-semibold') : selectedPeriod.periodId === currentPeriod.periodId ? 'font-normal' : 'text-gray-600 font-normal'} text-small`}
         >
-          Varning
+          Uppmärksammad
         </span>
       </label>
       <label
