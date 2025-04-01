@@ -1,103 +1,65 @@
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { Button, Icon, Spinner } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { formatPreviousPeriod } from '@utils/format-previous-period';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import dayjs from 'dayjs';
+import { useEffect } from 'react';
 
 interface PeriodPickerProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
 
-export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
+export const PeriodPicker: React.FC<PeriodPickerProps> = () => {
   //stores
   const user = useUserStore((s) => s.user);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedId = useForecastStore((s) => s.selectedId);
-  const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);
+  const { GY } = hasRolePermission(user);
+  const setSelectedPeriod = usePupilForecastStore((s) => s.setSelectedPeriod);
+  const allPeriods = usePupilForecastStore((s) => s.allPeriods);
+  const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const selectedIndex = allPeriods.findIndex((p) => p.periodId === selectedPeriod.periodId);
 
+  // const { watch, setValue, register, formState } = useFormContext<SelectedPeriodForm>();
+  // const selectedPeriod = watch('selectedPeriod');
   //utils
-  const { GR, GY } = hasRolePermission(user);
-  const {
-    currentYear,
-    currentMonthPeriod,
-    termPeriod,
-    previousMonthPeriod,
-    previousTermPeriod,
-    previousPeriodDate,
-    schoolYear,
-  } = thisSchoolYearPeriod();
 
-  let forecastPeriod: string = currentMonthPeriod;
-  let DOMPeriod: string = `${selectedPeriod?.slice(2)}`;
+  useEffect(() => {
+    if (selectedPeriod.periodId === 0) {
+      setSelectedPeriod(currentPeriod);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPeriod]);
 
-  if (GY) {
-    forecastPeriod = currentMonthPeriod;
-    DOMPeriod = `${selectedPeriod?.slice(2)}`;
-  } else {
-    forecastPeriod = termPeriod;
-    DOMPeriod = `${selectedPeriod} ${selectedPeriod === 'VT' ? currentYear : selectedSchoolYear}`;
-  }
+  const { currentMonthPeriod, termPeriod, previousMonthPeriod, previousTermPeriod } = thisSchoolYearPeriod();
+
+  // let forecastPeriod: string = currentMonthPeriod;
+  // let DOMPeriod: string = `${selectedPeriod?.slice(2)}`;
+
+  // if (GY) {
+  //   forecastPeriod = currentMonthPeriod;
+  //   DOMPeriod = `${selectedPeriod?.slice(2)}`;
+  // } else {
+  //   forecastPeriod = termPeriod;
+  //   DOMPeriod = `${selectedPeriod} ${selectedPeriod === 'VT' ? currentYear : selectedSchoolYear}`;
+  // }
 
   const pickPreviousHandler = async () => {
-    let prevPeriod = previousMonthPeriod;
-    let year = selectedSchoolYear;
-    if (GY) {
-      prevPeriod = previousMonthPeriod;
-      if (previousPeriodDate <= new Date(currentYear, 7, 30)) {
-        year = schoolYear;
-      } else if (previousPeriodDate > new Date(currentYear, 7, 30)) {
-        year = currentYear;
-      }
-    } else if (GR) {
-      prevPeriod = previousTermPeriod;
-      if (termPeriod === 'HT') {
-        year = currentYear - 1;
-      } else if (termPeriod === 'VT') {
-        year = schoolYear;
-      }
-    }
-    const { previousPeriod, previousSchoolYear } = formatPreviousPeriod(user, prevPeriod, year);
+    const previous = allPeriods[selectedIndex - 1];
 
-    await setSelectedPeriod(
-      GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : prevPeriod,
-      GY && (previousMonthPeriod === 'VT Maj' || previousMonthPeriod === 'HT December') ? currentYear - 1 : year,
-      callback,
-      selectedId,
-      user
-    );
-    callback === 'subject' &&
-      selectedId &&
-      (await getPreviousPeriodGroup(selectedId, {
-        period: GY && previousMonthPeriod === 'VT Maj' ? 'VT Maj' : previousPeriod,
-        schoolYear:
-          GY && (previousMonthPeriod === 'VT Maj' || previousMonthPeriod === 'HT December')
-            ? currentYear - 1
-            : previousSchoolYear ?? currentYear - 1,
-      }));
+    selectedIndex !== 0 && setSelectedPeriod(previous);
   };
 
   const pickForwardToCurrentHandler = async () => {
-    let currentPeriod: string = forecastPeriod;
-    let year = selectedSchoolYear;
-    if (GY) {
-      currentPeriod = forecastPeriod;
-      year = schoolYear;
-    } else if (GR) {
-      currentPeriod = termPeriod;
-      year = schoolYear;
-    }
-    const { previousPeriod, previousSchoolYear } = formatPreviousPeriod(user, currentPeriod, year);
+    const forward = allPeriods[selectedIndex + 1];
+    selectedIndex !== allPeriods.length - 1 && setSelectedPeriod(forward);
+  };
 
-    await setSelectedPeriod(currentPeriod, year, callback, selectedId, user);
-    callback === 'subject' &&
-      selectedId &&
-      (await getPreviousPeriodGroup(selectedId, {
-        period: previousPeriod,
-        schoolYear: previousSchoolYear ?? currentYear - 1,
-      }));
+  const periodName = () => {
+    const date1 = new Date(selectedPeriod?.periodName.slice(0, 10));
+    const date2 = new Date(selectedPeriod?.periodName.slice(11));
+
+    return `${dayjs(date1).format('DD MMMM YYYY')} - ${dayjs(date2).format('DD MMMM YYYY')}`;
   };
 
   return (
@@ -107,16 +69,30 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
           GY ? previousMonthPeriod : previousTermPeriod === 'HT' ? 'Hösttermin' : 'Vårtermin'
         }`}
         onClick={pickPreviousHandler}
-        disabled={(GY && selectedPeriod === previousMonthPeriod) || (GR && selectedPeriod === previousTermPeriod)}
+        disabled={selectedPeriod?.periodId === allPeriods[0]?.periodId}
+        // disabled={(GY && selectedPeriod === previousMonthPeriod) || (GR && selectedPeriod === previousTermPeriod)}
         iconButton
         color="vattjom"
         size="sm"
         rounded
-        inverted={selectedPeriod === forecastPeriod}
+        inverted={selectedPeriod?.periodId === currentPeriod.periodId}
       >
         <Icon name="arrow-left" />
       </Button>
-      <span className="font-bold">{selectedPeriod?.length !== 0 ? DOMPeriod : <Spinner size={3} />}</span>
+      <div>
+        {selectedPeriod && selectedPeriod.periodId !== 0 ? (
+          GY ? (
+            <>
+              <span className="font-bold block text-center">Period {selectedPeriod.periodId}</span>
+              <span>{periodName()}</span>
+            </>
+          ) : (
+            <span className="font-bold block text-center">{selectedPeriod.periodName}</span>
+          )
+        ) : (
+          <Spinner size={3} />
+        )}
+      </div>
       <Button
         aria-describedby={`Visa framåt till nuvarande period ${
           GY ? currentMonthPeriod : termPeriod === 'HT' ? 'Hösttermin' : 'Vårtermin'
@@ -124,10 +100,10 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = ({ callback }) => {
         onClick={pickForwardToCurrentHandler}
         iconButton
         color="vattjom"
-        disabled={selectedPeriod === forecastPeriod}
+        disabled={selectedPeriod?.periodId === currentPeriod.periodId}
         size="sm"
         rounded
-        inverted={selectedPeriod !== forecastPeriod}
+        inverted={selectedPeriod?.periodId !== currentPeriod.periodId}
       >
         <Icon name="arrow-right" />
       </Button>

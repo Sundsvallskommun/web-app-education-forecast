@@ -3,6 +3,6 @@ export interface User {
   name: string;
   username: string;
   roles: [{ role: string; typeOfSchool: string }];
-  school: string;
+  schools: [{ schoolId: string; schoolName: string }];
   // permissions: Permissions;
 }

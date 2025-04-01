@@ -44,7 +44,6 @@ import { HttpException } from './exceptions/HttpException';
 import { join } from 'path';
 import { isValidUrl } from './utils/util';
 import { additionalConverters } from './utils/custom-validation-classes';
-import { User } from './interfaces/users.interface';
 import ApiService from './services/api.service';
 import QueryString from 'qs';
 
@@ -98,24 +97,35 @@ const samlStrategy = new Strategy(
 
     try {
       let personId = '';
-      let unitid = '';
-      let unitName = '';
+      const schools: {}[] = [];
+      const roles: {}[] = [];
 
       const employeeDetails = await apiService.get<any>({ url: `employee/1.0/portalpersondata/PERSONAL/${username}` });
       const { personid } = employeeDetails.data;
       personId = personid;
-      const userRole = await apiService.get<[{ role: string; typeOfSchool: string; unitId: string }]>({
-        url: 'education/1.0/forecast/userroles',
+      const userRole = await apiService.get<[{ role: string; typeOfSchool: string; schoolId: string; schoolName: string }]>({
+        url: 'pupilforecast/1.0/2281/forecast/userroles',
         params: { teacherId: personId },
       });
-      unitid = userRole.data[0]?.unitId;
-      if (unitid) {
-        const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
-        unitName = employeeSchool.data.unitCode;
+
+      if (userRole.data) {
+        userRole.data.forEach(user => {
+          user &&
+            schools.push({
+              schoolId: user.schoolId,
+              schoolName: user.schoolName,
+            });
+
+          user &&
+            roles.push({
+              role: user.role,
+              typeOfSchool: user.typeOfSchool,
+            });
+        });
       } else {
         return done({
           name: 'SAML_MISSING_PERMISSIONS',
-          message: 'Failed to fetch user roles from education API, missing unitId',
+          message: 'Failed to fetch user roles from education API, missing schoolId',
         });
       }
 
@@ -126,14 +136,14 @@ const samlStrategy = new Strategy(
         });
       }
 
-      const findUser: User = {
+      const findUser = {
         personId: personId,
         username: username,
         name: `${givenName} ${surname}`,
         givenName: givenName,
         surname: surname,
-        roles: userRole.data,
-        school: unitName,
+        roles: roles,
+        schools: schools,
       };
 
       done(null, findUser);

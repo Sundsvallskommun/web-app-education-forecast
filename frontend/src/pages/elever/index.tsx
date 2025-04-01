@@ -6,36 +6,34 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import router from 'next/router';
 import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { QueriesDto } from '@interfaces/forecast/forecast';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
-  const { headmaster, GR } = hasRolePermission(user);
+  const { headmaster } = hasRolePermission(user);
   const pageTitle = 'Elever';
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const getAllPupils = usePupilForecastStore((s) => s.getAllPupils);
 
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  const pupilsQueries: ForeacastQueriesDto = {
+    schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
+    OrderBy: 'Givenname',
+    OrderDirection: 'ASC',
+    PageSize: 10,
+  };
 
   useEffect(() => {
-    const queries: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
-
-    !headmaster
-      ? router.push('/mina-amnen-grupper')
-      : setSelectedPeriod(queries.period ?? selectedPeriod, queries.schoolYear, 'pupils');
-  });
+    !headmaster ? router.push('/mina-amnen-grupper') : getAllPupils(pupilsQueries);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - Elever`}>
       <Main>
-        <AllPupils pageTitle={pageTitle} />
+        <AllPupils pageTitle={pageTitle} pupilsQueries={pupilsQueries} />
       </Main>
     </DefaultLayout>
   );

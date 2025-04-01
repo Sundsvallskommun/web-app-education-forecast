@@ -1,40 +1,39 @@
 import { SubjectsGroups } from '@components/subjects-groups/subjects-groups.component';
-import { QueriesDto } from '@interfaces/forecast/forecast';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { hasRolePermission } from '@utils/has-role-permission';
 import router from 'next/router';
 import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
-  const { headmaster, GR } = hasRolePermission(user);
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
+  const { headmaster } = hasRolePermission(user);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const getSubjects = usePupilForecastStore((s) => s.getMySubjects);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const pageTitle = 'Ämnen/grupper';
 
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  const subjectsQueries: ForeacastQueriesDto = {
+    schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
+    OrderBy: 'GroupName',
+    OrderDirection: 'ASC',
+    PageSize: 10,
+  };
 
   useEffect(() => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
-    !headmaster
-      ? router.push('/mina-amnen-grupper')
-      : setSelectedPeriod(myGroup.period ? myGroup.period : selectedPeriod, myGroup.schoolYear, 'subjects');
-  });
+    !headmaster ? router.push('/mina-amnen-grupper') : getSubjects(subjectsQueries);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}>
       <Main>
-        <SubjectsGroups pageTitle={pageTitle} />
+        <SubjectsGroups pageTitle={pageTitle} subjectsQueries={subjectsQueries} />
       </Main>
     </DefaultLayout>
   );

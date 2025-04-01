@@ -1,36 +1,100 @@
-import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
-import { HeadingMenu } from '@components/heading-menu/heading-menu.component';
-import { GroupTables } from '@components/tables/group-tables.component';
+import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
 import Loader from '@components/loader/loader';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
+import { useForm, FormProvider } from 'react-hook-form';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { SubjectsTable } from './components/subjects-table.components';
 
 interface SubjectsGroupsProps {
   pageTitle: string;
+  subjectsQueries: ForeacastQueriesDto;
 }
 
-export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+export interface SubjectsTableForm {
+  sortOrder: 'ASC' | 'DESC';
+  sortColumn: string;
+  page: number;
+  size: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+}
 
-  const user = useUserStore((s) => s.user, shallow);
-  const { mySubjects, grouplistTable, groupsListRendered, grouptable } = GroupTables('G', user, searchQuery);
-  const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
-  const subjectsIsLoading = useForecastStore((s) => s.subjectsIsLoading);
+export interface ISubjectsTable {
+  id: string | null;
+  groupName: string | null;
+  teachers: ForecastMyGroupTeacher[] | null;
+  totalPupils: number | null;
+  presence: number | null;
+  approvedPupils: number | null;
+  warningPupils: number | null;
+  unapprovedPupils: number | null;
+  notFilledIn: number | null;
+}
 
-  const fullTitle = mySubjects.length !== 0 ? `${pageTitle} (${mySubjects.length})` : pageTitle;
+export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subjectsQueries }) => {
+  const { mySubjects, getMySubjects } = usePupilForecastStore();
+  //const { mySubjects, grouplistTable, groupsListRendered, grouptable } = GroupTables('G', user, searchQuery);
+  const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const fullTitle = mySubjects.totalRecords !== 0 ? `${pageTitle} (${mySubjects.totalRecords})` : pageTitle;
 
+  const tableForm = useForm<SubjectsTableForm>({
+    defaultValues: {
+      sortColumn: subjectsQueries.OrderBy,
+      sortOrder: subjectsQueries.OrderDirection,
+      pageSize: subjectsQueries.PageSize || 10,
+    },
+  });
+
+  const { watch: watchTable } = tableForm;
+  const { sortOrder, sortColumn, pageSize, page } = watchTable();
+
+  const searchForm = useForm<SearchTableForm>({
+    defaultValues: {
+      searchQuery: '',
+    },
+  });
+
+  const { watch: watchSearch } = searchForm;
+  const { searchQuery } = watchSearch();
+
+  useEffect(() => {
+    getMySubjects({
+      schoolId: selectedSchool.schoolId,
+      periodId: selectedPeriod.periodId,
+      PageNumber: page,
+      searchFilter: searchQuery,
+      PageSize: pageSize,
+      OrderBy: sortColumn,
+      OrderDirection: sortOrder,
+    });
+
+    //eslint-disable-next-line
+  }, [sortOrder, sortColumn, pageSize, page, searchQuery, selectedPeriod.periodId, selectedSchool]);
   return (
     <div>
-      <HeadingMenu
-        pageTitle={fullTitle}
-        callback="subjects"
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchPlaceholder="Sök på ämne/grupp..."
-      />
-      {!subjectsIsLoading && !listByPeriodIsLoading && grouptable.length !== 0 ? (
-        <>{groupsListRendered.length !== 0 ? grouplistTable : <p>Inga sökresultat att visa</p>}</>
+      <FormProvider {...searchForm}>
+        <HeadingMenu
+          pageTitle={fullTitle}
+          callback="subjects"
+          searchQuery={searchQuery}
+          searchPlaceholder="Sök på ämne/grupp..."
+        />
+      </FormProvider>
+      {!subjectsIsLoading ? (
+        <>
+          {mySubjects.totalRecords !== 0 ? (
+            <FormProvider {...tableForm}>
+              <SubjectsTable />
+            </FormProvider>
+          ) : (
+            <p>Inga sökresultat att visa</p>
+          )}
+        </>
       ) : (
         <div className="h-[500px] flex justify-center items-center">
           <Loader />

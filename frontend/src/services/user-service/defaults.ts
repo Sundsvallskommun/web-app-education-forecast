@@ -15,7 +15,7 @@ export const emptyUser: User = {
       typeOfSchool: '',
     },
   ],
-  school: '',
+  schools: [{ schoolId: '', schoolName: '' }],
   //   permissions: defaultPermissions,
 };
 

@@ -2,13 +2,11 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { Pupil } from '@components/pupils/pupil.component';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { QueriesDto } from '@interfaces/forecast/forecast';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
-import { hasRolePermission } from '@utils/has-role-permission';
 import { useUserStore } from '@services/user-service/user-service';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 interface Riffle {
   id: string;
@@ -19,32 +17,38 @@ interface Riffle {
 export const Index: React.FC = () => {
   const router = useRouter();
   const routerpupilId = router.query['pupil'];
-  const user = useUserStore((s) => s.user);
-  const { GR } = hasRolePermission(user);
+
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
-  const pupil = useForecastStore((s) => s.pupil);
-  const singlePupilIsLoading = useForecastStore((s) => s.singlePupilIsLoading);
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
 
-  const allPupils = useForecastStore((s) => s.allPupils);
-  const pupilsIsLoading = useForecastStore((s) => s.pupilsIsLoading);
+  console.log(routerpupilId);
+  const pupil = usePupilForecastStore((s) => s.pupil);
+  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
+
+  const getPupil = usePupilForecastStore((s) => s.getPupil);
+  const getAllPupils = usePupilForecastStore((s) => s.getAllPupils);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+
+  const allPupils = usePupilForecastStore((s) => s.allPupils);
+  const pupilsIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
+  const [selectedId, setSelectedId] = useState<string>();
 
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  const classQueries: ForeacastQueriesDto = {
+    schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
+    OrderBy: 'GroupName',
+    OrderDirection: 'ASC',
+    PageSize: 500,
+  };
 
   useEffect(() => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'pupils');
-        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'pupil', pupilId);
+        await getAllPupils(classQueries);
+        await getPupil(selectedSchool.schoolId, pupilId, selectedPeriod.periodId);
+        setSelectedId(pupilId);
       } else {
         if (!pupilId) {
           router.push('/klasser');
@@ -64,9 +68,17 @@ export const Index: React.FC = () => {
   }, [router.query, router.isReady]);
 
   useEffect(() => {
+    if (selectedId) {
+      getAllPupils(classQueries);
+      getPupil(selectedSchool.schoolId, selectedId, selectedPeriod.periodId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, selectedPeriod.periodId]);
+
+  useEffect(() => {
     const riffleArray: Riffle[] = [];
 
-    allPupils.filter((p) => {
+    allPupils.data.filter((p) => {
       riffleArray.push({
         id: p.pupil ?? pupilId ?? '',
         link: `/klasser/klass/elev/${p.pupil}`,
@@ -99,8 +111,13 @@ export const Index: React.FC = () => {
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - Elev ${pupil[0]?.givenname} ${pupil[0]?.lastname}}`}
     >
       <Main>
-        <Pupil isSinglePupil />
-        <RifflePrevNext riffleIsLoading={pupilsIsLoading} riffleObjects={rifflePupils} callback="pupil" />
+        <Pupil />
+        <RifflePrevNext
+          currentId={selectedId}
+          riffleIsLoading={pupilsIsLoading}
+          riffleObjects={rifflePupils}
+          callback="pupil"
+        />
       </Main>
     </DefaultLayout>
   );

@@ -1,27 +1,25 @@
 import { Spinner, useSnackbar } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { SetForecastDto } from '@interfaces/forecast/forecast';
 import { IsGradedForecast } from '@utils/is-grade-forecast';
 import { useState } from 'react';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 interface EditForecastprops {
   pupil: {
+    syllabusId: string;
     pupilId: string;
     groupId: string;
-    period: string;
-    schoolYear: number;
   };
   forecast?: number | null;
 }
 
 export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) => {
-  const setForecast = useForecastStore((s) => s.setForecast);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
+  const setForecast = usePupilForecastStore((s) => s.setForecast);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
   const [forecastLoading, setForecastLoading] = useState(false);
   const { APPROVED, WARNINGS, UNNAPROVED } = IsGradedForecast(forecast);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [focusedForecast, setFocusedForecast] = useState(false);
   const message = useSnackbar();
 
   const onSetForecastHandler = async (e: React.BaseSyntheticEvent) => {
@@ -30,8 +28,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
     const setForecastBody: SetForecastDto = {
       pupilId: pupil?.pupilId,
       groupId: pupil?.groupId,
-      period: selectedPeriod,
-      schoolYear: selectedSchoolYear,
+      syllabusId: pupil.syllabusId,
       forecast: Number(forecast),
     };
 
@@ -58,62 +55,83 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
     }
   };
 
-  const isSummer =
-    selectedPeriod.includes('Juni') || selectedPeriod.includes('Juli') || selectedPeriod.includes('Augusti');
-
   return forecastLoading ? (
     <div className="flex w-[580px] justify-end">
       <Spinner size={4} />
     </div>
   ) : (
     <div className="flex w-[580px] justify-between">
-      <label className={`flex gap-8 items-center ${!APPROVED && 'cursor-pointer'}`}>
+      <label
+        className={`flex gap-8 items-center ${!APPROVED && selectedPeriod.periodId === currentPeriod.periodId && 'cursor-pointer'}`}
+      >
         <input
           onChange={onSetForecastHandler}
           value={1}
           className={`${
             APPROVED
               ? 'p-6 border-4 bg-success border-white outline outline-offset-1 outline-2 outline-success'
-              : 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
+              : selectedPeriod.periodId === currentPeriod.periodId
+                ? 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
+                : 'p-6 border-4 bg-gray-200 border-gray-200 outline outline-offset-1 outline-1 outline-gray-300'
           } `}
-          disabled={APPROVED || isSummer}
-          aria-disabled={APPROVED || isSummer}
+          disabled={APPROVED || selectedPeriod.periodId !== currentPeriod.periodId}
+          aria-disabled={APPROVED || selectedPeriod.periodId !== currentPeriod.periodId}
           type="radio"
           name="forecast"
         ></input>
-        <span className={`${APPROVED ? 'text-black font-semibold' : 'font-normal'} text-small`}>Når målen</span>
+        <span
+          className={`${APPROVED ? (selectedPeriod.periodId === currentPeriod.periodId ? 'text-black font-semibold' : 'text-gray-400 font-semibold') : selectedPeriod.periodId === currentPeriod.periodId ? 'font-normal' : 'text-gray-600 font-normal'} text-small`}
+        >
+          Når målen
+        </span>
       </label>
-      <label className={`flex gap-8 items-center ${!WARNINGS && 'cursor-pointer'}`}>
+      <label
+        className={`flex gap-8 items-center ${!WARNINGS && selectedPeriod.periodId === currentPeriod.periodId && 'cursor-pointer'}`}
+      >
         <input
           onChange={onSetForecastHandler}
           value={2}
           className={`${
             WARNINGS
               ? 'p-6 border-4 bg-warning border-white outline outline-offset-1 outline-2 outline-warning'
-              : 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
+              : selectedPeriod.periodId === currentPeriod.periodId
+                ? 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
+                : 'p-6 border-4 bg-gray-200 border-gray-200 outline outline-offset-1 outline-1 outline-gray-300'
           } `}
-          disabled={WARNINGS || isSummer}
-          aria-disabled={WARNINGS || isSummer}
+          disabled={WARNINGS || selectedPeriod.periodId !== currentPeriod.periodId}
+          aria-disabled={WARNINGS || selectedPeriod.periodId !== currentPeriod.periodId}
           type="radio"
           name="forecast"
         ></input>
-        <span className={`${WARNINGS ? 'text-black font-semibold' : 'font-normal'} text-small`}>Varning</span>
+        <span
+          className={`${WARNINGS ? (selectedPeriod.periodId === currentPeriod.periodId ? 'text-black font-semibold' : 'text-gray-400 font-semibold') : selectedPeriod.periodId === currentPeriod.periodId ? 'font-normal' : 'text-gray-600 font-normal'} text-small`}
+        >
+          Uppmärksammad
+        </span>
       </label>
-      <label className={`flex gap-8 items-center ${!UNNAPROVED && 'cursor-pointer'}`}>
+      <label
+        className={`flex gap-8 items-center ${!UNNAPROVED && selectedPeriod.periodId === currentPeriod.periodId && 'cursor-pointer'}`}
+      >
         <input
           onChange={onSetForecastHandler}
           value={3}
           className={`${
             UNNAPROVED
               ? 'p-6 border-4 bg-error border-white outline outline-offset-1 outline-2 outline-error'
-              : 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
+              : selectedPeriod.periodId === currentPeriod.periodId
+                ? 'p-6 border-4 bg-white border-white outline outline-offset-1 outline-1 outline-gray-500 hover:bg-primitives-overlay-darken-6 cursor-pointer'
+                : 'p-6 border-4 bg-gray-200 border-gray-200 outline outline-offset-1 outline-1 outline-gray-300'
           } `}
-          disabled={UNNAPROVED || isSummer}
-          aria-disabled={UNNAPROVED || isSummer}
+          disabled={UNNAPROVED || selectedPeriod.periodId !== currentPeriod.periodId}
+          aria-disabled={UNNAPROVED || selectedPeriod.periodId !== currentPeriod.periodId}
           type="radio"
           name="forecast"
         ></input>
-        <span className={`${UNNAPROVED ? 'text-black font-semibold' : 'font-normal'} text-small`}>Når ej målen</span>
+        <span
+          className={`${UNNAPROVED ? (selectedPeriod.periodId === currentPeriod.periodId ? 'text-black font-semibold' : 'text-gray-400 font-semibold') : selectedPeriod.periodId === currentPeriod.periodId ? 'font-normal' : 'text-gray-600 font-normal'} text-small`}
+        >
+          Når ej målen
+        </span>
       </label>
     </div>
   );

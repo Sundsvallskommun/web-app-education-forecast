@@ -3,13 +3,10 @@ import { useEffect, useState } from 'react';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
 import { SubjectWithPupils } from '@components/subjects-groups/subject-with-pupils.component';
-import { QueriesDto } from '@interfaces/forecast/forecast';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { formatPreviousPeriod } from '@utils/format-previous-period';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
-import { hasRolePermission } from '@utils/has-role-permission';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 interface Riffle {
   id: string;
@@ -20,40 +17,39 @@ interface Riffle {
 export const Index: React.FC = () => {
   const router = useRouter();
   const routersubjectId = router.query['groupId'];
-  const subjectId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
-  const user = useUserStore((s) => s.user);
-  const { GR, mentor, headmaster } = hasRolePermission(user);
+  const routeId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
+  const subjectId = routeId?.split('-syllabus-')[0];
+  const syllabusId = routeId?.split('-syllabus-')[1];
+  const getSubjectWithPupils = usePupilForecastStore((s) => s.getSubjectWithPupils);
+  const getSubjects = usePupilForecastStore((s) => s.getMySubjects);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const subjectsQueries: ForeacastQueriesDto = {
+    schoolId: selectedSchool.schoolId,
+    periodId: selectedPeriod.periodId,
+    OrderBy: 'GroupName',
+    OrderDirection: 'ASC',
+    PageSize: 500,
+  };
 
-  const getPreviousPeriodGroup = useForecastStore((s) => s.getPreviousPeriodGroup);
-  const { schoolYear, currentMonthPeriod, termPeriod, currentYear } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const subjectIsLoading = useForecastStore((s) => s.groupWithPupilsIsLoading);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
+  const subjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const [pageTitle, setPageTitle] = useState<string>();
 
-  const allSubjects = useForecastStore((s) => s.mySubjects);
-  const subjectsIsLoading = useForecastStore((s) => s.subjectsIsLoading);
+  const allSubjects = usePupilForecastStore((s) => s.mySubjects);
+  const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
+  const [selectedId, setSelectedId] = useState<string>();
+  const [selectedSyllabus, setSelectedSyllabus] = useState<string>();
   const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
 
-  const { previousPeriod, previousSchoolYear } = formatPreviousPeriod(user, selectedPeriod, selectedSchoolYear);
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
   useEffect(() => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
     const loadClass = async () => {
-      if (subjectId) {
+      if (subjectId && syllabusId) {
         if (router.pathname.includes(subjectId)) return;
-        mentor ||
-          (headmaster && (await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'classes')));
-        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subjects');
-        await setSelectedPeriod(myGroup.period ?? selectedPeriod, myGroup.schoolYear, 'subject', subjectId);
-        await getPreviousPeriodGroup(subjectId, {
-          period: previousPeriod,
-          schoolYear: previousSchoolYear ?? currentYear - 1,
-        });
+
+        await getSubjects(subjectsQueries);
+        await getSubjectWithPupils(subjectId, syllabusId);
+        setSelectedId(subjectId);
+        setSelectedSyllabus(syllabusId);
       } else {
         if (!subjectId) {
           router.push('/mina-amnen-grupper');
@@ -72,6 +68,14 @@ export const Index: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query, router.isReady]);
 
+  useEffect(() => {
+    if (selectedId && selectedSyllabus) {
+      getSubjects(subjectsQueries);
+      getSubjectWithPupils(selectedId, selectedSyllabus, selectedPeriod.periodId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, selectedSyllabus, selectedPeriod.periodId]);
+
   const breadcrumbLinks = [
     { link: '/mina-amnen-grupper', title: 'Mina ämnen/grupper', currentPage: false },
     { link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true },
@@ -80,15 +84,16 @@ export const Index: React.FC = () => {
   useEffect(() => {
     const riffleArray: Riffle[] = [];
 
-    allSubjects.filter((s) => {
+    allSubjects.data.filter((s) => {
       riffleArray.push({
         id: s.groupId,
-        link: `/amnen-grupper/amne-grupp/${s.groupId}`,
+        link: `/mina-amnen-grupper/amne-grupp/${s.groupId}-syllabus-${s.syllabusId}`,
         title: `${s.groupName}`,
       });
     });
 
     setRiffleSubjects(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSubjects]);
 
   return (
@@ -98,9 +103,18 @@ export const Index: React.FC = () => {
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}
     >
       <Main>
-        <SubjectWithPupils setPageTitle={setPageTitle} pageTitle={pageTitle ?? selectedPeriod} />
+        <SubjectWithPupils
+          selectedSyllabus={selectedSyllabus}
+          setPageTitle={setPageTitle}
+          pageTitle={pageTitle ?? 'Ämne'}
+        />
         {riffleSubjects.length > 1 && (
-          <RifflePrevNext riffleIsLoading={subjectsIsLoading} riffleObjects={riffleSubjects} callback="subject" />
+          <RifflePrevNext
+            currentId={selectedId}
+            riffleIsLoading={subjectsIsLoading}
+            riffleObjects={riffleSubjects}
+            callback="subject"
+          />
         )}
       </Main>
     </DefaultLayout>
