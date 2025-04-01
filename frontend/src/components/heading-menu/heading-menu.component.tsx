@@ -148,12 +148,8 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
       <Divider />
 
       <div className="flex flex-wrap justify-between items-center mt-20 gap-24">
-        {/* {selectedPeriod?.includes('Juni') || selectedPeriod?.includes('Juli') || selectedPeriod?.includes('Augusti') ? (
-          <span className="bold text-error"> Inga prognoser att fylla i under sommaren</span>
-        ) : ( */}
         <GeneralForecastInfo callback={callback} />
-        {/* )} */}
-        {SUBJECT && teacher ? (
+        {SUBJECT && (teacher || (headmaster && teacher)) ? (
           <>
             {subject.find((x) => x.forecast !== null) ? (
               <>

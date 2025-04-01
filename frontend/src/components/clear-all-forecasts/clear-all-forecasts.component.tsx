@@ -2,12 +2,14 @@ import { Button, Icon, Modal, useSnackbar } from '@sk-web-gui/react';
 import { useState } from 'react';
 import { clearGroupForecastsDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useUserStore } from '@services/user-service/user-service';
 
 export const ClearAllForecasts: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const subject = usePupilForecastStore((s) => s.subject);
   const allSubjects = usePupilForecastStore((s) => s.mySubjects);
   const clearAll = usePupilForecastStore((s) => s.clearGroupForecasts);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
 
   const message = useSnackbar();
 
@@ -24,7 +26,7 @@ export const ClearAllForecasts: React.FC = () => {
         groupId: subject[0].groupId ?? '',
         syllabusId: allSubjects.data.find((s) => s.groupId === subject[0].groupId)?.syllabusId || '',
       };
-      clearAll(body).then((res) => {
+      clearAll(body, selectedSchool.schoolId).then((res) => {
         if (!res.error) {
           message({
             message: `Prognoserna rensades bort`,

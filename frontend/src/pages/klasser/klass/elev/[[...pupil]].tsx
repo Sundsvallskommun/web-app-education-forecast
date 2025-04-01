@@ -20,7 +20,6 @@ export const Index: React.FC = () => {
 
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
 
-  console.log(routerpupilId);
   const pupil = usePupilForecastStore((s) => s.pupil);
   const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
 

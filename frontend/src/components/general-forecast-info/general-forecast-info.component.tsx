@@ -102,8 +102,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     isLoading = singleSubjectIsLoading && subjectsIsLoading;
   }
 
-  console.log(numberOfNotFilledIn);
-
   if (MENTORCLASS) {
     mentorClass.forEach((p) => {
       const notFilledIn = p.forecasts?.filter((x) => x.forecast === null).length;

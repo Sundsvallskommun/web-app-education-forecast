@@ -1,17 +1,8 @@
 import {
   clearGroupForecastsDto,
-  //   clearGroupForecastsDto,
   CopyPreviousForecastDto,
   ForeacastQueriesDto,
   MentorClassPupilGrid,
-  //   CopyPreviousForecastDto,
-  //   MentorClassPupil,
-  //   MyGroup,
-  //   QueriesDto,
-  //   Pupil,
-  //   SetForecastDto,
-  //   clearGroupForecastsDto,
-  //   MentorClassPupilGrid,
   MetaGroup,
   MetaPupils,
   MyGroup,
@@ -20,16 +11,7 @@ import {
   SetForecastDto,
 } from '@interfaces/forecast/forecast';
 import { ApiResponse, apiService } from '../api-service';
-// import { createWithEqualityFn } from 'zustand/traditional';
-// import { devtools, persist } from 'zustand/middleware';
-// import { __DEV__ } from '@sk-web-gui/react';
-// import { emptyMyGroup } from './defaults';
 import { ServiceResponse } from '@interfaces/service';
-// import { callbackType } from '@utils/callback-type';
-// import { apiURL } from '@utils/api-url';
-// import { User } from '@interfaces/user';
-// import { hasRolePermission } from '@utils/has-role-permission';
-// import dayjs from 'dayjs';
 import {
   handleCopyForecast,
   handleGetAllPeriods,
@@ -298,9 +280,9 @@ interface Actions {
   getMentorClass: (groupId: string, periodId?: number | null) => Promise<ServiceResponse<MentorClassPupilGrid[]>>;
   getAllPupils: (queries: ForeacastQueriesDto) => Promise<ServiceResponse<MetaPupils>>;
   getPupil: (pupilId: string, unitId: string, periodId?: number | null) => Promise<ServiceResponse<Pupil[]>>;
-  setForecast: (forecast: SetForecastDto) => Promise<ServiceResponse<object>>;
-  copyPreviousForecast: (forecast: CopyPreviousForecastDto) => Promise<ServiceResponse<object>>;
-  clearGroupForecasts: (forecast: clearGroupForecastsDto) => Promise<ServiceResponse<object>>;
+  setForecast: (forecast: SetForecastDto, schoolId: string) => Promise<ServiceResponse<object>>;
+  copyPreviousForecast: (forecast: CopyPreviousForecastDto, schoolId: string) => Promise<ServiceResponse<object>>;
+  clearGroupForecasts: (forecast: clearGroupForecastsDto, schoolId: string) => Promise<ServiceResponse<object>>;
   reset: () => void;
 }
 
@@ -603,23 +585,36 @@ export const usePupilForecastStore = createWithEqualityFn<
           // });
           return { data, error: res.error };
         },
-        setForecast: async (forecast: SetForecastDto) => {
+        setForecast: async (forecast: SetForecastDto, schoolId) => {
           const res = await setForecast(forecast);
           if (!res.error) {
             await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod.periodId);
+            await get().getMySubjects({
+              schoolId: schoolId,
+              periodId: get().selectedPeriod.periodId,
+              OrderDirection: 'ASC',
+              OrderBy: 'GroupName',
+              PageSize: 100,
+            });
           }
           return { data: res.data };
         },
-        copyPreviousForecast: async (forecast: CopyPreviousForecastDto) => {
+        copyPreviousForecast: async (forecast: CopyPreviousForecastDto, schoolId) => {
           await set(() => ({ singleSubjectIsLoading: true }));
           const res = await copyPreviousForecast(forecast);
           if (!res.error) {
             await get().getSubjectWithPupils(forecast.groupId, forecast.syllabusId, get().selectedPeriod.periodId);
-            await set(() => ({ singleSubjectIsLoading: false }));
+            await get().getMySubjects({
+              schoolId: schoolId,
+              periodId: get().selectedPeriod.periodId,
+              OrderDirection: 'ASC',
+              OrderBy: 'GroupName',
+              PageSize: 100,
+            });
           }
           return { data: res.data, message: res.message };
         },
-        clearGroupForecasts: async (forecast: clearGroupForecastsDto) => {
+        clearGroupForecasts: async (forecast: clearGroupForecastsDto, schoolId) => {
           const res = await clearGroupForecasts(forecast.groupId, forecast.syllabusId);
           const subject = get().subject;
           if (!res.error) {
@@ -628,6 +623,13 @@ export const usePupilForecastStore = createWithEqualityFn<
               subject[0].syllabusId ? subject[0].syllabusId : '',
               get().selectedPeriod.periodId
             );
+            await get().getMySubjects({
+              schoolId: schoolId,
+              periodId: get().selectedPeriod.periodId,
+              OrderDirection: 'ASC',
+              OrderBy: 'GroupName',
+              PageSize: 100,
+            });
           }
           return { data: res.data };
         },
