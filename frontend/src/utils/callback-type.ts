@@ -1,4 +1,4 @@
-export const callbackType = (string) => {
+export const callbackType = (string: string) => {
   const CLASSES = string === 'classes';
   const MENTORCLASS = string === 'mentorclass';
   const SUBJECTS = string === 'subjects';

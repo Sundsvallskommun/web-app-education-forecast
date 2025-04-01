@@ -1,61 +1,68 @@
 import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
-import { HeadingMenu } from '@components/heading-menu/heading-menu.component';
+import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
 import Loader from '@components/loader/loader';
-import { hasRolePermission } from '@utils/has-role-permission';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { useState } from 'react';
-import { MentorClassTable } from '@components/tables/mentor-class-table.component';
 import { Spinner } from '@sk-web-gui/react';
+import Main from '@layouts/main/main.component';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { MentorClassTable } from './components/class-with-pupils-table.component';
+import { FormProvider, useForm } from 'react-hook-form';
 
 export const ClassWithPupils: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
-  const [searchQuery, setSearchQuery] = useState('');
-  const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
-  const { mentor, headmaster } = hasRolePermission(user);
-  const {
-    mentorclassTable,
-    mentorClass,
-    mentorClassGrid,
-    mentorClassIsLoading,
-    mentorClassListRendered,
-    mentorClassData,
-  } = MentorClassTable(user, searchQuery);
+  const mentorClassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
+  const mentorClass = usePupilForecastStore((s) => s.mentorClass);
 
-  const fullTitle = !mentorClassIsLoading ? `Klass ${mentorClassGrid[0]?.className}` : 'Klass';
+  const fullTitle = !mentorClassIsLoading ? `Klass ${mentorClass[0]?.className}` : 'Klass';
+
+  const searchForm = useForm<SearchTableForm>({
+    defaultValues: {
+      searchQuery: '',
+    },
+  });
+
+  const { watch: watchSearch } = searchForm;
+  const { searchQuery } = watchSearch();
 
   const generalInformation =
-    mentorClass.length !== 0 || ((mentor || headmaster) && mentorClassGrid.length !== 0) ? (
+    mentorClass.length !== 0 ? (
       <span>
-        <strong>{mentor || headmaster ? mentorClassGrid.length : mentorClass.length}</strong> elever
+        <strong>{mentorClass.length}</strong> elever
       </span>
     ) : (
       <Spinner size={2} />
     );
   return (
     <div>
-      <HeadingMenu
-        pageTitle={fullTitle}
-        GeneralInformation={generalInformation}
-        teachers={
-          mentor || headmaster
-            ? [
-                {
-                  givenname: user.name.split(' ')[0],
-                  lastname: user.name.split(' ')[1],
-                  personId: user.personId,
-                  email: user.username,
-                },
-              ]
-            : mentorClass[0]?.teachers
-        }
-        callback="mentorclass"
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchPlaceholder="Sök på elev..."
-      />
-      {!mentorClassIsLoading && !listByPeriodIsLoading && mentorClassData.length !== 0 ? (
-        <>{mentorClassListRendered.length !== 0 ? mentorclassTable : <p>Inga sökresultat att visa</p>}</>
+      <Main>
+        <FormProvider {...searchForm}>
+          <HeadingMenu
+            pageTitle={fullTitle}
+            GeneralInformation={generalInformation}
+            teachers={[
+              {
+                givenname: user.name.split(' ')[0],
+                lastname: user.name.split(' ')[1],
+                personId: user.personId,
+                email: user.username,
+              },
+            ]}
+            callback="mentorclass"
+            searchQuery={searchQuery}
+            searchPlaceholder="Sök på elev..."
+          />
+        </FormProvider>
+      </Main>
+      {!mentorClassIsLoading ? (
+        <>
+          {mentorClass.length !== 0 ? (
+            <div className="max-w-[4000px] w-full">
+              <MentorClassTable user={user} searchQuery={searchQuery} />
+            </div>
+          ) : (
+            <p>Inga sökresultat att visa</p>
+          )}
+        </>
       ) : (
         <div className="h-[500px] flex justify-center items-center">
           <Loader />

@@ -1,37 +1,24 @@
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ClassWithPupils } from '@components/classes/class-with-pupils.component';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
-import Main from '@layouts/main/main.component';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { QueriesDto } from '@interfaces/forecast/forecast';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { hasRolePermission } from '@utils/has-role-permission';
-import { useUserStore } from '@services/user-service/user-service';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 
 export const Index: React.FC = () => {
   const router = useRouter();
-  const user = useUserStore((s) => s.user);
-  const { GR, mentor } = hasRolePermission(user);
   const routerclassId = router.query['groupId'];
   const classId = routerclassId && Array.isArray(routerclassId) ? routerclassId.pop() : null;
-  const mentorClass = useForecastStore((s) => (mentor ? s.mentorClassGrid : s.mentorClass));
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const setSelectedPeriod = useForecastStore((s) => s.setSelectedPeriod);
-
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  const getMentorClass = usePupilForecastStore((s) => s.getMentorClass);
+  const mentorClass = usePupilForecastStore((s) => s.mentorClass);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const [selectedId, setSelectedId] = useState<string>();
 
   useEffect(() => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
-    };
     const loadClass = async () => {
-      if (classId) {
-        if (router.pathname.includes(classId)) return;
-        await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'mentorclass', classId, user);
+      if (classId && classId !== undefined) {
+        // if (router.pathname.includes(classId)) return;
+        await getMentorClass(classId, selectedPeriod.periodId);
+        setSelectedId(classId);
       } else {
         if (!classId) {
           router.push('/mina-amnen-grupper');
@@ -50,11 +37,16 @@ export const Index: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query, router.isReady]);
 
+  useEffect(() => {
+    if (selectedId) {
+      getMentorClass(selectedId, selectedPeriod.periodId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, selectedPeriod.periodId]);
+
   return (
     <DefaultLayout title={`${process.env.NEXT_PUBLIC_APP_NAME} - Klass ${mentorClass[0]?.className}`}>
-      <Main>
-        <ClassWithPupils />
-      </Main>
+      <ClassWithPupils />
     </DefaultLayout>
   );
 };

@@ -2,11 +2,32 @@ import {
   CopyPreviousForecastDto,
   MentorClassPupil,
   MentorClassPupilGrid,
+  MetaGroup,
+  MetaPupils,
   MyGroup,
+  Period,
   Pupil,
   SetForecastDto,
 } from '@interfaces/forecast/forecast';
 import { ApiResponse } from '@services/api-service';
+
+export const handleGetPeriod: (res: ApiResponse<Period>) => Period = (res) => ({
+  periodName: res.data.periodName,
+  schoolYear: res.data.schoolYear,
+  periodId: res.data.periodId,
+  startDate: res.data.startDate,
+  endDate: res.data.endDate,
+});
+
+export const handleGetAllPeriods: (res: ApiResponse<Period[]>) => Period[] = (res) => {
+  return res.data.map((data) => ({
+    periodName: data.periodName,
+    schoolYear: data.schoolYear,
+    periodId: data.periodId,
+    startDate: data.startDate,
+    endDate: data.endDate,
+  }));
+};
 
 export const handleGetMyGroupResponse: (res: ApiResponse<MyGroup>) => MyGroup = (res) => ({
   groupId: res.data.groupId,
@@ -23,7 +44,7 @@ export const handleGetMyGroupResponse: (res: ApiResponse<MyGroup>) => MyGroup = 
   teachers: res.data.teachers,
 });
 
-export const handleGetMyGroupsResponse: (res: ApiResponse<MyGroup[]>) => MyGroup[] = (res) => {
+export const handleGetGroupsResponse: (res: ApiResponse<MyGroup[]>) => MyGroup[] = (res) => {
   return res.data.map((data) => ({
     groupId: data.groupId,
     coursePeriod: data.coursePeriod,
@@ -39,6 +60,14 @@ export const handleGetMyGroupsResponse: (res: ApiResponse<MyGroup[]>) => MyGroup
     teachers: data.teachers,
   }));
 };
+
+export const handleGetMetaGroupResponse: (res: ApiResponse<MetaGroup>) => MetaGroup = (res) => ({
+  pageNumber: res.data.pageNumber,
+  pageSize: res.data.pageSize,
+  totalRecords: res.data.totalRecords,
+  totalPages: res.data.totalPages,
+  data: res.data.data,
+});
 
 export const handleGetPupil: (res: ApiResponse<Pupil>) => Pupil = (res) => ({
   pupil: res.data.pupil,
@@ -59,6 +88,7 @@ export const handleGetPupil: (res: ApiResponse<Pupil>) => Pupil = (res) => ({
   courseName: res.data.courseName,
   courseId: res.data.courseId,
   teachers: res.data.teachers,
+  syllabusId: res.data.syllabusId,
   totalSubjects: res.data.totalSubjects,
 });
 
@@ -82,10 +112,21 @@ export const handleGetManyPupils: (res: ApiResponse<Pupil[]>) => Pupil[] = (res)
     classGroupId: data.classGroupId,
     courseName: data.courseName,
     courseId: data.courseId,
+    syllabusId: data.syllabusId,
+    unitId: data.unitId,
+    typeOfSchool: data.typeOfSchool,
     teachers: data.teachers,
     totalSubjects: data.totalSubjects,
   }));
 };
+
+export const handleGetMetapupils: (res: ApiResponse<MetaPupils>) => MetaPupils = (res) => ({
+  pageNumber: res.data.pageNumber,
+  pageSize: res.data.pageSize,
+  totalRecords: res.data.totalRecords,
+  totalPages: res.data.totalPages,
+  data: res.data.data,
+});
 
 export const handleGetMentorClassPupil: (res: ApiResponse<MentorClassPupil>) => MentorClassPupil = (res) => ({
   pupil: res.data.pupil,
@@ -110,6 +151,7 @@ export const handleGetMentorClassPupilGrid: (res: ApiResponse<MentorClassPupilGr
   lastname: res.data.lastname,
   className: res.data.className,
   presence: res.data.presence,
+  unitId: res.data.unitId,
   typeOfSchool: res.data.typeOfSchool,
   forecasts: res.data.forecasts,
 });
@@ -140,6 +182,7 @@ export const handleGetMentorClassGrid: (res: ApiResponse<MentorClassPupilGrid[]>
     className: data.className,
     presence: data.presence,
     typeOfSchool: data.typeOfSchool,
+    unitId: data.unitId,
     forecasts: data.forecasts,
   }));
 };
@@ -147,15 +190,11 @@ export const handleGetMentorClassGrid: (res: ApiResponse<MentorClassPupilGrid[]>
 export const handleSendForecast: (res: SetForecastDto) => SetForecastDto = (res) => ({
   pupilId: res.pupilId,
   groupId: res.groupId,
-  period: res.period,
-  schoolYear: res.schoolYear,
+  syllabusId: res.syllabusId,
   forecast: res.forecast,
 });
 
 export const handleCopyForecast: (res: CopyPreviousForecastDto) => CopyPreviousForecastDto = (res) => ({
   groupId: res.groupId,
-  period: res.period,
-  previusPeriod: res.previusPeriod,
-  schoolYear: res.schoolYear,
-  previusSchoolYear: res.previusSchoolYear,
+  syllabusId: res.syllabusId,
 });

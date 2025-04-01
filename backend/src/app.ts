@@ -12,7 +12,7 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
 import passport from 'passport';
-import { Strategy, VerifiedCallback } from 'passport-saml';
+import { Strategy, VerifiedCallback } from '@node-saml/passport-saml';
 import bodyParser from 'body-parser';
 import { useExpressServer, getMetadataArgsStorage } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
@@ -44,8 +44,8 @@ import { HttpException } from './exceptions/HttpException';
 import { join } from 'path';
 import { isValidUrl } from './utils/util';
 import { additionalConverters } from './utils/custom-validation-classes';
-import { User } from './interfaces/users.interface';
 import ApiService from './services/api.service';
+import QueryString from 'qs';
 
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
@@ -71,11 +71,13 @@ const samlStrategy = new Strategy(
     // decryptionPvk: SAML_PRIVATE_KEY,
     privateKey: SAML_PRIVATE_KEY,
     // Identity Provider's public key
-    cert: SAML_IDP_PUBLIC_CERT,
+    idpCert: SAML_IDP_PUBLIC_CERT,
     issuer: SAML_ISSUER,
     wantAssertionsSigned: false,
     acceptedClockSkewMs: 1000,
     logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
+    wantAuthnResponseSigned: false,
+    audience: false,
   },
   async function (profile: Profile, done: VerifiedCallback) {
     if (!profile) {
@@ -95,24 +97,35 @@ const samlStrategy = new Strategy(
 
     try {
       let personId = '';
-      let unitid = '';
-      let unitName = '';
+      const schools: {}[] = [];
+      const roles: {}[] = [];
 
       const employeeDetails = await apiService.get<any>({ url: `employee/1.0/portalpersondata/PERSONAL/${username}` });
       const { personid } = employeeDetails.data;
       personId = personid;
-      const userRole = await apiService.get<[{ role: string; typeOfSchool: string; unitId: string }]>({
-        url: 'education/1.0/forecast/userroles',
+      const userRole = await apiService.get<[{ role: string; typeOfSchool: string; schoolId: string; schoolName: string }]>({
+        url: 'pupilforecast/1.0/2281/forecast/userroles',
         params: { teacherId: personId },
       });
-      unitid = userRole.data[0]?.unitId;
-      if (unitid) {
-        const employeeSchool = await apiService.get<any>({ url: `education/1.0/schoolunits/${unitid}` });
-        unitName = employeeSchool.data.unitCode;
+
+      if (userRole.data) {
+        userRole.data.forEach(user => {
+          user &&
+            schools.push({
+              schoolId: user.schoolId,
+              schoolName: user.schoolName,
+            });
+
+          user &&
+            roles.push({
+              role: user.role,
+              typeOfSchool: user.typeOfSchool,
+            });
+        });
       } else {
         return done({
           name: 'SAML_MISSING_PERMISSIONS',
-          message: 'Failed to fetch user roles from education API, missing unitId',
+          message: 'Failed to fetch user roles from education API, missing schoolId',
         });
       }
 
@@ -123,14 +136,14 @@ const samlStrategy = new Strategy(
         });
       }
 
-      const findUser: User = {
+      const findUser = {
         personId: personId,
         username: username,
         name: `${givenName} ${surname}`,
         givenName: givenName,
         surname: surname,
-        roles: userRole.data,
-        school: unitName,
+        roles: roles,
+        schools: schools,
       };
 
       done(null, findUser);
@@ -140,6 +153,9 @@ const samlStrategy = new Strategy(
       }
       done(err);
     }
+  },
+  async function (profile: Profile, done: VerifiedCallback) {
+    return done(null, {});
   },
 );
 
@@ -237,13 +253,13 @@ class App {
         next();
       },
       (req, res, next) => {
-        const successRedirect = req.query.successRedirect;
+        const successRedirect: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] = req.query.successRedirect;
         samlStrategy.logout(req as any, () => {
           req.logout(err => {
             if (err) {
               return next(err);
             }
-            res.redirect(successRedirect as string);
+            res.redirect(successRedirect.toString());
           });
         });
       },

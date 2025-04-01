@@ -4,32 +4,33 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { thisSchoolYearPeriod } from '@utils/school-year-period';
-import { QueriesDto } from '@interfaces/forecast/forecast';
+import { ForeacastQueriesDto, Period } from '@interfaces/forecast/forecast';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+
+export interface SelectedPeriodForm {
+  selectedPeriod: Period;
+}
 
 export default function Index() {
   const user = useUserStore((s) => s.user, shallow);
-  const { getMyClasses } = useForecastStore();
+  const { getMyClasses } = usePupilForecastStore();
   const { headmaster, teacher, mentor } = hasRolePermission(user);
   const router = useRouter();
-  const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
 
-  const { GR } = hasRolePermission(user);
-  const currentPeriod = GR ? termPeriod : currentMonthPeriod;
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
 
   const teacherAndMentorRoutes = () => {
-    const myGroup: QueriesDto = {
-      period: selectedPeriod ? selectedPeriod : currentPeriod,
-      schoolYear: selectedSchoolYear ? selectedSchoolYear : schoolYear,
+    const myGroup: ForeacastQueriesDto = {
+      schoolId: selectedSchool.schoolId,
+      OrderBy: 'GroupName',
+      OrderDirection: 'ASC',
+      PageSize: 10,
     };
     if (teacher || (mentor && teacher)) {
       router.push('/mina-amnen-grupper');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        router.push(`/min-mentorsklass/${res.data[0].groupId}`);
+        res.data && router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
       });
     }
   };

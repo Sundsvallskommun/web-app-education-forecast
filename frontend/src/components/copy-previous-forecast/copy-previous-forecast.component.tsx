@@ -1,54 +1,25 @@
 import { Button, Icon, Modal, useSnackbar } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
-import { hasRolePermission } from '@utils/has-role-permission';
-import { useUserStore } from '@services/user-service/user-service';
-import { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 
-export const CopyPreviousForecast: React.FC = () => {
-  const user = useUserStore((s) => s.user);
-  const subject = useForecastStore((s) => s.groupWithPupils);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const selectedId = useForecastStore((s) => s.selectedId);
-  const copyPreviousForecast = useForecastStore((s) => s.copyPreviousForecast);
-  const { GR, GY } = hasRolePermission(user);
+import { useEffect, useState } from 'react';
+import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useUserStore } from '@services/user-service/user-service';
+
+interface ICopyPreviousForecast {
+  syllabusId: string;
+}
+
+export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabusId }) => {
+  const subject = usePupilForecastStore((s) => s.subject);
+  const copyPreviousForecast = usePupilForecastStore((s) => s.copyPreviousForecast);
   const [isOpen, setisOpen] = useState(false);
   const [summerPeriod, setSummerPeriod] = useState(false);
-  // const [previousIsEmpty, setPreviousIsEmpty] = useState(true);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const allPeriods = usePupilForecastStore((s) => s.allPeriods);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const currentDate = new Date();
+
   const message = useSnackbar();
-
-  const monthPeriods = [
-    'VT Januari',
-    'VT Februari',
-    'VT Mars',
-    'VT April',
-    'VT Maj',
-    'HT September',
-    'HT Oktober',
-    'HT November',
-    'HT December',
-  ];
-
-  const termPeriods = ['HT', 'VT'];
-  let previousPeriod;
-  let previousSchoolYear;
-
-  if (GY) {
-    monthPeriods[monthPeriods.indexOf(selectedPeriod)] === monthPeriods[0]
-      ? (previousPeriod = monthPeriods[monthPeriods.length - 1])
-      : (previousPeriod = monthPeriods[monthPeriods.indexOf(selectedPeriod) - 1]);
-
-    monthPeriods.indexOf(previousPeriod) === monthPeriods.indexOf('VT Maj')
-      ? (previousSchoolYear = selectedSchoolYear - 1)
-      : (previousSchoolYear = selectedSchoolYear);
-  } else if (GR) {
-    termPeriods[termPeriods.indexOf(selectedPeriod)] === termPeriods[0]
-      ? (previousPeriod = termPeriods[termPeriods.length - 1])
-      : (previousPeriod = termPeriods[termPeriods.indexOf(selectedPeriod) - 1]);
-
-    previousPeriod === 'VT' ? (previousSchoolYear = selectedSchoolYear - 1) : (previousSchoolYear = selectedSchoolYear);
-  }
 
   const openModalhandler = async () => {
     await setisOpen(true);
@@ -58,27 +29,39 @@ export const CopyPreviousForecast: React.FC = () => {
     setisOpen(false);
   };
 
+  useEffect(() => {
+    if (
+      currentDate >= new Date(`${new Date().getFullYear()}-07-01`) &&
+      currentDate < new Date(allPeriods[allPeriods.length - 1].startDate) &&
+      currentDate < new Date(selectedPeriod.startDate)
+    ) {
+      setSummerPeriod(true);
+    } else {
+      setSummerPeriod(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod]);
+
   const onCopyHandler = async () => {
-    const body = {
-      groupId: selectedId,
-      period: selectedPeriod,
-      previusPeriod: previousPeriod,
-      schoolYear: selectedSchoolYear,
-      previusSchoolYear: previousSchoolYear,
-    };
-    await copyPreviousForecast(body).then((res) => {
-      if (!res.error) {
-        message({
-          message: `Prognosen sparades`,
-          status: 'success',
-        });
-      } else {
-        message({
-          message: res.message,
-          status: 'error',
-        });
-      }
-    });
+    if (subject[0].groupId) {
+      const body: CopyPreviousForecastDto = {
+        groupId: subject[0].groupId || '',
+        syllabusId: syllabusId,
+      };
+      await copyPreviousForecast(body, selectedSchool.schoolId).then((res) => {
+        if (!res.error) {
+          message({
+            message: `Prognosen sparades`,
+            status: 'success',
+          });
+        } else {
+          message({
+            message: res.message,
+            status: 'error',
+          });
+        }
+      });
+    }
   };
 
   let numberOfForecasts = 0;
@@ -90,15 +73,16 @@ export const CopyPreviousForecast: React.FC = () => {
 
   useEffect(() => {
     if (
-      (selectedPeriod === 'HT' || selectedPeriod === 'HT September') &&
-      dayjs(new Date()).month() >= dayjs(new Date(new Date().getFullYear(), 5, 1)).month() &&
-      dayjs(new Date()).month() < dayjs(new Date(new Date().getFullYear(), 7, 1)).month()
+      currentDate >= new Date(`${new Date().getFullYear()}-07-01`) &&
+      currentDate < new Date(allPeriods[allPeriods.length - 1].startDate) &&
+      currentDate < new Date(selectedPeriod.startDate)
     ) {
       setSummerPeriod(true);
     } else {
       setSummerPeriod(false);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod]);
 
   return summerPeriod ? (
     <></>

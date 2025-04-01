@@ -1,16 +1,15 @@
 import { Button, Icon, Modal, useSnackbar } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
 import { useState } from 'react';
 import { clearGroupForecastsDto } from '@interfaces/forecast/forecast';
+import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useUserStore } from '@services/user-service/user-service';
 
 export const ClearAllForecasts: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const selectedId = useForecastStore((s) => s.selectedId);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
-  const subject = useForecastStore((s) => s.groupWithPupils);
-  const clearAll = useForecastStore((s) => s.clearGroupForecasts);
+  const subject = usePupilForecastStore((s) => s.subject);
+  const allSubjects = usePupilForecastStore((s) => s.mySubjects);
+  const clearAll = usePupilForecastStore((s) => s.clearGroupForecasts);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
 
   const message = useSnackbar();
 
@@ -22,13 +21,12 @@ export const ClearAllForecasts: React.FC = () => {
   };
 
   const clearAllHandler = () => {
-    if (selectedId) {
+    if (subject[0].groupId) {
       const body: clearGroupForecastsDto = {
-        groupId: selectedId,
-        period: selectedPeriod,
-        schoolYear: selectedSchoolYear,
+        groupId: subject[0].groupId ?? '',
+        syllabusId: allSubjects.data.find((s) => s.groupId === subject[0].groupId)?.syllabusId || '',
       };
-      clearAll(body).then((res) => {
+      clearAll(body, selectedSchool.schoolId).then((res) => {
         if (!res.error) {
           message({
             message: `Prognoserna rensades bort`,

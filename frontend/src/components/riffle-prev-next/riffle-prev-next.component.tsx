@@ -1,5 +1,5 @@
 import { Button, Icon, Spinner } from '@sk-web-gui/react';
-import { useForecastStore } from '@services/forecast-service/forecats-service';
+import { useRouter } from 'next/router';
 
 interface RiffleProps {
   callback: 'classes' | 'pupils' | 'subjects' | 'mentorclass' | 'pupil' | 'subject';
@@ -10,40 +10,46 @@ interface RiffleProps {
     title: string;
   }>;
 
-  dataId?: string;
+  currentId?: string;
 }
 
-export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsLoading, callback, dataId }) => {
-  const selectedId = useForecastStore((s) => s.selectedId) || dataId;
-  const setObjectWithPeriod = useForecastStore((s) => s.setSelectedPeriod);
-  const selectedPeriod = useForecastStore((s) => s.selectedPeriod);
-  const selectedSchoolYear = useForecastStore((s) => s.selectedSchoolYear);
+export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsLoading, currentId }) => {
+  const router = useRouter();
+  const selectedId = currentId;
 
   const currentRiffle = riffleObjects.find((f) => f.id === selectedId?.toLowerCase());
   const prevRiffle =
-    riffleObjects[riffleObjects.indexOf(currentRiffle)] === riffleObjects[0]
+    riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0])] === riffleObjects[0]
       ? riffleObjects[riffleObjects.length - 1]
-      : riffleObjects[riffleObjects.indexOf(currentRiffle) - 1];
+      : riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0]) - 1];
   const nextRiffle =
-    riffleObjects[riffleObjects.indexOf(currentRiffle)] === riffleObjects[riffleObjects.length - 1]
+    riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0])] === riffleObjects[riffleObjects.length - 1]
       ? riffleObjects[0]
-      : riffleObjects[riffleObjects.indexOf(currentRiffle) + 1];
+      : riffleObjects[riffleObjects.indexOf(currentRiffle ?? riffleObjects[0]) + 1];
 
-  const riffleHandler = (id) => {
-    setObjectWithPeriod(selectedPeriod, selectedSchoolYear, callback, id);
+  const riffleHandler = async (link: string) => {
+    await router.push(link);
   };
 
   return !riffleIsLoading ? (
     <div className={`w-full flex ${riffleObjects.length > 2 ? 'justify-between' : 'justify-end'} mt-24`}>
       {riffleObjects.length > 2 ? (
-        <Button onClick={() => riffleHandler(prevRiffle.id)} leftIcon={<Icon name="arrow-left" />} variant="secondary">
+        <Button
+          onClick={() => riffleHandler(prevRiffle.link)}
+          leftIcon={<Icon name="arrow-left" />}
+          variant="secondary"
+        >
           {prevRiffle?.title}
         </Button>
       ) : (
         <></>
       )}
 
-      <Button onClick={() => riffleHandler(nextRiffle.id)} rightIcon={<Icon name="arrow-right" />} variant="secondary">
+      <Button
+        onClick={() => riffleHandler(nextRiffle.link)}
+        rightIcon={<Icon name="arrow-right" />}
+        variant="secondary"
+      >
         {nextRiffle?.title}
       </Button>
     </div>

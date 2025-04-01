@@ -1,6 +1,7 @@
+import { User } from '@interfaces/user';
 import { hasRolePermission } from './has-role-permission';
 
-export const formatPreviousPeriod = (user, selectedPeriod, selectedSchoolYear) => {
+export const formatPreviousPeriod = (user: User, selectedPeriod: string, selectedSchoolYear: number) => {
   const { GY, GR } = hasRolePermission(user);
 
   const monthPeriods = [
