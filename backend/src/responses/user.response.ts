@@ -17,8 +17,8 @@ export class User implements ClientUser {
   username: string;
   @IsArray()
   roles: [{ role: string; typeOfSchool: string }];
-  @IsString()
-  school: string;
+  @IsArray()
+  schools: [{ schoolId: string; schoolName: string }];
   // @IsEnum(InternalRoleEnum)
   // role: InternalRole;
   // @ValidateNested()
