@@ -41,7 +41,7 @@ interface ISinglePupilTable {
 
 export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuery }) => {
   const router = useRouter();
-  const { headmaster } = hasRolePermission(user);
+  const { headmaster, teacher } = hasRolePermission(user);
   const [pageSize] = useState<number>(10);
   const pupil = usePupilForecastStore((s) => s.pupil);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
@@ -230,6 +230,21 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
                   inverted
                   rightIcon={<Icon name="arrow-right" />}
                   onClick={() => router.push(`/mina-amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`)}
+                >
+                  Rapportera
+                </Button>
+              </div>
+            </Table.Column>
+          ) : headmaster && teacher ? (
+            <Table.Column>
+              <div className="flex items-center gap-2">
+                <Button
+                  className="float-right"
+                  color="vattjom"
+                  size="sm"
+                  inverted
+                  rightIcon={<Icon name="arrow-right" />}
+                  onClick={() => router.push(`/amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`)}
                 >
                   Rapportera
                 </Button>

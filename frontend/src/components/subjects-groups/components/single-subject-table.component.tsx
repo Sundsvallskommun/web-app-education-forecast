@@ -44,7 +44,7 @@ interface ISingleSubjectTable {
 }
 
 export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, searchQuery, selectedSyllabus }) => {
-  const { headmaster } = hasRolePermission(user);
+  const { headmaster, teacher } = hasRolePermission(user);
   const [pageSize] = useState<number>(60);
   const subject = usePupilForecastStore((s) => s.subject);
   const myClasses = usePupilForecastStore((s) => s.myClasses);
@@ -178,7 +178,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
                 size="sm"
                 accent
               />
-              {headmaster ? (
+              {headmaster && !teacher ? (
                 <span className="ml-8 font-bold">
                   <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
                 </span>
@@ -212,7 +212,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
             </div>
           </Table.Column>
           <Table.Column>
-            {headmaster ? (
+            {headmaster && !teacher ? (
               <div className="flex items-center gap-2">
                 {summerPeriod ? (
                   <Label inverted rounded color="juniskar">
