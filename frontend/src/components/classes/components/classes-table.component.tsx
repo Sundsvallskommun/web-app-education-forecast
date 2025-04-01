@@ -33,7 +33,6 @@ export const ClassesTable: React.FC = () => {
   const { mentor, teacher } = hasRolePermission(user);
   const { myClasses } = usePupilForecastStore();
   const [classTable, setClassTable] = useState<IClasses[]>([]);
-  //   const [pageSize] = useState<number>(myClasses.pageSize);
 
   const { watch, setValue, register, formState } = useFormContext<ClassesTableForm>();
   const sortOrder = watch('sortOrder');
