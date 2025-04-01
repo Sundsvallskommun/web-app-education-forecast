@@ -63,8 +63,7 @@ export class PupilForecastController {
     @QueryParam('PageNumber') PageNumber?: number | null,
     @QueryParam('PageSize') PageSize?: number | null,
   ): Promise<ApiResponse<ForecastMetaGroups>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { personId } = req.user; //CHANGE TO AS TEACHERID WHEN EMPLOYMENT IS FIXED
+    const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast/${schoolId}`;
 
     return await this.apiService.get<ForecastMetaGroups>({
@@ -123,7 +122,6 @@ export class PupilForecastController {
 
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<Pupil[]>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast/group/${groupId}/${syllabusId}`;
     return await this.apiService.get<Pupil[]>({
@@ -142,7 +140,6 @@ export class PupilForecastController {
     @QueryParam('periodId') periodId: number,
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<Pupil[]>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast/${schoolId}/pupil/${pupilId}`;
     return await this.apiService.get<Pupil[]>({
@@ -160,7 +157,6 @@ export class PupilForecastController {
     @QueryParam('periodId') periodId: number,
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<MyMentorClassPupilGrid[]>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast/class/${groupId}/grid`;
     return await this.apiService.get<MyMentorClassPupilGrid[]>({
@@ -173,7 +169,6 @@ export class PupilForecastController {
   @OpenAPI({ summary: 'Set forecast grade on a pupil' })
   @UseBefore(authMiddleware, validationMiddleware(setForecastDto, 'body'))
   async setForecast(@Req() req: RequestWithUser, @Body() body: setForecastDto): Promise<ApiResponse<{}>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast`;
     return await this.apiService.post({ url, data: { ...body, teacherId: personId } });
@@ -183,7 +178,6 @@ export class PupilForecastController {
   @OpenAPI({ summary: 'Copy previous forecast and set to current' })
   @UseBefore(authMiddleware, validationMiddleware(copyPreviousForecastDto, 'body'))
   async copyPreviousForecast(@Req() req: RequestWithUser, @Body() body: copyPreviousForecastDto): Promise<ApiResponse<{}>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast/copy`;
     return await this.apiService.post({ url, data: { ...body, teacherId: personId } });
@@ -198,7 +192,6 @@ export class PupilForecastController {
     @Param('groupId') groupId: string,
     @Param('syllabusId') syllabusId: string,
   ): Promise<ApiResponse<{}>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { personId } = req.user;
     const url = `${API_URL}/${municipalityId}/forecast/${groupId}/${syllabusId}`;
     return await this.apiService.delete({
