@@ -3,6 +3,7 @@ import { SetForecastDto } from '@interfaces/forecast/forecast';
 import { IsGradedForecast } from '@utils/is-grade-forecast';
 import { useState } from 'react';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useUserStore } from '@services/user-service/user-service';
 
 interface EditForecastprops {
   pupil: {
@@ -16,6 +17,7 @@ interface EditForecastprops {
 export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) => {
   const setForecast = usePupilForecastStore((s) => s.setForecast);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
   const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
   const [forecastLoading, setForecastLoading] = useState(false);
   const { APPROVED, WARNINGS, UNNAPROVED } = IsGradedForecast(forecast);
@@ -34,7 +36,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
 
     if (pupil.pupilId && forecast) {
       setForecastLoading(true);
-      await setForecast(setForecastBody).then((res) => {
+      await setForecast(setForecastBody, selectedSchool.schoolId).then((res) => {
         if (res.data) {
           message({
             message: `Prognosen sparades`,

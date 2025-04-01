@@ -3,6 +3,7 @@ import { Button, Icon, Modal, useSnackbar } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useUserStore } from '@services/user-service/user-service';
 
 interface ICopyPreviousForecast {
   syllabusId: string;
@@ -15,6 +16,7 @@ export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabus
   const [summerPeriod, setSummerPeriod] = useState(false);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const allPeriods = usePupilForecastStore((s) => s.allPeriods);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
   const currentDate = new Date();
 
   const message = useSnackbar();
@@ -46,7 +48,7 @@ export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabus
         groupId: subject[0].groupId || '',
         syllabusId: syllabusId,
       };
-      await copyPreviousForecast(body).then((res) => {
+      await copyPreviousForecast(body, selectedSchool.schoolId).then((res) => {
         if (!res.error) {
           message({
             message: `Prognosen sparades`,

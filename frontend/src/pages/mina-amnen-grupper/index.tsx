@@ -20,7 +20,6 @@ export const Index: React.FC = () => {
   const getSubjects = usePupilForecastStore((s) => s.getMySubjects);
   const getMyClasses = usePupilForecastStore((s) => s.getMyClasses);
   const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
-  console.log(selectedPeriod);
 
   const myGroup: ForeacastQueriesDto = {
     schoolId: selectedSchool?.schoolId,
