@@ -21,7 +21,7 @@ export default function Index() {
 
   const teacherAndMentorRoutes = () => {
     const myGroup: ForeacastQueriesDto = {
-      schoolId: selectedSchool.schoolId,
+      schoolId: selectedSchool?.schoolId,
       OrderBy: 'GroupName',
       OrderDirection: 'ASC',
       PageSize: 10,

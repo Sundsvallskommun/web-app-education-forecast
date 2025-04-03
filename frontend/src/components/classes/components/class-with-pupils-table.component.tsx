@@ -19,10 +19,10 @@ interface IMentorClassTable {
 export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuery }) => {
   const router = useRouter();
   const { headmaster, mentor } = hasRolePermission(user);
-  const [pageSize] = useState<number>(mentor || headmaster ? 100 : 10);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
   const [mentorClassData, setMentorClassData] = useState<KeyStringTable[]>([]);
   const [subjectHeaders, setSubjectHeaders] = useState<MentorClassHeaders[]>([]);
+  const [pageSize] = useState<number>(mentor || headmaster ? mentorClass.length : 10);
 
   useEffect(() => {
     const tableArr: KeyStringTable[] = [];
