@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
 import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
-import dayjs from 'dayjs';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 export interface TablePupil extends Pupil {
   id?: string | null;
@@ -44,7 +43,6 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
   const { headmaster, teacher } = hasRolePermission(user);
   const [pageSize] = useState<number>(10);
   const pupil = usePupilForecastStore((s) => s.pupil);
-  const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
   const [pupilTable, setPupilTable] = useState<TablePupil[]>([]);
 
   useEffect(() => {
@@ -57,17 +55,6 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
 
     setPupilTable(pupilArr);
   }, [pupil]);
-
-  useEffect(() => {
-    if (
-      dayjs(new Date()).month() >= dayjs(new Date(new Date().getFullYear(), 5, 1)).month() &&
-      dayjs(new Date()).month() < dayjs(new Date(new Date().getFullYear(), 7, 1)).month()
-    ) {
-      setSummerPeriod(true);
-    } else {
-      setSummerPeriod(false);
-    }
-  }, []);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
   const [sortColumn, setSortColumn] = useState<keyof TablePupil>('courseName');
@@ -189,34 +176,28 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
             colSpan={Array.isArray(p.teachers) && !p.teachers?.find((x) => x.personId === user.personId) ? 2 : 1}
           >
             <div className="flex justify-between">
-              {summerPeriod ? (
-                <Label inverted rounded color="juniskar">
-                  Inga prognoser under sommaren
-                </Label>
-              ) : (
-                <div className="flex items-center gap-2">
-                  {p.forecast === 1 && (
-                    <Label rounded color="gronsta">
-                      Når målen
-                    </Label>
-                  )}
-                  {p.forecast === 2 && (
-                    <Label rounded color="warning">
-                      Uppmärksammad
-                    </Label>
-                  )}
-                  {p.forecast === 3 && (
-                    <Label rounded color="error">
-                      Når ej målen
-                    </Label>
-                  )}
-                  {!p.forecast && (
-                    <Label rounded color="black">
-                      Inte ifylld
-                    </Label>
-                  )}
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {p.forecast === 1 && (
+                  <Label rounded color="gronsta">
+                    Når målen
+                  </Label>
+                )}
+                {p.forecast === 2 && (
+                  <Label rounded color="warning">
+                    Uppmärksammad
+                  </Label>
+                )}
+                {p.forecast === 3 && (
+                  <Label rounded color="error">
+                    Når ej målen
+                  </Label>
+                )}
+                {!p.forecast && (
+                  <Label rounded color="black">
+                    Inte ifylld
+                  </Label>
+                )}
+              </div>
             </div>
           </Table.Column>
 
