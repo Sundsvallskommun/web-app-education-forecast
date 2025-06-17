@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { initialsFunction } from '@utils/initials';
 import { EditForecast } from '@components/edit-forecast/edit-forecast.component';
-import dayjs from 'dayjs';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 interface TablePupil extends Pupil {
   id?: string | null;
@@ -49,7 +48,6 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
   const subject = usePupilForecastStore((s) => s.subject);
   const myClasses = usePupilForecastStore((s) => s.myClasses);
   const [pupilsInGroupData, setPupilsInGroupData] = useState<TablePupil[]>([]);
-  const [summerPeriod, setSummerPeriod] = useState<boolean>(false);
 
   useEffect(() => {
     const tableArr: TablePupil[] = [];
@@ -86,17 +84,6 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
     setPupilsInGroupData(tableArr);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subject]);
-
-  useEffect(() => {
-    if (
-      dayjs(new Date()).month() >= dayjs(new Date(new Date().getFullYear(), 5, 1)).month() &&
-      dayjs(new Date()).month() < dayjs(new Date(new Date().getFullYear(), 7, 1)).month()
-    ) {
-      setSummerPeriod(true);
-    } else {
-      setSummerPeriod(false);
-    }
-  }, []);
 
   const [_pageSize, setPageSize] = useState<number>(pageSize);
   const [sortColumn, setSortColumn] = useState<keyof TablePupil>('pupil');
@@ -214,54 +201,40 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
           <Table.Column>
             {headmaster && !teacher ? (
               <div className="flex items-center gap-2">
-                {summerPeriod ? (
-                  <Label inverted rounded color="juniskar">
-                    Inga prognoser under sommaren
-                  </Label>
-                ) : (
-                  <>
-                    {p.forecast === 1 && (
-                      <Label rounded color="gronsta">
-                        Når målen
-                      </Label>
-                    )}
-                    {p.forecast === 2 && (
-                      <Label rounded color="warning">
-                        Uppmärksammad
-                      </Label>
-                    )}
-                    {p.forecast === 3 && (
-                      <Label rounded color="error">
-                        Når ej målen
-                      </Label>
-                    )}
-                    {!p.forecast && (
-                      <Label rounded color="black">
-                        Inte ifylld
-                      </Label>
-                    )}
-                  </>
-                )}
+                <>
+                  {p.forecast === 1 && (
+                    <Label rounded color="gronsta">
+                      Når målen
+                    </Label>
+                  )}
+                  {p.forecast === 2 && (
+                    <Label rounded color="warning">
+                      Uppmärksammad
+                    </Label>
+                  )}
+                  {p.forecast === 3 && (
+                    <Label rounded color="error">
+                      Når ej målen
+                    </Label>
+                  )}
+                  {!p.forecast && (
+                    <Label rounded color="black">
+                      Inte ifylld
+                    </Label>
+                  )}
+                </>
               </div>
             ) : (
-              <>
-                {summerPeriod ? (
-                  <Label inverted rounded color="juniskar">
-                    Inga prognoser under sommaren
-                  </Label>
-                ) : (
-                  <EditForecast
-                    pupil={
-                      p && {
-                        syllabusId: p.syllabusId && typeof p.syllabusId === 'string' ? p.syllabusId : '',
-                        pupilId: p.id && typeof p.id === 'string' ? p.id : '',
-                        groupId: p.groupId && typeof p.groupId === 'string' ? p.groupId : '',
-                      }
-                    }
-                    forecast={p.forecast === null || typeof p.forecast !== 'number' ? null : p.forecast}
-                  />
-                )}
-              </>
+              <EditForecast
+                pupil={
+                  p && {
+                    syllabusId: p.syllabusId && typeof p.syllabusId === 'string' ? p.syllabusId : '',
+                    pupilId: p.id && typeof p.id === 'string' ? p.id : '',
+                    groupId: p.groupId && typeof p.groupId === 'string' ? p.groupId : '',
+                  }
+                }
+                forecast={p.forecast === null || typeof p.forecast !== 'number' ? null : p.forecast}
+              />
             )}
           </Table.Column>
         </Table.Row>
