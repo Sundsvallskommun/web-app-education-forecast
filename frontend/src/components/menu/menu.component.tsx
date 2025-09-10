@@ -1,4 +1,4 @@
-import { Icon, Link, MenuBar, PopupMenu } from '@sk-web-gui/react';
+import { Icon, Link, MenuBar, PopupMenu, useSnackbar } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
@@ -21,6 +21,8 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
   const setSelectedSchool = useUserStore((s) => s.setSelectedShool);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
+  const toastMessage = useSnackbar();
+
   const classesQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool?.schoolId,
     periodId: selectedPeriod?.periodId,
@@ -36,7 +38,12 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
 
   useEffect(() => {
     if (mentor) {
-      getMyClasses(classesQueries);
+      getMyClasses(classesQueries).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av alla klasser',
+          status: 'error',
+        });
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod?.periodId]);
@@ -86,7 +93,7 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
             {user.schools.length > 1 ? (
               <PopupMenu>
                 <PopupMenu.Button rightIcon={<Icon name="chevron-down" />}>{link.label}</PopupMenu.Button>
-                <PopupMenu.Panel className="w-fit">
+                <PopupMenu.Panel>
                   {user.schools.map((s) => {
                     return (
                       <PopupMenu.Item key={`popupmenyitem-${s.schoolId}`}>

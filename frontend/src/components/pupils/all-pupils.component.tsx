@@ -6,6 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { AllPupilsTable } from './components/all-pupils-table.components';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface AllPupilsProps {
   pageTitle: string;
@@ -46,6 +47,8 @@ export const AllPupils: React.FC<AllPupilsProps> = ({ pageTitle, pupilsQueries }
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const fullTitle = allPupils.totalRecords !== 0 ? `${pageTitle} (${allPupils.totalRecords})` : pageTitle;
 
+  const toastMessage = useSnackbar();
+
   const tableForm = useForm<PupilsTableForm>({
     defaultValues: {
       sortColumn: pupilsQueries.OrderBy,
@@ -75,6 +78,11 @@ export const AllPupils: React.FC<AllPupilsProps> = ({ pageTitle, pupilsQueries }
       PageSize: pageSize,
       OrderBy: sortColumn,
       OrderDirection: sortOrder,
+    }).catch(() => {
+      toastMessage({
+        message: 'Något gick fel vid hämtning av alla elever',
+        status: 'error',
+      });
     });
 
     //eslint-disable-next-line

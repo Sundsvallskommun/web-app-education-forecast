@@ -8,6 +8,7 @@ import { hasRolePermission } from '@utils/has-role-permission';
 import { Classes } from '@components/classes/classes.component';
 import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
@@ -17,6 +18,8 @@ export const Index: React.FC = () => {
   const getClasses = usePupilForecastStore((s) => s.getMyClasses);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
+
+  const toastMessage = useSnackbar();
 
   //const currentPeriod = GR ? termPeriod : currentMonthPeriod;
   const classQueries: ForeacastQueriesDto = {
@@ -28,7 +31,14 @@ export const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    !headmaster ? router.push('/mina-amnen-grupper') : getClasses(classQueries);
+    !headmaster
+      ? router.push('/mina-amnen-grupper')
+      : getClasses(classQueries).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av alla klasser',
+            status: 'error',
+          });
+        });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

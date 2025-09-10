@@ -6,6 +6,7 @@ import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecas
 import { useForm, FormProvider } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { SubjectsTable } from './components/subjects-table.components';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface SubjectsGroupsProps {
   pageTitle: string;
@@ -42,6 +43,8 @@ export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subje
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const fullTitle = mySubjects.totalRecords !== 0 ? `${pageTitle} (${mySubjects.totalRecords})` : pageTitle;
 
+  const toastMessage = useSnackbar();
+
   const tableForm = useForm<SubjectsTableForm>({
     defaultValues: {
       sortColumn: subjectsQueries.OrderBy,
@@ -71,6 +74,11 @@ export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subje
       PageSize: pageSize,
       OrderBy: sortColumn,
       OrderDirection: sortOrder,
+    }).catch(() => {
+      toastMessage({
+        message: 'Något gick fel vid hämtning av alla ämnen/grupper',
+        status: 'error',
+      });
     });
 
     //eslint-disable-next-line

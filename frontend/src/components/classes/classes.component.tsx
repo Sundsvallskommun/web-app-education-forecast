@@ -7,6 +7,7 @@ import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecas
 import { FormProvider, useForm } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { ClassesTable } from './components/classes-table.component';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface ClassesProps {
   pageTitle: string;
@@ -43,6 +44,8 @@ export const Classes: React.FC<ClassesProps> = ({ pageTitle, classQueries }) => 
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
 
+  const toastMessage = useSnackbar();
+
   const fullTitle = myClasses && myClasses.data.length !== 0 ? `${pageTitle} (${myClasses.data.length})` : pageTitle;
 
   const tableForm = useForm<ClassesTableForm>({
@@ -74,6 +77,11 @@ export const Classes: React.FC<ClassesProps> = ({ pageTitle, classQueries }) => 
       PageSize: pageSize,
       OrderBy: sortColumn,
       OrderDirection: sortOrder,
+    }).catch(() => {
+      toastMessage({
+        message: 'Något gick fel vid hämtning av alla klasser',
+        status: 'error',
+      });
     });
 
     //eslint-disable-next-line

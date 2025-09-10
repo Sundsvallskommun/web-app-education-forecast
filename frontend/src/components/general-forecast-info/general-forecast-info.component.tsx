@@ -119,15 +119,18 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
   }
 
   useEffect(() => {
-    if (
-      currentDate >= new Date(`${new Date().getFullYear()}-07-01`) &&
-      currentDate < new Date(allPeriods[allPeriods.length - 1].startDate) &&
-      currentDate < new Date(selectedPeriod.startDate)
-    ) {
-      setSummerPeriod(true);
-    } else {
-      setSummerPeriod(false);
+    if (allPeriods) {
+      if (
+        currentDate >= new Date(`${new Date().getFullYear()}-07-01`) &&
+        currentDate < new Date(allPeriods[allPeriods.length - 1]?.startDate) &&
+        currentDate < new Date(selectedPeriod.startDate)
+      ) {
+        setSummerPeriod(true);
+      } else {
+        setSummerPeriod(false);
+      }
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 

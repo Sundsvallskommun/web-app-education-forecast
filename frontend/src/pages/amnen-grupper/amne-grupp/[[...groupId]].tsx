@@ -7,6 +7,7 @@ import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface Riffle {
   id: string;
@@ -24,6 +25,7 @@ export const Index: React.FC = () => {
   const getSubjectWithPupils = usePupilForecastStore((s) => s.getSubjectWithPupils);
   const geMySubjects = usePupilForecastStore((s) => s.getMySubjects);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const toastMessage = useSnackbar();
   const [pageTitle, setPageTitle] = useState<string>();
 
   const allSubjects = usePupilForecastStore((s) => s.mySubjects);
@@ -50,8 +52,18 @@ export const Index: React.FC = () => {
       if (subjectId && syllabusId) {
         if (router.pathname.includes(subjectId) && router.pathname.includes(syllabusId)) return;
         //await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
-        await getSubjectWithPupils(subjectId, syllabus, selectedPeriod.periodId);
-        await geMySubjects(subjectQueries);
+        await getSubjectWithPupils(subjectId, syllabus, selectedPeriod.periodId).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av ämnet/gruppen',
+            status: 'error',
+          });
+        });
+        await geMySubjects(subjectQueries).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av alla ämnen och grupper',
+            status: 'error',
+          });
+        });
         setSelectedId(subjectId);
         setSelectedSyllabus(syllabusId);
         // await getPreviousPeriodGroup(subjectId, {

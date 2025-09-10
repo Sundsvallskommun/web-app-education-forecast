@@ -7,6 +7,7 @@ import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface Riffle {
   id: string;
@@ -41,13 +42,25 @@ export const Index: React.FC = () => {
   const [selectedSyllabus, setSelectedSyllabus] = useState<string>();
   const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
 
+  const toastMessage = useSnackbar();
+
   useEffect(() => {
     const loadClass = async () => {
       if (subjectId && syllabusId) {
         if (router.pathname.includes(subjectId)) return;
 
-        await getSubjects(subjectsQueries);
-        await getSubjectWithPupils(subjectId, syllabusId);
+        await getSubjects(subjectsQueries).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av alla dina ämnen/grupper',
+            status: 'error',
+          });
+        });
+        await getSubjectWithPupils(subjectId, syllabusId).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av ämnet/gruppen',
+            status: 'error',
+          });
+        });
         setSelectedId(subjectId);
         setSelectedSyllabus(syllabusId);
       } else {
@@ -70,8 +83,18 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     if (selectedId && selectedSyllabus) {
-      getSubjects(subjectsQueries);
-      getSubjectWithPupils(selectedId, selectedSyllabus, selectedPeriod.periodId);
+      getSubjects(subjectsQueries).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av alla dina ämnen/grupper',
+          status: 'error',
+        });
+      });
+      getSubjectWithPupils(selectedId, selectedSyllabus, selectedPeriod.periodId).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av ämnet/gruppen',
+          status: 'error',
+        });
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedSyllabus, selectedPeriod.periodId]);

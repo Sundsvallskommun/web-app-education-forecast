@@ -5,7 +5,7 @@ import Main from '@layouts/main/main.component';
 
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
-import { Spinner } from '@sk-web-gui/react';
+import { Spinner, useSnackbar } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import router from 'next/router';
 import { useEffect } from 'react';
@@ -21,6 +21,8 @@ export const Index: React.FC = () => {
   const getMyClasses = usePupilForecastStore((s) => s.getMyClasses);
   const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
 
+  const toastMessage = useSnackbar();
+
   const myGroup: ForeacastQueriesDto = {
     schoolId: selectedSchool?.schoolId,
     periodId: selectedPeriod?.periodId !== 0 ? selectedPeriod?.periodId : currentPeriod.periodId,
@@ -31,11 +33,23 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     if (teacher || (mentor && teacher)) {
-      getSubjects(myGroup);
-    } else if (mentor && !teacher) {
-      getMyClasses(myGroup).then((res) => {
-        res.data && router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+      getSubjects(myGroup).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av dina ämnen/grupper',
+          status: 'error',
+        });
       });
+    } else if (mentor && !teacher) {
+      getMyClasses(myGroup)
+        .then((res) => {
+          res.data && router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+        })
+        .catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av din mentorsklass',
+            status: 'error',
+          });
+        });
     } else if (headmaster) {
       router.push('/amnen-grupper');
     }

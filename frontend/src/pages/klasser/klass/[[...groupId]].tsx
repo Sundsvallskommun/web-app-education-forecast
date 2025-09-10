@@ -6,6 +6,7 @@ import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { useUserStore } from '@services/user-service/user-service';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface Riffle {
   id: string;
@@ -29,6 +30,8 @@ export const Index: React.FC = () => {
   const classesIsLoading = usePupilForecastStore((s) => s.classesIsLoading);
   const [riffleClasses, setRiffleClasses] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
+
+  const toastMessage = useSnackbar();
 
   const classQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
@@ -63,8 +66,18 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     if (selectedId) {
-      getClasses(classQueries);
-      getMentorClass(selectedId, selectedPeriod.periodId);
+      getClasses(classQueries).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av alla klasser',
+          status: 'error',
+        });
+      });
+      getMentorClass(selectedId, selectedPeriod.periodId).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av klassen',
+          status: 'error',
+        });
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedPeriod.periodId]);
