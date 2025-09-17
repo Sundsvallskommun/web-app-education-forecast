@@ -38,7 +38,6 @@ export const Index: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string>();
   const [selectedSyllabus, setSelectedSyllabus] = useState<string>();
 
-  //const currentPeriod = GR ? termPeriod : currentMonthPeriod;
   const subjectQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
     periodId: selectedPeriod.periodId,
@@ -51,7 +50,6 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (subjectId && syllabusId) {
         if (router.pathname.includes(subjectId) && router.pathname.includes(syllabusId)) return;
-        //await setSelectedPeriod(myGroup.period, myGroup.schoolYear, 'subjects');
         await getSubjectWithPupils(subjectId, syllabus, selectedPeriod.periodId).catch(() => {
           toastMessage({
             message: 'Något gick fel vid hämtning av ämnet/gruppen',
@@ -66,10 +64,6 @@ export const Index: React.FC = () => {
         });
         setSelectedId(subjectId);
         setSelectedSyllabus(syllabusId);
-        // await getPreviousPeriodGroup(subjectId, {
-        //   period: previousPeriod,
-        //   schoolYear: previousSchoolYear ?? currentYear - 1,
-        // });
       } else {
         if (!subjectId) {
           router.push('/amnen-grupper');
