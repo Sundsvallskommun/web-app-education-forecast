@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
@@ -16,6 +17,8 @@ export const Index: React.FC = () => {
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const getAllPupils = usePupilForecastStore((s) => s.getAllPupils);
+
+  const toastMessage = useSnackbar();
 
   const pupilsQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
@@ -26,7 +29,14 @@ export const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    !headmaster ? router.push('/mina-amnen-grupper') : getAllPupils(pupilsQueries);
+    !headmaster
+      ? router.push('/mina-amnen-grupper')
+      : getAllPupils(pupilsQueries).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av alla elever',
+            status: 'error',
+          });
+        });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

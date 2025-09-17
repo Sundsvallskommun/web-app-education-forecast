@@ -6,6 +6,7 @@ import { Pupil } from '@components/pupils/pupil.component';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { useUserStore } from '@services/user-service/user-service';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface Riffle {
   id: string;
@@ -28,6 +29,8 @@ export const Index: React.FC = () => {
   const mentorclassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
+
+  const toastMessage = useSnackbar();
 
   useEffect(() => {
     const loadClass = async () => {
@@ -59,8 +62,18 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     if (selectedId && selectedPeriod) {
-      getMentorClass(pupil[0].classGroupId || '', selectedPeriod.periodId);
-      getPupil(selectedSchool.schoolId, selectedId, selectedPeriod.periodId);
+      getMentorClass(pupil[0].classGroupId || '', selectedPeriod.periodId).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av din mentorsklass',
+          status: 'error',
+        });
+      });
+      getPupil(selectedSchool.schoolId, selectedId, selectedPeriod.periodId).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av eleven',
+          status: 'error',
+        });
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedPeriod.periodId]);

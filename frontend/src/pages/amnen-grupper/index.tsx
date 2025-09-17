@@ -8,6 +8,7 @@ import router from 'next/router';
 import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
@@ -15,7 +16,7 @@ export const Index: React.FC = () => {
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const getSubjects = usePupilForecastStore((s) => s.getMySubjects);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
-
+  const toastMessage = useSnackbar();
   const pageTitle = 'Ämnen/grupper';
 
   const subjectsQueries: ForeacastQueriesDto = {
@@ -27,7 +28,14 @@ export const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    !headmaster ? router.push('/mina-amnen-grupper') : getSubjects(subjectsQueries);
+    !headmaster
+      ? router.push('/mina-amnen-grupper')
+      : getSubjects(subjectsQueries).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av ämnen och grupper',
+            status: 'error',
+          });
+        });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
