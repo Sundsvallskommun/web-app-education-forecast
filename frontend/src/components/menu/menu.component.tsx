@@ -54,14 +54,14 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
 
     if (user) {
       user.schools.forEach((s) => {
-        if (!schools.findIndex((x) => x.schoolId === s.schoolId)) {
+        if (!schools.find((x) => x.schoolId === s.schoolId)) {
           schools.push({ schoolId: s.schoolId, schoolName: s.schoolName });
         }
       });
     }
 
     setHeadMasterSchools(schools);
-  }, []);
+  }, [user]);
 
   const Usermenu = (
     <PopupMenu>
