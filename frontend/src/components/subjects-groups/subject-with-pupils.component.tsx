@@ -55,7 +55,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
           pageTitle={singleSubject.length !== 0 ? pageTitle : 'Ämne/grupp'}
           GeneralInformation={generalInformation}
           teachers={
-            teacher && singleSubject[0]?.teachers?.find((x) => x.personId === user.personId)
+            teacher
               ? [
                   {
                     givenname: user.name.split(' ')[0],

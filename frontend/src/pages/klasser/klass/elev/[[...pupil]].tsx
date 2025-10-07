@@ -7,6 +7,7 @@ import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
 import { useUserStore } from '@services/user-service/user-service';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useSnackbar } from '@sk-web-gui/react';
 
 interface Riffle {
   id: string;
@@ -33,6 +34,8 @@ export const Index: React.FC = () => {
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
 
+  const toastMessage = useSnackbar();
+
   const classQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
     periodId: selectedPeriod.periodId,
@@ -45,8 +48,18 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (pupilId) {
         if (router.pathname.includes(pupilId)) return;
-        await getAllPupils(classQueries);
-        await getPupil(selectedSchool.schoolId, pupilId, selectedPeriod.periodId);
+        await getAllPupils(classQueries).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av alla elever',
+            status: 'error',
+          });
+        });
+        await getPupil(selectedSchool.schoolId, pupilId, selectedPeriod.periodId).catch(() => {
+          toastMessage({
+            message: 'Något gick fel vid hämtning av eleven',
+            status: 'error',
+          });
+        });
         setSelectedId(pupilId);
       } else {
         if (!pupilId) {

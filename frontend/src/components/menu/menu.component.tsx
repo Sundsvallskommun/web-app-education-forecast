@@ -1,4 +1,4 @@
-import { Icon, Link, MenuBar, PopupMenu } from '@sk-web-gui/react';
+import { Icon, Link, MenuBar, PopupMenu, useSnackbar } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
@@ -20,6 +20,9 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const setSelectedSchool = useUserStore((s) => s.setSelectedShool);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const [headmasterSchools, setHeadMasterSchools] = useState<{ schoolId: string; schoolName: string }[]>();
+
+  const toastMessage = useSnackbar();
 
   const classesQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool?.schoolId,
@@ -36,10 +39,29 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
 
   useEffect(() => {
     if (mentor) {
-      getMyClasses(classesQueries);
+      getMyClasses(classesQueries).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av alla klasser',
+          status: 'error',
+        });
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod?.periodId]);
+
+  useEffect(() => {
+    const schools: { schoolId: string; schoolName: string }[] = [];
+
+    if (user) {
+      user.schools.forEach((s) => {
+        if (!schools.find((x) => x.schoolId === s.schoolId)) {
+          schools.push({ schoolId: s.schoolId, schoolName: s.schoolName });
+        }
+      });
+    }
+
+    setHeadMasterSchools(schools);
+  }, [user]);
 
   const Usermenu = (
     <PopupMenu>
@@ -83,11 +105,11 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
       {headMasterlinks.map((link) => {
         return (
           <MenuBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
-            {user.schools.length > 1 ? (
+            {headmasterSchools && headmasterSchools.length > 1 ? (
               <PopupMenu>
                 <PopupMenu.Button rightIcon={<Icon name="chevron-down" />}>{link.label}</PopupMenu.Button>
-                <PopupMenu.Panel className="w-fit">
-                  {user.schools.map((s) => {
+                <PopupMenu.Panel>
+                  {headmasterSchools.map((s) => {
                     return (
                       <PopupMenu.Item key={`popupmenyitem-${s.schoolId}`}>
                         <Link

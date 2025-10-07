@@ -6,8 +6,8 @@ export const hasRolePermission = (user: User) => {
   const teacher = roles.find((x) => x.role === 'GradeAuthor');
   const mentor = roles.find((x) => x.role === 'Mentor');
 
-  const GR = roles.find((x) => x.typeOfSchool === 'GR');
-  const GY = roles.find((x) => x.typeOfSchool === 'GY');
+  const GR = roles.find((x) => x.typeOfSchool === 'GR' || x.typeOfSchool === 'GRS');
+  const GY = roles.find((x) => x.typeOfSchool === 'GY' || x.typeOfSchool === 'GYS');
 
   const canEditForecast = teacher;
   const canViewAllSubjectsGroups = headmaster;
