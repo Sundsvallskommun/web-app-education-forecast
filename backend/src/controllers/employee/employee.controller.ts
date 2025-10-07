@@ -9,8 +9,9 @@ import { OpenAPI } from 'routing-controllers-openapi';
 
 @Controller()
 export class EmployeeController {
-  private apiService = new ApiService();
-  private api = APIS.find(api => api.name === 'employee');
+  private readonly apiService = new ApiService();
+  private readonly api = APIS.find(api => api.name === 'employee');
+
   @Get('/employee/:personId/personimage')
   @OpenAPI({ summary: 'Return employee image' })
   @UseBefore(authMiddleware)

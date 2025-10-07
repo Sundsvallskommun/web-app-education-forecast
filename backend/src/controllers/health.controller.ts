@@ -6,8 +6,8 @@ import { OpenAPI } from 'routing-controllers-openapi';
 
 @Controller()
 export class HealthController {
-  private apiService = new ApiService();
-  private api = APIS.find(api => api.name === 'simulatorserver');
+  private readonly apiService = new ApiService();
+  private readonly api = APIS.find(api => api.name === 'simulatorserver');
   @Get('/health/up')
   @OpenAPI({ summary: 'Return health check' })
   async up() {

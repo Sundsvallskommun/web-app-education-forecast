@@ -19,12 +19,12 @@ import { copyPreviousForecastDto, setForecastDto } from '@/dtos/forecast.dto';
 import { APIS } from '@/config/api-config';
 import { MUNICIPALITY_ID } from '@/config';
 
-const API_PREFIX = 'pupilforecast';
+const API_PREFIX = '/pupilforecast';
 
 @Controller()
 export class PupilForecastController {
-  private apiService = new ApiService();
-  private api = APIS.find(api => api.name === 'pupilforecast');
+  private readonly apiService = new ApiService();
+  private readonly api = APIS.find(api => api.name === 'pupilforecast');
 
   @Get(`${API_PREFIX}/currentperiod/:schoolType`)
   @OpenAPI({ summary: 'Returns current period based on school type' })

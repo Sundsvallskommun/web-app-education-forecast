@@ -7,8 +7,8 @@ import { OpenAPI } from 'routing-controllers-openapi';
 
 @Controller()
 export class EducationController {
-  private apiService = new ApiService();
-  private api = APIS.find(api => api.name === 'education');
+  private readonly apiService = new ApiService();
+  private readonly api = APIS.find(api => api.name === 'education');
 
   @Get('/education/:pupilId/personimage')
   @OpenAPI({ summary: 'Return pupil image' })
