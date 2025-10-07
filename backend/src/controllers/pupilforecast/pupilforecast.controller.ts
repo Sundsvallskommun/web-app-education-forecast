@@ -5,7 +5,6 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Post, QueryParam, Req, 
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import ApiResponse from '@/interfaces/api-service.interface';
-import { API_URL, API_PREFIX } from './config';
 import {
   PupilsApiResponse,
   PupilApiResponse,
@@ -17,19 +16,22 @@ import {
 } from '@/responses/forecast.response';
 import { ForecastMetaGroups, MyMentorClassPupilGrid, Pupil } from '@/interfaces/forecast.interface';
 import { copyPreviousForecastDto, setForecastDto } from '@/dtos/forecast.dto';
+import { APIS } from '@/config/api-config';
+import { MUNICIPALITY_ID } from '@/config';
 
-const municipalityId: string = '2281';
+const API_PREFIX = 'pupilforecast';
 
 @Controller()
 export class PupilForecastController {
   private apiService = new ApiService();
+  private api = APIS.find(api => api.name === 'pupilforecast');
 
   @Get(`${API_PREFIX}/currentperiod/:schoolType`)
   @OpenAPI({ summary: 'Returns current period based on school type' })
   @UseBefore(authMiddleware)
   @ResponseSchema(PeriodApiResponse)
   async getCurrentPeriod(@Param('schoolType') schoolType: string): Promise<ApiResponse<Period>> {
-    const url = `${API_URL}/${municipalityId}/forecast/${schoolType}/period`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/${schoolType}/period`;
 
     return await this.apiService.get<Period>({
       url,
@@ -41,7 +43,7 @@ export class PupilForecastController {
   @UseBefore(authMiddleware)
   @ResponseSchema(PeriodsApiResponse)
   async getPeriods(@Param('schoolType') schoolType: string): Promise<ApiResponse<Period[]>> {
-    const url = `${API_URL}/${municipalityId}/forecast/${schoolType}/periods`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/${schoolType}/periods`;
 
     return await this.apiService.get<Period[]>({
       url,
@@ -64,7 +66,7 @@ export class PupilForecastController {
     @QueryParam('PageSize') PageSize?: number | null,
   ): Promise<ApiResponse<ForecastMetaGroups>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/${schoolId}`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/${schoolId}`;
 
     return await this.apiService.get<ForecastMetaGroups>({
       url,
@@ -96,7 +98,7 @@ export class PupilForecastController {
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<Pupil[]>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/${schoolId}/pupils`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/${schoolId}/pupils`;
     return await this.apiService.get<Pupil[]>({
       url,
       params: {
@@ -123,7 +125,7 @@ export class PupilForecastController {
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<Pupil[]>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/group/${groupId}/${syllabusId}`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/group/${groupId}/${syllabusId}`;
     return await this.apiService.get<Pupil[]>({
       url,
       params: { teacherId: personId, periodId: periodId },
@@ -141,7 +143,7 @@ export class PupilForecastController {
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<Pupil[]>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/${schoolId}/pupil/${pupilId}`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/${schoolId}/pupil/${pupilId}`;
     return await this.apiService.get<Pupil[]>({
       url,
       params: { teacherId: personId, periodId: periodId },
@@ -158,7 +160,7 @@ export class PupilForecastController {
     @Req() req: RequestWithUser,
   ): Promise<ApiResponse<MyMentorClassPupilGrid[]>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/class/${groupId}/grid`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/class/${groupId}/grid`;
     return await this.apiService.get<MyMentorClassPupilGrid[]>({
       url,
       params: { teacherId: personId, periodId: periodId },
@@ -170,16 +172,19 @@ export class PupilForecastController {
   @UseBefore(authMiddleware, validationMiddleware(setForecastDto, 'body'))
   async setForecast(@Req() req: RequestWithUser, @Body() body: setForecastDto): Promise<ApiResponse<{}>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast`;
     return await this.apiService.post({ url, data: { ...body, teacherId: personId } });
   }
 
   @Post(`${API_PREFIX}/copypreviousforecast`)
   @OpenAPI({ summary: 'Copy previous forecast and set to current' })
   @UseBefore(authMiddleware, validationMiddleware(copyPreviousForecastDto, 'body'))
-  async copyPreviousForecast(@Req() req: RequestWithUser, @Body() body: copyPreviousForecastDto): Promise<ApiResponse<{}>> {
+  async copyPreviousForecast(
+    @Req() req: RequestWithUser,
+    @Body() body: copyPreviousForecastDto,
+  ): Promise<ApiResponse<{}>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/copy`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/copy`;
     return await this.apiService.post({ url, data: { ...body, teacherId: personId } });
   }
 
@@ -193,7 +198,7 @@ export class PupilForecastController {
     @Param('syllabusId') syllabusId: string,
   ): Promise<ApiResponse<{}>> {
     const { personId } = req.user;
-    const url = `${API_URL}/${municipalityId}/forecast/${groupId}/${syllabusId}`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/${groupId}/${syllabusId}`;
     return await this.apiService.delete({
       url,
       params: { teacherId: personId },

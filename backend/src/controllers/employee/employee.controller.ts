@@ -1,3 +1,5 @@
+import { MUNICIPALITY_ID } from '@/config';
+import { APIS } from '@/config/api-config';
 import { HttpException } from '@/exceptions/HttpException';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
@@ -8,7 +10,7 @@ import { OpenAPI } from 'routing-controllers-openapi';
 @Controller()
 export class EmployeeController {
   private apiService = new ApiService();
-
+  private api = APIS.find(api => api.name === 'employee');
   @Get('/employee/:personId/personimage')
   @OpenAPI({ summary: 'Return employee image' })
   @UseBefore(authMiddleware)
@@ -16,7 +18,7 @@ export class EmployeeController {
   @Header('Cross-Origin-Embedder-Policy', 'require-corp')
   @Header('Cross-Origin-Resource-Policy', 'cross-origin')
   async getEmployeeImage(@Param('personId') personId: string, @QueryParam('width') width): Promise<any> {
-    const url = `employee/1.0/${personId}/personimage`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/${personId}/personimage`;
     const res = await this.apiService.get<any>({
       url,
       responseType: 'arraybuffer',
@@ -40,7 +42,7 @@ export class EmployeeController {
       throw new HttpException(400, 'Bad Request');
     }
 
-    const url = `employee/1.0/${personId}/personimage`;
+    const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/${personId}/personimage`;
     const res = await this.apiService.get<any>({
       url,
       responseType: 'arraybuffer',
