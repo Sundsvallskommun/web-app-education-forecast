@@ -28,14 +28,17 @@ export const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    !headmaster
-      ? router.push('/mina-amnen-grupper')
-      : getSubjects(subjectsQueries).catch(() => {
-          toastMessage({
-            message: 'Något gick fel vid hämtning av ämnen och grupper',
-            status: 'error',
-          });
+    if (!headmaster) {
+      router.push('/mina-amnen-grupper');
+    } else {
+      getSubjects(subjectsQueries).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av ämnen och grupper',
+          status: 'error',
         });
+      });
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

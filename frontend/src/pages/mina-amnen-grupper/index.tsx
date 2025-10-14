@@ -42,7 +42,9 @@ export const Index: React.FC = () => {
     } else if (mentor && !teacher) {
       getMyClasses(myGroup)
         .then((res) => {
-          res.data && router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+          if (res.data) {
+            router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+          }
         })
         .catch(() => {
           toastMessage({

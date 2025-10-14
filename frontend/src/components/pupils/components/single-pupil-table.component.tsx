@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { ArrowRight } from 'lucide-react';
 export interface TablePupil extends Pupil {
   id?: string | null;
   pupil?: string | null;
@@ -209,7 +210,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
                   color="vattjom"
                   size="sm"
                   inverted
-                  rightIcon={<Icon name="arrow-right" />}
+                  rightIcon={<Icon icon={<ArrowRight />} />}
                   onClick={() => router.push(`/mina-amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`)}
                 >
                   Rapportera
@@ -224,7 +225,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
                   color="vattjom"
                   size="sm"
                   inverted
-                  rightIcon={<Icon name="arrow-right" />}
+                  rightIcon={<Icon icon={<ArrowRight />} />}
                   onClick={() => router.push(`/amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`)}
                 >
                   Rapportera

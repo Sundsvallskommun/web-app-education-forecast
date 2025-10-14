@@ -21,7 +21,6 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
   const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
   const [forecastLoading, setForecastLoading] = useState(false);
   const { APPROVED, WARNINGS, UNNAPROVED } = IsGradedForecast(forecast);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const message = useSnackbar();
 
   const onSetForecastHandler = async (e: React.BaseSyntheticEvent) => {

@@ -1,18 +1,17 @@
-import { Icon, Link, MenuBar, PopupMenu, useSnackbar } from '@sk-web-gui/react';
-import { useEffect, useState } from 'react';
-import NextLink from 'next/link';
-import { useRouter } from 'next/router';
-import { User } from '@interfaces/user';
-import { hasRolePermission } from '@utils/has-role-permission';
+import { UserMenu } from '@components/user-menu/user-menu.component';
 import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
+import { Icon, Link, NavigationBar, PopupMenu, useSnackbar } from '@sk-web-gui/react';
+import { hasRolePermission } from '@utils/has-role-permission';
+import { ChevronDown } from 'lucide-react';
+import NextLink from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { shallow } from 'zustand/shallow';
 
-interface MenuProps {
-  user: User;
-}
-
-export const Menu: React.FC<MenuProps> = ({ user }) => {
+export const Menu: React.FC = () => {
+  const user = useUserStore((s) => s.user, shallow);
   const router = useRouter();
   const { getMyClasses, myClasses } = usePupilForecastStore();
   const { headmaster, mentor, teacher } = hasRolePermission(user);
@@ -63,22 +62,6 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
     setHeadMasterSchools(schools);
   }, [user]);
 
-  const Usermenu = (
-    <PopupMenu>
-      <PopupMenu.Button leftIcon={<Icon name="user" />}>
-        <span className="ml-4">{user.name}</span>
-      </PopupMenu.Button>
-      <PopupMenu.Panel className="w-full mt-xl">
-        <PopupMenu.Item>
-          <NextLink href="/logout">
-            {' '}
-            <Icon name="log-out" />
-            Logga ut
-          </NextLink>
-        </PopupMenu.Item>
-      </PopupMenu.Panel>
-    </PopupMenu>
-  );
   const headMasterlinks = [
     {
       label: 'Klasser',
@@ -101,13 +84,13 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
   ];
 
   return headmaster ? (
-    <MenuBar className="flex-wrap justify-end" color="vattjom">
+    <NavigationBar className="flex-wrap justify-end" color="vattjom">
       {headMasterlinks.map((link) => {
         return (
-          <MenuBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
+          <NavigationBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
             {headmasterSchools && headmasterSchools.length > 1 ? (
               <PopupMenu>
-                <PopupMenu.Button rightIcon={<Icon name="chevron-down" />}>{link.label}</PopupMenu.Button>
+                <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>{link.label}</PopupMenu.Button>
                 <PopupMenu.Panel>
                   {headmasterSchools.map((s) => {
                     return (
@@ -128,31 +111,31 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
             ) : (
               <NextLink href={link.url}>{link.label}</NextLink>
             )}
-          </MenuBar.Item>
+          </NavigationBar.Item>
         );
       })}
-      <MenuBar.Item
+      <NavigationBar.Item
         className="flex justify-end ml-32 max-phone-max:order-first max-phone-max:w-full"
         key={`menyitem-user-${user.name}`}
       >
-        {Usermenu}
-      </MenuBar.Item>
-    </MenuBar>
+        <UserMenu />
+      </NavigationBar.Item>
+    </NavigationBar>
   ) : (
-    <MenuBar className="flex-wrap justify-end" color="vattjom">
+    <NavigationBar className="flex-wrap justify-end" color="vattjom">
       {teacherLinks.map((link) => {
         return (
           teacher && (
-            <MenuBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
+            <NavigationBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
               <NextLink href={link.url}>{link.label}</NextLink>
-            </MenuBar.Item>
+            </NavigationBar.Item>
           )
         );
       })}
       {mentor ? (
-        <MenuBar.Item>
+        <NavigationBar.Item current={activeURL.includes('min-mentorsklass') || activeURL.includes('klasser')}>
           <PopupMenu>
-            <PopupMenu.Button rightIcon={<Icon name="chevron-down" />}>Klasser</PopupMenu.Button>
+            <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>Klasser</PopupMenu.Button>
             <PopupMenu.Panel className="w-full">
               {myClasses.data.map((classlink) => {
                 return (
@@ -165,14 +148,14 @@ export const Menu: React.FC<MenuProps> = ({ user }) => {
               })}
             </PopupMenu.Panel>
           </PopupMenu>
-        </MenuBar.Item>
+        </NavigationBar.Item>
       ) : (
         <></>
       )}
-      <MenuBar.Item className="flex justify-end ml-32 max-phone-max:order-first max-phone-max:w-full">
-        {Usermenu}
-      </MenuBar.Item>
-    </MenuBar>
+      <NavigationBar.Item className="flex justify-end ml-32 max-phone-max:order-first max-phone-max:w-full">
+        <UserMenu />
+      </NavigationBar.Item>
+    </NavigationBar>
   );
 };
 

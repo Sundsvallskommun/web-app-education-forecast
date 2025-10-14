@@ -5,13 +5,13 @@ import { thisSchoolYearPeriod } from '@utils/school-year-period';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface PeriodPickerProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
 
 export const PeriodPicker: React.FC<PeriodPickerProps> = () => {
-  //stores
   const user = useUserStore((s) => s.user);
   const { GY } = hasRolePermission(user);
   const setSelectedPeriod = usePupilForecastStore((s) => s.setSelectedPeriod);
@@ -19,10 +19,6 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = () => {
   const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedIndex = allPeriods.findIndex((p) => p.periodId === selectedPeriod.periodId);
-
-  // const { watch, setValue, register, formState } = useFormContext<SelectedPeriodForm>();
-  // const selectedPeriod = watch('selectedPeriod');
-  //utils
 
   useEffect(() => {
     if (selectedPeriod.periodId === 0) {
@@ -33,26 +29,18 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = () => {
 
   const { currentMonthPeriod, termPeriod, previousMonthPeriod, previousTermPeriod } = thisSchoolYearPeriod();
 
-  // let forecastPeriod: string = currentMonthPeriod;
-  // let DOMPeriod: string = `${selectedPeriod?.slice(2)}`;
-
-  // if (GY) {
-  //   forecastPeriod = currentMonthPeriod;
-  //   DOMPeriod = `${selectedPeriod?.slice(2)}`;
-  // } else {
-  //   forecastPeriod = termPeriod;
-  //   DOMPeriod = `${selectedPeriod} ${selectedPeriod === 'VT' ? currentYear : selectedSchoolYear}`;
-  // }
-
   const pickPreviousHandler = async () => {
     const previous = allPeriods[selectedIndex - 1];
-
-    selectedIndex !== 0 && setSelectedPeriod(previous);
+    if (selectedIndex !== 0) {
+      setSelectedPeriod(previous);
+    }
   };
 
   const pickForwardToCurrentHandler = async () => {
     const forward = allPeriods[selectedIndex + 1];
-    selectedIndex !== allPeriods.length - 1 && setSelectedPeriod(forward);
+    if (selectedIndex !== allPeriods.length - 1) {
+      setSelectedPeriod(forward);
+    }
   };
 
   const periodName = () => {
@@ -70,14 +58,13 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = () => {
         }`}
         onClick={pickPreviousHandler}
         disabled={selectedPeriod?.periodId === allPeriods[0]?.periodId}
-        // disabled={(GY && selectedPeriod === previousMonthPeriod) || (GR && selectedPeriod === previousTermPeriod)}
         iconButton
         color="vattjom"
         size="sm"
         rounded
         inverted={selectedPeriod?.periodId === currentPeriod.periodId}
       >
-        <Icon name="arrow-left" />
+        <Icon icon={<ArrowLeft />} />
       </Button>
       <div>
         {selectedPeriod && selectedPeriod.periodId !== 0 ? (
@@ -105,7 +92,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = () => {
         rounded
         inverted={selectedPeriod?.periodId !== currentPeriod.periodId}
       >
-        <Icon name="arrow-right" />
+        <Icon icon={<ArrowRight />} />
       </Button>
     </div>
   );

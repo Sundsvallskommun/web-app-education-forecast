@@ -30,6 +30,7 @@ module.exports = withBundleAnalyzer({
   images: {
     domains: [process.env.DOMAIN_NAME],
     formats: ['image/avif', 'image/webp'],
+    unoptimized: true,
   },
   basePath: process.env.BASE_PATH,
   sassOptions: {

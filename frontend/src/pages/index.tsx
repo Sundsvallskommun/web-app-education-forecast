@@ -30,13 +30,19 @@ export default function Index() {
       router.push('/mina-amnen-grupper');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        res.data && router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+        if (res.data) {
+          router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+        }
       });
     }
   };
 
   useEffect(() => {
-    headmaster ? router.push('/klasser') : teacherAndMentorRoutes();
+    if (headmaster) {
+      router.push('/klasser');
+    } else {
+      teacherAndMentorRoutes();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return <LoaderFullScreen />;

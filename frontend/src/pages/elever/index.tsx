@@ -29,14 +29,17 @@ export const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    !headmaster
-      ? router.push('/mina-amnen-grupper')
-      : getAllPupils(pupilsQueries).catch(() => {
-          toastMessage({
-            message: 'Något gick fel vid hämtning av alla elever',
-            status: 'error',
-          });
+    if (!headmaster) {
+      router.push('/mina-amnen-grupper');
+    } else {
+      getAllPupils(pupilsQueries).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av alla elever',
+          status: 'error',
         });
+      });
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

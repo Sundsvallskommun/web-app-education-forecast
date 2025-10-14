@@ -20,6 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).send(health);
   } catch (error) {
+    console.log('health error', error);
     res.status(500).send({
       status: 'ERROR!',
     });

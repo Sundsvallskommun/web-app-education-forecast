@@ -4,5 +4,4 @@ export interface User {
   username: string;
   roles: [{ role: string; typeOfSchool: string }];
   schools: [{ schoolId: string; schoolName: string }];
-  // permissions: Permissions;
 }
