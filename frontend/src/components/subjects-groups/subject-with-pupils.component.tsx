@@ -31,9 +31,11 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const { searchQuery } = watchSearch();
 
   useEffect(() => {
-    !singleSubjectIsLoading
-      ? setPageTitle(singleSubject[0]?.courseName ? singleSubject[0]?.courseName : '')
-      : setPageTitle('Ämne/grupp');
+    if (!singleSubjectIsLoading) {
+      setPageTitle(singleSubject[0]?.courseName ? singleSubject[0]?.courseName : '');
+    } else {
+      setPageTitle('Ämne/grupp');
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [singleSubjectIsLoading, singleSubject]);

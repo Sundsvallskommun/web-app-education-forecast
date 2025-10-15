@@ -12,7 +12,6 @@ const handleSetUserResponse: (res: ApiResponse<User>) => User = (res) => ({
   username: res.data.username,
   roles: res.data.roles,
   schools: res.data.schools,
-  // permissions: res.data.permissions,
 });
 
 const getMe: () => Promise<ServiceResponse<User>> = () => {
@@ -57,10 +56,16 @@ export const useUserStore = createWithEqualityFn<State & Actions>()(
         let user = get().user;
         const res = await getMe();
         if (!res.error) {
-          res.data ? (user = res.data) : (user = emptyUser);
-          get().selectedSchool.schoolId && get().selectedSchool.schoolId !== ''
-            ? set(() => ({ user: user, selectedSchool: get().selectedSchool }))
-            : set(() => ({ user: user, selectedSchool: user.schools[0] }));
+          if (res.data) {
+            user = res.data;
+          } else {
+            user = emptyUser;
+          }
+          if (get().selectedSchool.schoolId && get().selectedSchool.schoolId !== '') {
+            set(() => ({ user: user, selectedSchool: get().selectedSchool }));
+          } else {
+            set(() => ({ user: user, selectedSchool: user.schools[0] }));
+          }
         }
         return { data: user };
       },

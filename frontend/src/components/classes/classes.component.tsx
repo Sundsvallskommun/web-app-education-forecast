@@ -38,8 +38,6 @@ export interface ClassesTableForm {
 
 export const Classes: React.FC<ClassesProps> = ({ pageTitle, classQueries }) => {
   const { myClasses, getMyClasses } = usePupilForecastStore();
-  //const { myClasses, grouplistTable, groupsListRendered, grouptable } = GroupTables('K', user, searchQuery);
-  //const listByPeriodIsLoading = useForecastStore((s) => s.listByPeriodIsLoading);
   const classesIsLoading = usePupilForecastStore((s) => s.classesIsLoading);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
@@ -84,7 +82,7 @@ export const Classes: React.FC<ClassesProps> = ({ pageTitle, classQueries }) => 
       });
     });
 
-    //eslint-disable-next-line
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortOrder, sortColumn, pageSize, page, searchQuery, selectedPeriod.periodId, selectedSchool]);
 
   return (

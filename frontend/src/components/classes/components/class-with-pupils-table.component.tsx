@@ -1,10 +1,11 @@
 import { User } from '@interfaces/user';
-import { Link, SortMode, Table, Select, Pagination, Input, Icon } from '@sk-web-gui/react';
+import { SortMode, Table, Select, Pagination, Input, Icon } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 import { GridForecast, KeyStringTable } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { useRouter } from 'next/router';
+import { Check, Minus, X } from 'lucide-react';
+import NextLink from 'next/link';
 
 interface MentorClassHeaders {
   label: string;
@@ -17,7 +18,6 @@ interface IMentorClassTable {
 }
 
 export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuery }) => {
-  const router = useRouter();
   const { headmaster, mentor } = hasRolePermission(user);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
   const [mentorClassData, setMentorClassData] = useState<KeyStringTable[]>([]);
@@ -28,8 +28,8 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     const tableArr: KeyStringTable[] = [];
     const subjectArr: MentorClassHeaders[] = [];
     if (mentorClass.length !== 0) {
-      mentorClass.map((p) => {
-        const allSubjects = p.forecasts?.reduce((accumulator: GridForecast[], current) => {
+      mentorClass.map((pupil) => {
+        const allSubjects = pupil.forecasts?.reduce((accumulator: GridForecast[], current) => {
           if (!accumulator.find((item: GridForecast) => item.courseId === current.courseId)) {
             accumulator.push(current);
           }
@@ -41,17 +41,17 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
             subjectArr.push({ label: s.courseId, property: s.courseId, isColumnSortable: true });
         });
 
-        const numberNotFilledIn = p.forecasts?.filter((x) => x.forecast === null).length;
+        const numberNotFilledIn = pupil.forecasts?.filter((x) => x.forecast === null).length;
         const object = {
-          id: p.pupil,
-          pupil: `${p.givenname} ${p.lastname}`,
-          unitId: p.unitId,
-          className: p.className,
-          presence: p.presence,
+          id: pupil.pupil,
+          pupil: `${pupil.givenname} ${pupil.lastname}`,
+          unitId: pupil.unitId,
+          className: pupil.className,
+          presence: pupil.presence,
           notFilledIn: numberNotFilledIn,
         };
 
-        p.forecasts?.map((f) => {
+        pupil.forecasts?.map((f) => {
           const forecastObj = {
             [f.courseId]: f.forecast,
           };
@@ -126,11 +126,11 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
 
   const iconType = (prop: number) => {
     if (prop === 1) {
-      return 'check';
+      return <Check />;
     } else if (prop === 2) {
-      return 'minus';
+      return <Minus />;
     } else if (prop === 3) {
-      return 'x';
+      return <X />;
     }
   };
 
@@ -144,59 +144,64 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     }
   };
 
+  const getColIcon = (label: string, pupil: KeyStringTable) => {
+    if (!(label in pupil)) return;
+    if (pupil?.[label] === null) {
+      return <Icon size={14} icon={<Minus />} />;
+    }
+    return (
+      <Icon.Padded inverted color={iconColor(Number(pupil[label]))} rounded icon={iconType(Number(pupil[label]))} />
+    );
+  };
+
+  const getPupilLink = (pupil: KeyStringTable) => {
+    const pupilname = typeof pupil.pupil === 'string' ? pupil.pupil : '';
+    const pupilid = typeof pupil.id === 'string' ? pupil.id : '';
+    if (headmaster) {
+      return (
+        <NextLink className="sk-link sk-link-primary" href={`/klasser/klass/elev/${pupilid}`}>
+          {pupilname}
+        </NextLink>
+      );
+    }
+    if (pupil.notFilledIn === undefined || pupil.notFilledIn === null) {
+      return <span>{pupilname} </span>;
+    }
+    return (
+      <NextLink className="sk-link sk-link-primary" href={`/min-mentorsklass/elev/${pupilid}`}>
+        {pupilname}
+      </NextLink>
+    );
+  };
+
   const mentorclassRows = mentorClassListRendered
     .sort((a, b) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
       return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
     .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
-    .map((p, idx: number) => {
+    .map((pupil, idx: number) => {
       return (
         <Table.Row
           key={`row-${idx}`}
           className={`${
-            p.forecast === 1 && 'border-b-1 border-gray-300 bg-success-background-200 hover:bg-success-background-100'
+            pupil.forecast === 1 &&
+            'border-b-1 border-gray-300 bg-success-background-200 hover:bg-success-background-100'
           } ${
-            p.forecast === 2 && 'border-b-1 border-gray-300 bg-warning-background-200 hover:bg-warning-background-100'
-          } ${p.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
+            pupil.forecast === 2 &&
+            'border-b-1 border-gray-300 bg-warning-background-200 hover:bg-warning-background-100'
+          } ${pupil.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
         >
           <Table.HeaderColumn scope="row" sticky>
             <div className="flex flex-col py-2 gap-6 min-w-[177px]">
-              <span>
-                {headmaster ? (
-                  <Link className="cursor-pointer" onClick={() => router.push(`/klasser/klass/elev/${p.id}`)}>
-                    {p.pupil}
-                  </Link>
-                ) : p.notFilledIn === undefined || p.notFilledIn === null ? (
-                  <span>{typeof p.pupil === 'string' && p.pupil} </span>
-                ) : (
-                  <Link className="cursor-pointer" onClick={() => router.push(`/min-mentorsklass/elev/${p.id}`)}>
-                    {p.pupil}
-                  </Link>
-                )}
-              </span>
-              <span>Närvaro: {typeof p.presence === 'number' && p.presence}%</span>
+              <span>{getPupilLink(pupil)}</span>
+              <span>Närvaro: {typeof pupil.presence === 'number' && pupil.presence}%</span>
             </div>
           </Table.HeaderColumn>
-          {subjectHeaders.map((s, index) => {
+          {subjectHeaders.map((subject, index) => {
             return (
               <Table.Column key={index} className={`${index === 0 ? 'border-l-1' : null} border-r-1 !p-0`}>
-                <div className="w-full flex justify-center items-center">
-                  {s.label in p ? (
-                    p[s.label] !== null ? (
-                      <Icon.Padded
-                        inverted
-                        color={iconColor(Number(p[s.label]))}
-                        rounded
-                        name={iconType(Number(p[s.label]))}
-                      />
-                    ) : (
-                      <Icon size={14} name="minus" />
-                    )
-                  ) : (
-                    ''
-                  )}
-                </div>
+                <div className="w-full flex justify-center items-center">{getColIcon(subject.label, pupil)}</div>
               </Table.Column>
             );
           })}

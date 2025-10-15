@@ -38,7 +38,9 @@ export const Index: React.FC = () => {
         if (router.pathname.includes(pupilId)) return;
         if (router.pathname.includes(pupilId)) return;
         await getPupil(selectedSchool.schoolId, pupilId, selectedPeriod.periodId).then(async (p) => {
-          p.data && (await getMentorClass(p.data[0].classGroupId || '', selectedPeriod.periodId));
+          if (p.data) {
+            await getMentorClass(p.data[0].classGroupId || '', selectedPeriod.periodId);
+          }
         });
 
         setSelectedId(pupilId);

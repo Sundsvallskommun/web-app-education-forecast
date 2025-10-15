@@ -19,7 +19,6 @@ export const Index: React.FC = () => {
   useEffect(() => {
     const loadClass = async () => {
       if (classId && classId !== undefined) {
-        // if (router.pathname.includes(classId)) return;
         await getMentorClass(classId, selectedPeriod.periodId);
         setSelectedId(classId);
       } else {

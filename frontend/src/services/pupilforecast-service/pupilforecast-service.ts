@@ -244,39 +244,27 @@ interface State {
 }
 
 interface Actions {
-  setCurrentPeriod: (currentPeriod: Period) => Promise<void>;
-  setSelectedPeriod: (selectedPeriod: Period) => Promise<void>;
-  setSubjects: (mySubjects: MetaGroup | ((prevState: MetaGroup) => MetaGroup)) => Promise<void>;
-  setClasses: (myClasses: MetaGroup | ((prevState: MetaGroup) => MetaGroup) | undefined) => Promise<void>;
-  //   setGroup: (classes: MyGroup) => void;
-  setSingleSubject: (subject: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
-  //   //setPreviousPeriodGroup: (groupWithPupils: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
+  setCurrentPeriod: (currentPeriod: Period) => Promise<unknown>;
+  setSelectedPeriod: (selectedPeriod: Period) => Promise<unknown>;
+  setSubjects: (mySubjects: MetaGroup | ((prevState: MetaGroup) => MetaGroup)) => Promise<unknown>;
+  setClasses: (myClasses: MetaGroup | ((prevState: MetaGroup) => MetaGroup) | undefined) => Promise<unknown>;
+  setSingleSubject: (subject: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<unknown>;
   setMentorClass: (
     mentorClass: MentorClassPupilGrid[] | ((prevState: MentorClassPupilGrid[]) => MentorClassPupilGrid[])
-  ) => Promise<void>;
-  //   setClassDetails: (classDetails: MyGroup) => void;
-  setAllPupils: (allPupils: MetaPupils | ((prevState: MetaPupils) => MetaPupils)) => Promise<void>;
-  setPupil: (pupil: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<void>;
+  ) => Promise<unknown>;
+  setAllPupils: (allPupils: MetaPupils | ((prevState: MetaPupils) => MetaPupils)) => Promise<unknown>;
+  setPupil: (pupil: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<unknown>;
 
-  //     selectedPeriod: string,
-  //     selectedSchoolYear: number,
-  //     callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil',
-  //     objectId?: string | null,
-  //     user?: User
-  //   ) => Promise<void>;
   getCurrentPeriod: (schoolType: string) => Promise<ServiceResponse<Period>>;
   getAllPeriods: (schoolType: string) => Promise<ServiceResponse<Period[]>>;
 
   getMySubjects: (body: ForeacastQueriesDto) => Promise<ServiceResponse<MetaGroup>>;
-  //   // getGroup: (groupId: string) => Promise<ServiceResponse<MyGroup>>;
   getSubjectWithPupils: (
     groupId: string,
     syllabusId: string,
     periodId?: number | null
   ) => Promise<ServiceResponse<Pupil[]>>;
-  //   getPreviousPeriodGroup: (groupId: string, queries: ForeacastQueriesDto) => Promise<ServiceResponse<Pupil[]>>;
   getMyClasses: (body: ForeacastQueriesDto) => Promise<ServiceResponse<MetaGroup>>;
-  //   getClassDetails: (groupId: string, period: string) => Promise<ServiceResponse<MyGroup>>;
   getMentorClass: (groupId: string, periodId?: number | null) => Promise<ServiceResponse<MentorClassPupilGrid[]>>;
   getAllPupils: (queries: ForeacastQueriesDto) => Promise<ServiceResponse<MetaPupils>>;
   getPupil: (pupilId: string, unitId: string, periodId?: number | null) => Promise<ServiceResponse<Pupil[]>>;
@@ -542,11 +530,7 @@ export const usePupilForecastStore = createWithEqualityFn<
             await get().reset();
           }
           await set(() => ({ singleSubjectIsLoading: true }));
-          const res = await getSubjectWithPupils(
-            groupId ? groupId : get().subject[0].groupId ?? '',
-            syllabusId,
-            periodId
-          );
+          const res = await getSubjectWithPupils(groupId ?? get().subject[0].groupId ?? '', syllabusId, periodId);
 
           const data = (res.data && res.data) || initialState.subject;
           data.map((d) => {

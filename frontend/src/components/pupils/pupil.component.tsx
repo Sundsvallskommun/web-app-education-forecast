@@ -27,12 +27,6 @@ export const Pupil: React.FC = () => {
 
   const pageTitle = pupil.length !== 0 ? `${pupil[0].givenname} ${pupil[0].lastname}` : 'Elev';
 
-  let presenceSum = 0;
-
-  pupil.forEach((p) => {
-    p.presence ? (presenceSum += p.presence) : 0;
-  });
-
   const generalInformation = (
     <div className="flex gap-14">
       <span className="flex gap-4 items-center">
@@ -63,7 +57,6 @@ export const Pupil: React.FC = () => {
       {(!headmaster && !mentorClassIsLoading && !singlePupilIsLoading && pupil.length !== 0) ||
       (headmaster && !pupilsIsLoading && !singlePupilIsLoading && pupil.length !== 0) ? (
         <>
-          {' '}
           {pupil.length !== 0 ? (
             <SinglePupilTable user={user} searchQuery={searchQuery} />
           ) : (

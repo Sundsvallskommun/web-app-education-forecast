@@ -36,15 +36,10 @@ export const SubjectsTable: React.FC = () => {
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const { mySubjects } = usePupilForecastStore();
   const [subjectsTable, setSubjectsTable] = useState<ISubjects[]>([]);
-  //   const [pageSize] = useState<number>(myClasses.pageSize);
 
   const { watch, setValue, register, formState } = useFormContext<SubjectsTableForm>();
   const sortOrder = watch('sortOrder');
   const sortColumn = watch('sortColumn');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const pageSize = watch('pageSize');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const totalPages = watch('totalPages');
   const page = watch('page');
 
   const TableSortOrder = sortOrder === 'ASC' ? SortMode.ASC : SortMode.DESC;
@@ -124,7 +119,6 @@ export const SubjectsTable: React.FC = () => {
         <Table.HeaderColumn scope="row">
           <div className="flex items-center gap-2">
             <Avatar
-              // imageUrl=""
               color="vattjom"
               rounded
               initials={`${g.groupName && typeof g.groupName === 'string' && g.groupName.split('').slice(0, 2)}`}
@@ -138,7 +132,6 @@ export const SubjectsTable: React.FC = () => {
                     `${headmaster ? `/amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}/` : `/mina-amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}`}`
                   )
                 }
-                // to={`${headmaster ? `/amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}/` : `/mina-amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}`}`}
               >
                 {g.groupName}
               </Link>

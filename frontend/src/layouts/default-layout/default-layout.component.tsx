@@ -1,12 +1,10 @@
 import Menu from '@components/menu/menu.component';
 import { useUserStore } from '@services/user-service/user-service';
-import { CookieConsent, Header, Link, Spinner } from '@sk-web-gui/react';
+import { Breadcrumb, Header, Logo, Spinner } from '@sk-web-gui/react';
+import { hasRolePermission } from '@utils/has-role-permission';
 import Head from 'next/head';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
 import { shallow } from 'zustand/shallow';
-import { Breadcrumb } from '@sk-web-gui/react';
-import { hasRolePermission } from '@utils/has-role-permission';
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -36,8 +34,6 @@ export default function DefaultLayout({
   breadcrumbLinks,
   breadcrumbsIsLoading,
 }: DefaultLayoutProps) {
-  const router = useRouter();
-
   const user = useUserStore((s) => s.user, shallow);
   const { headmaster } = hasRolePermission(user);
 
@@ -54,10 +50,6 @@ export default function DefaultLayout({
   const setFocusToMain = () => {
     const contentElement = document.getElementById('content');
     contentElement?.focus();
-  };
-
-  const handleLogoClick = () => {
-    router.push(logoLinkHref);
   };
 
   return (
@@ -79,10 +71,13 @@ export default function DefaultLayout({
         title={headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME}
         subtitle={headerSubtitle() || ''}
         aria-label={`${headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME} ${headerSubtitle}`}
-        logoLinkOnClick={handleLogoClick}
-        userMenu={<Menu user={user} />}
-        LogoLinkWrapperComponent={<NextLink legacyBehavior href={logoLinkHref} passHref />}
-        mobileMenu={<Menu user={user} />}
+        logo={
+          <NextLink href={logoLinkHref}>
+            <Logo title={headerTitle ?? process.env.NEXT_PUBLIC_APP_NAME} />
+          </NextLink>
+        }
+        userMenu={<Menu />}
+        mobileMenu={<Menu />}
       />
 
       {preContent && preContent}
@@ -111,46 +106,6 @@ export default function DefaultLayout({
       </div>
 
       {postContent && postContent}
-
-      <CookieConsent
-        title={`Kakor på ${process.env.NEXT_PUBLIC_APP_NAME}`}
-        body={
-          <p>
-            Vi använder kakor, cookies, för att ge dig en förbättrad upplevelse, sammanställa statistik och för att viss
-            nödvändig funktionalitet ska fungera på webbplatsen.{' '}
-            <NextLink href="/kakor" passHref legacyBehavior>
-              <Link>Läs mer om hur vi använder kakor</Link>
-            </NextLink>
-          </p>
-        }
-        cookies={[
-          {
-            optional: false,
-            displayName: 'Nödvändiga kakor',
-            description:
-              'Dessa kakor är nödvändiga för att webbplatsen ska fungera och kan inte stängas av i våra system.',
-            cookieName: 'necessary',
-          },
-          {
-            optional: true,
-            displayName: 'Funktionella kakor',
-            description: ' Dessa kakor ger förbättrade funktioner på webbplatsen.',
-            cookieName: 'func',
-          },
-          {
-            optional: true,
-            displayName: 'Kakor för statistik',
-            description:
-              'Dessa kakor tillåter oss att räkna besök och trafikkällor, så att vi kan mäta och förbättra prestanda på vår webbplats.',
-            cookieName: 'stats',
-          },
-        ]}
-        resetConsentOnInit={false}
-        onConsent={() => {
-          // FIXME: do stuff with cookies?
-          // NO ANO FUNCTIONS
-        }}
-      />
     </div>
   );
 }
