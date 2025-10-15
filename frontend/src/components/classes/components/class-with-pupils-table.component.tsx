@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { GridForecast, KeyStringTable } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { Check, Minus, X } from 'lucide-react';
-import { NextLink } from '@sk-web-gui/next';
+import NextLink from 'next/link';
 
 interface MentorClassHeaders {
   label: string;
@@ -158,12 +158,20 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     const pupilname = typeof pupil.pupil === 'string' ? pupil.pupil : '';
     const pupilid = typeof pupil.id === 'string' ? pupil.id : '';
     if (headmaster) {
-      return <NextLink href={`/klasser/klass/elev/${pupilid}`}>{pupilname}</NextLink>;
+      return (
+        <NextLink className="sk-link sk-link-primary" href={`/klasser/klass/elev/${pupilid}`}>
+          {pupilname}
+        </NextLink>
+      );
     }
     if (pupil.notFilledIn === undefined || pupil.notFilledIn === null) {
       return <span>{pupilname} </span>;
     }
-    return <NextLink href={`/min-mentorsklass/elev/${pupilid}`}>{pupilname}</NextLink>;
+    return (
+      <NextLink className="sk-link sk-link-primary" href={`/min-mentorsklass/elev/${pupilid}`}>
+        {pupilname}
+      </NextLink>
+    );
   };
 
   const mentorclassRows = mentorClassListRendered
