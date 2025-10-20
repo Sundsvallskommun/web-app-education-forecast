@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Frontend",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend",
+      "urlFilter": "http://localhost:3000/*",
+      "skipFiles": ["**/node_modules/**", "<node_internals>/**"],
+      "sourceMapPathOverrides": {
+        "webpack://_N_E/./*": "${webRoot}/*",
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///*": "${webRoot}/*",
+        "webpack:///src/*": "${webRoot}/src/*"
+      }
+    },
+    {
+      // Backend – run your Node server (adjust command if needed)
+      "name": "Backend",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["dev"],
+      "env": { "PORT": "3001" },
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Attach to Backend (9229)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "restart": true,
+      "localRoot": "${workspaceFolder}/backend",
+      "remoteRoot": "${workspaceFolder}/backend",
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/backend/node_modules/**"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/backend/**",
+        "!**/node_modules/**"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Start Both",
+      "configurations": ["Backend", "Frontend"]
+    },
+    {
+      "name": "Start Both2",
+      "configurations": ["Attach to Backend (9229)", "Frontend"]
+    }
+  ]
+}
