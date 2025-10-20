@@ -33,7 +33,7 @@ interface State {
 }
 interface Actions {
   setUser: (user: User) => void;
-  setSelectedShool: (selectedSchool: { schoolId: string; schoolName: string }) => void;
+  setSelectedSchool: (selectedSchool: { schoolId: string; schoolName: string }) => void;
   getMe: () => Promise<ServiceResponse<User>>;
   reset: () => void;
 }
@@ -51,7 +51,10 @@ export const useUserStore = createWithEqualityFn<State & Actions>()(
     (set, get) => ({
       ...initialState,
       setUser: (user) => set(() => ({ user })),
-      setSelectedShool: (selectedSchool) => set(() => ({ selectedSchool })),
+      setSelectedSchool: (selectedSchool) =>
+        set(() => {
+          return { selectedSchool };
+        }),
       getMe: async () => {
         let user = get().user;
         const res = await getMe();
@@ -64,7 +67,9 @@ export const useUserStore = createWithEqualityFn<State & Actions>()(
           if (get().selectedSchool.schoolId && get().selectedSchool.schoolId !== '') {
             set(() => ({ user: user, selectedSchool: get().selectedSchool }));
           } else {
-            set(() => ({ user: user, selectedSchool: user.schools[0] }));
+            set(() => {
+              return { user: user, selectedSchool: user.schools[0] };
+            });
           }
         }
         return { data: user };
