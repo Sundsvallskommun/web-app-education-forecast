@@ -46,7 +46,7 @@ export interface ForeacastQueriesDto {
   schoolId: string;
   periodId?: number | null;
   searchFilter?: string | null;
-  PageNumber?: number | null | undefined;
+  PageNumber?: number | null;
   PageSize?: number | null;
   OrderBy: string;
   OrderDirection: 'ASC' | 'DESC';

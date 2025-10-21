@@ -1,4 +1,4 @@
-import { ForeacastQueriesDto, QuerySchoolsClasses } from '@interfaces/forecast/forecast';
+import { QuerySchoolsClasses } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { Icon, Link, NavigationBar, PopupMenu, useSnackbar } from '@sk-web-gui/react';
@@ -49,10 +49,8 @@ export const MentorNavItems = (): React.ReactElement => {
         <PopupMenu.Panel>
           {schoolsClasses.map((schoolClasses) => {
             return (
-              <div className="px-15">
-                <div key={`popupmenyitem-${schoolClasses.schoolId}`} className="mt-15">
-                  {schoolClasses.schoolName}
-                </div>
+              <div className="px-15" key={`popupmenyitem-${schoolClasses.schoolId}`}>
+                <div className="mt-15">{schoolClasses.schoolName}</div>
                 {schoolClasses.classes.data.map((classLink) => {
                   return (
                     <PopupMenu.Item key={classLink.groupId}>
