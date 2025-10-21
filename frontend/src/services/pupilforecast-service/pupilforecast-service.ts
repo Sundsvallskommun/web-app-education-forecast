@@ -514,7 +514,7 @@ export const usePupilForecastStore = createWithEqualityFn<
             body.periodId,
             body.searchFilter
           );
-          const data = (res.data && res.data) || initialState.mySchoolsClasses;
+          const data = res?.data || initialState.mySchoolsClasses;
           await set(() => ({ mySchoolsClasses: data, schoolsClassesIsLoading: false }));
           await set(() => ({
             schoolsClassesIsLoading: false,
