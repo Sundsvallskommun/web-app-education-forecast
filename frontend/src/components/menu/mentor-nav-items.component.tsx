@@ -49,24 +49,20 @@ export const MentorNavItems = (): React.ReactElement => {
         <PopupMenu.Panel>
           {schoolsClasses.map((schoolClasses) => {
             return (
-              <PopupMenu.Item key={`popupmenyitem-${schoolClasses.schoolId}`}>
-                <PopupMenu>
-                  <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>
-                    {schoolClasses.schoolName}
-                  </PopupMenu.Button>
-                  <PopupMenu.Panel>
-                    {schoolClasses.classes.data.map((classLink) => {
-                      return (
-                        <PopupMenu.Item>
-                          <Link onClick={() => router.push(`/min-mentorsklass/${classLink.groupId}`)}>
-                            {classLink.groupName}
-                          </Link>
-                        </PopupMenu.Item>
-                      );
-                    })}
-                  </PopupMenu.Panel>
-                </PopupMenu>
-              </PopupMenu.Item>
+              <div className="px-15">
+                <div key={`popupmenyitem-${schoolClasses.schoolId}`} className="mt-15">
+                  {schoolClasses.schoolName}
+                </div>
+                {schoolClasses.classes.data.map((classLink) => {
+                  return (
+                    <PopupMenu.Item key={classLink.groupId}>
+                      <Link onClick={() => router.push(`/min-mentorsklass/${classLink.groupId}`)}>
+                        {classLink.groupName}
+                      </Link>
+                    </PopupMenu.Item>
+                  );
+                })}
+              </div>
             );
           })}
         </PopupMenu.Panel>
