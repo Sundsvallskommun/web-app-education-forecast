@@ -114,7 +114,7 @@ const samlStrategy = new Strategy(
 
     try {
       let personId = '';
-      const schools: {}[] = [];
+      let schools: {}[] = [];
       const roles: {}[] = [];
       const employeeApi = APIS.find(api => api.name === 'employee');
 
@@ -150,6 +150,8 @@ const samlStrategy = new Strategy(
           message: 'Failed to fetch user roles from education API, missing schoolId',
         });
       }
+
+      schools = schools.filter((v: any, i, arr) => arr.findIndex((vv: any) => vv.schoolId === v.schoolId) === i);
 
       if (!userRole) {
         return done({
