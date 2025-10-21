@@ -12,6 +12,13 @@ export interface MetaGroup {
   totalPages: number;
   data: MyGroup[];
 }
+
+export interface SchoolClasses {
+  schoolId: string;
+  schoolName: string;
+  classes: MetaGroup;
+}
+
 export interface MyGroup {
   groupId: string;
   coursePeriod?: string | null;
@@ -37,6 +44,15 @@ export interface QueriesDto {
 
 export interface ForeacastQueriesDto {
   schoolId: string;
+  periodId?: number | null;
+  searchFilter?: string | null;
+  PageNumber?: number | null | undefined;
+  PageSize?: number | null;
+  OrderBy: string;
+  OrderDirection: 'ASC' | 'DESC';
+}
+export interface QuerySchoolsClasses {
+  schools: { schoolId: string; schoolName: string }[];
   periodId?: number | null;
   searchFilter?: string | null;
   PageNumber?: number | null | undefined;
