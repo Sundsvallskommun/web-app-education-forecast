@@ -43,7 +43,7 @@ export const useMentorNavItems = (): React.ReactNode[] => {
   const schoolsClasses = mySchoolsClasses ?? [];
 
   return [
-    <NavigationBar.Item current={isCurrent}>
+    <NavigationBar.Item current={isCurrent} key={'mentor-nav-item'}>
       <PopupMenu>
         <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>Klasser</PopupMenu.Button>
         <PopupMenu.Panel>
