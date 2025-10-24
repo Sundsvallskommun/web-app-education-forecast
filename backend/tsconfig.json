@@ -12,7 +12,6 @@
     "module": "commonjs",
     "pretty": true,
     "sourceMap": true,
-    "inlineSources": true,
     "declaration": true,
     "outDir": "dist",
     "allowJs": true,
