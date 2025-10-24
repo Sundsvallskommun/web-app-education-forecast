@@ -53,6 +53,7 @@ import { isValidUrl } from './utils/util';
 import rateLimit from 'express-rate-limit';
 import { getRelayState } from './utils/getRelayState';
 import { getRedirects } from './utils/getRedirects';
+import { School } from './interfaces/forecast.interface';
 
 const corsWhitelist = ORIGIN?.split(',');
 const defaultRedirect = SAML_SUCCESS_REDIRECT ?? '/';
@@ -114,7 +115,7 @@ const samlStrategy = new Strategy(
 
     try {
       let personId = '';
-      let schools: {}[] = [];
+      let schools: School[] = [];
       const roles: {}[] = [];
       const employeeApi = APIS.find(api => api.name === 'employee');
 
@@ -151,7 +152,7 @@ const samlStrategy = new Strategy(
         });
       }
 
-      schools = schools.filter((v: any, i, arr) => arr.findIndex((vv: any) => vv.schoolId === v.schoolId) === i);
+      schools = Array.from(new Map(schools.map(school => [school.schoolId, school])).values());
 
       if (!userRole) {
         return done({
