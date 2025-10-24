@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useMemo } from 'react';
 import { shallow } from 'zustand/shallow';
 
-export const MentorNavItems = (): React.ReactElement => {
+export const useMentorNavItems = (): React.ReactNode[] => {
   const router = useRouter();
   const activeURL = router.pathname;
 
@@ -42,7 +42,7 @@ export const MentorNavItems = (): React.ReactElement => {
   const isCurrent = activeURL.includes('min-mentorsklass') || activeURL.includes('klasser');
   const schoolsClasses = mySchoolsClasses ?? [];
 
-  return (
+  return [
     <NavigationBar.Item current={isCurrent}>
       <PopupMenu>
         <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>Klasser</PopupMenu.Button>
@@ -65,6 +65,6 @@ export const MentorNavItems = (): React.ReactElement => {
           })}
         </PopupMenu.Panel>
       </PopupMenu>
-    </NavigationBar.Item>
-  );
+    </NavigationBar.Item>,
+  ];
 };

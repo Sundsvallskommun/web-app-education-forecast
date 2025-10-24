@@ -23,7 +23,7 @@ const headMasterlinks = [
   },
 ];
 
-export const HeadmasterNav = (): React.ReactElement => {
+export const useHeadmasterNav = (): React.ReactNode[] => {
   const router = useRouter();
   const activeURL = router.pathname;
 
@@ -38,37 +38,35 @@ export const HeadmasterNav = (): React.ReactElement => {
     return Object.values(uniq);
   }, [user]);
 
-  return (
-    <>
-      {headMasterlinks.map((link) => {
-        return (
-          <NavigationBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
-            {headmasterSchools && headmasterSchools.length > 1 ? (
-              <PopupMenu>
-                <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>{link.label}</PopupMenu.Button>
-                <PopupMenu.Panel>
-                  {headmasterSchools.map((s) => {
-                    return (
-                      <PopupMenu.Item key={`popupmenyitem-${s.schoolId}`}>
-                        <Link
-                          onClick={async () => {
-                            setSelectedSchool(s);
-                            await router.push(link.url);
-                          }}
-                        >
-                          {s.schoolName}
-                        </Link>
-                      </PopupMenu.Item>
-                    );
-                  })}
-                </PopupMenu.Panel>
-              </PopupMenu>
-            ) : (
-              <NextLink href={link.url}>{link.label}</NextLink>
-            )}
-          </NavigationBar.Item>
-        );
-      })}
-    </>
-  );
+  return [
+    headMasterlinks.map((link) => {
+      return (
+        <NavigationBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
+          {headmasterSchools && headmasterSchools.length > 1 ? (
+            <PopupMenu>
+              <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>{link.label}</PopupMenu.Button>
+              <PopupMenu.Panel>
+                {headmasterSchools.map((s) => {
+                  return (
+                    <PopupMenu.Item key={`popupmenyitem-${s.schoolId}`}>
+                      <Link
+                        onClick={async () => {
+                          setSelectedSchool(s);
+                          await router.push(link.url);
+                        }}
+                      >
+                        {s.schoolName}
+                      </Link>
+                    </PopupMenu.Item>
+                  );
+                })}
+              </PopupMenu.Panel>
+            </PopupMenu>
+          ) : (
+            <NextLink href={link.url}>{link.label}</NextLink>
+          )}
+        </NavigationBar.Item>
+      );
+    }),
+  ];
 };

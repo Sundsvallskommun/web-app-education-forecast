@@ -6,25 +6,20 @@ import { UserMenu } from '@components/user-menu/user-menu.component';
 import { useUserStore } from '@services/user-service/user-service';
 import { hasRolePermission } from '@utils/has-role-permission';
 
-import { HeadmasterNav } from './headmaster-nav-items.component';
-import { MentorNavItems } from './mentor-nav-items.component';
-import { TeacherNavItems } from './teacher-nav-items.component';
+import { useHeadmasterNav } from './headmaster-nav-items.component';
+import { useMentorNavItems } from './mentor-nav-items.component';
+import { useTeacherNavItems } from './teacher-nav-items.component';
 
 export const Menu = (): React.ReactElement => {
   const user = useUserStore((s) => s.user, shallow);
   const { headmaster, mentor, teacher } = hasRolePermission(user);
 
-  let navItems = <></>;
+  let navItems: React.ReactNode[] = [];
 
-  if (headmaster) navItems = <HeadmasterNav />;
+  if (headmaster) navItems.push(...useHeadmasterNav());
   else {
-    if (teacher) navItems = <TeacherNavItems />;
-    if (mentor)
-      navItems = (
-        <>
-          {navItems} <MentorNavItems />
-        </>
-      );
+    if (teacher) navItems.push(...useTeacherNavItems());
+    if (mentor) navItems.push(...useMentorNavItems());
   }
 
   return (
