@@ -159,20 +159,10 @@ export const getClassesForSchools: (
       })
     );
 
-    // Testing: Convert each settled result to a consistent structure, i.e. keep all schools even with empty classes
-    // const responses: SchoolClasses[] = results.map((r, i) => {
-    //   if (r.status === 'fulfilled') return r.value;
-    //   return {
-    //     schoolId: schools[i].schoolId,
-    //     schoolName: schools[i].schoolName,
-    //     classes: { pageNumber: 0, pageSize: 0, totalRecords: 0, totalPages: 0, data: [] } as MetaGroup,
-    //   } as SchoolClasses;
-    // });
-
     // Ignore the failed responses, i.e. keep only the schools with at least one class
     const responses: SchoolClasses[] = results
-      .filter((r): r is PromiseFulfilledResult<SchoolClasses> => r.status === 'fulfilled')
-      .map((r) => r.value);
+      .filter((result): result is PromiseFulfilledResult<SchoolClasses> => result.status === 'fulfilled')
+      .map((result) => result.value);
 
     return { data: responses };
   } catch (e: any) {
