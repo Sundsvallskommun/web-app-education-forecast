@@ -47,20 +47,29 @@ export const useMentorNavItems = (): React.ReactNode[] => {
       <PopupMenu>
         <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>Klasser</PopupMenu.Button>
         <PopupMenu.Panel>
-          {schoolsClasses.map((schoolClasses) => {
+          {schoolsClasses.map((schoolClasses, index) => {
+            const headingId = `${schoolClasses.schoolId}-label`;
             return (
-              <div className="px-15" key={`popupmenyitem-${schoolClasses.schoolId}`}>
-                <div className="mt-15">{schoolClasses.schoolName}</div>
-                {schoolClasses.classes.data.map((classLink) => {
-                  return (
-                    <PopupMenu.Item key={classLink.groupId}>
-                      <Link onClick={() => router.push(`/min-mentorsklass/${classLink.groupId}`)}>
-                        {classLink.groupName}
-                      </Link>
-                    </PopupMenu.Item>
-                  );
-                })}
-              </div>
+              <PopupMenu.Group
+                title={`${schoolClasses.schoolName}-classes`}
+                aria-labelledby={headingId}
+                key={`popupmenyitem-${schoolClasses.schoolId}`}
+              >
+                <label className="text-label-medium px-8 pt-8" id={headingId}>
+                  {schoolClasses.schoolName}
+                </label>
+                <PopupMenu.Items autoFocus={index === 0}>
+                  {schoolClasses.classes.data.map((classLink) => {
+                    return (
+                      <PopupMenu.Item key={classLink.groupId}>
+                        <Link onClick={() => router.push(`/min-mentorsklass/${classLink.groupId}`)}>
+                          {classLink.groupName}
+                        </Link>
+                      </PopupMenu.Item>
+                    );
+                  })}
+                </PopupMenu.Items>
+              </PopupMenu.Group>
             );
           })}
         </PopupMenu.Panel>
