@@ -13,13 +13,16 @@ import { useTeacherNavItems } from './teacher-nav-items.component';
 export const Menu = (): React.ReactElement => {
   const user = useUserStore((s) => s.user, shallow);
   const { headmaster, mentor, teacher } = hasRolePermission(user);
+  const headmasterNavItems = useHeadmasterNav();
+  const teacherNavItems = useTeacherNavItems();
+  const mentorNavItems = useMentorNavItems();
 
   let navItems: React.ReactNode[] = [];
 
-  if (headmaster) navItems.push(...useHeadmasterNav());
+  if (headmaster) navItems.push(...headmasterNavItems);
   else {
-    if (teacher) navItems.push(...useTeacherNavItems());
-    if (mentor) navItems.push(...useMentorNavItems());
+    if (teacher) navItems.push(...teacherNavItems);
+    if (mentor) navItems.push(...mentorNavItems);
   }
 
   return (
