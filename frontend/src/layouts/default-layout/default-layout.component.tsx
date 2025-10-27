@@ -90,7 +90,13 @@ export default function DefaultLayout({
                 {breadcrumbLinks.map((crumb) => {
                   return (
                     <Breadcrumb.Item currentPage={crumb.currentPage} key={`link-${crumb.link}`}>
-                      <Breadcrumb.Link href={crumb.link}>{crumb.title}</Breadcrumb.Link>
+                      {crumb.currentPage ? (
+                        <Breadcrumb.Link href={crumb.link}>{crumb.title}</Breadcrumb.Link>
+                      ) : (
+                        <NextLink className="sk-link sk-link-primary" href={crumb.link}>
+                          {crumb.title}
+                        </NextLink>
+                      )}
                     </Breadcrumb.Item>
                   );
                 })}

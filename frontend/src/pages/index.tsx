@@ -17,7 +17,7 @@ export default function Index() {
   const { headmaster, teacher, mentor } = hasRolePermission(user);
   const router = useRouter();
 
-  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedSchool = useUserStore((s) => s.selectedSchool, shallow);
 
   const teacherAndMentorRoutes = () => {
     const myGroup: ForeacastQueriesDto = {

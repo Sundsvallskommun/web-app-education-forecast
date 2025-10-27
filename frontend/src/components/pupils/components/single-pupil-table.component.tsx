@@ -7,6 +7,8 @@ import { useRouter } from 'next/router';
 import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { ArrowRight } from 'lucide-react';
+import { useUserStore } from '@services/user-service/user-service';
+import { shallow } from 'zustand/shallow';
 export interface TablePupil extends Pupil {
   id?: string | null;
   pupil?: string | null;
@@ -45,6 +47,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
   const [pageSize] = useState<number>(10);
   const pupil = usePupilForecastStore((s) => s.pupil);
   const [pupilTable, setPupilTable] = useState<TablePupil[]>([]);
+  const selectedSchool = useUserStore((state) => state.selectedSchool, shallow);
 
   useEffect(() => {
     const pupilArr: TablePupil[] = [];
@@ -211,7 +214,11 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
                   size="sm"
                   inverted
                   rightIcon={<Icon icon={<ArrowRight />} />}
-                  onClick={() => router.push(`/mina-amnen-grupper/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`)}
+                  onClick={() =>
+                    router.push(
+                      `/mina-amnen-grupper/${selectedSchool.schoolId}/amne-grupp/${p.groupId}-syllabus-${p.syllabusId}`
+                    )
+                  }
                 >
                   Rapportera
                 </Button>

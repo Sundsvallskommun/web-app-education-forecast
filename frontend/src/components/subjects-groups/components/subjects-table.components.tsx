@@ -2,12 +2,12 @@ import { usePupilForecastStore } from '@services/pupilforecast-service/pupilfore
 import { Avatar, Badge, Link, Table, SortMode, Select, Pagination, Input } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
-
 import { useFormContext } from 'react-hook-form';
 import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { useUserStore } from '@services/user-service/user-service';
 import { ISubjectsTable, SubjectsTableForm } from '../subjects-groups.component';
 import { useRouter } from 'next/router';
+import { shallow } from 'zustand/shallow';
 
 interface GroupHeaders {
   label?: string;
@@ -36,7 +36,7 @@ export const SubjectsTable: React.FC = () => {
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const { mySubjects } = usePupilForecastStore();
   const [subjectsTable, setSubjectsTable] = useState<ISubjects[]>([]);
-
+  const selectedSchool = useUserStore((state) => state.selectedSchool, shallow);
   const { watch, setValue, register, formState } = useFormContext<SubjectsTableForm>();
   const sortOrder = watch('sortOrder');
   const sortColumn = watch('sortColumn');
@@ -112,8 +112,17 @@ export const SubjectsTable: React.FC = () => {
     );
   });
 
+  const getLink = (group: ISubjects) => {
+    switch (!!headmaster) {
+      case true:
+        return `/amnen-grupper/amne-grupp/${group.id}-syllabus-${group.syllabusId}/`;
+      default:
+        return `/mina-amnen-grupper/${selectedSchool.schoolId}/amne-grupp/${group.id}-syllabus-${group.syllabusId}`;
+    }
+  };
+
   //rows
-  const groupRows = subjectsTable.map((g, idx: number) => {
+  const groupRows = subjectsTable.map((group, idx: number) => {
     return (
       <Table.Row key={`row-${idx}`}>
         <Table.HeaderColumn scope="row">
@@ -121,20 +130,12 @@ export const SubjectsTable: React.FC = () => {
             <Avatar
               color="vattjom"
               rounded
-              initials={`${g.groupName && typeof g.groupName === 'string' && g.groupName.split('').slice(0, 2)}`}
+              initials={`${group.groupName && typeof group.groupName === 'string' && group.groupName.split('').slice(0, 2)}`}
               size="sm"
               accent
             />
             <span className="ml-8 font-bold cursor-pointer">
-              <Link
-                onClick={() =>
-                  router.push(
-                    `${headmaster ? `/amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}/` : `/mina-amnen-grupper/amne-grupp/${g.id}-syllabus-${g.syllabusId}`}`
-                  )
-                }
-              >
-                {g.groupName}
-              </Link>
+              <Link onClick={() => router.push(getLink(group))}>{group.groupName}</Link>
             </span>
           </div>
         </Table.HeaderColumn>
@@ -142,9 +143,9 @@ export const SubjectsTable: React.FC = () => {
           <Table.Column>
             <div className="flex max-w-[300px] items-center gap-2">
               <span className="ml-8">
-                {g.teachers && g.teachers.length > 0 ? (
-                  Array.isArray(g.teachers) &&
-                  g.teachers.map((t) => {
+                {group.teachers && group.teachers.length > 0 ? (
+                  Array.isArray(group.teachers) &&
+                  group.teachers.map((t) => {
                     const fullName = `${t.givenname} ${t.lastname}`;
                     const nameArr = fullName.split('');
                     const initials = nameArr.filter(function (char) {
@@ -156,10 +157,10 @@ export const SubjectsTable: React.FC = () => {
                     return t ? (
                       <span key={`teacher-${t.personId}`}>
                         {t?.givenname} {t?.lastname} ({abbreviation})`
-                        {g.teachers &&
-                          Array.isArray(g.teachers) &&
-                          g.teachers.length > 1 &&
-                          t.personId !== g.teachers[g.teachers.length - 1].personId &&
+                        {group.teachers &&
+                          Array.isArray(group.teachers) &&
+                          group.teachers.length > 1 &&
+                          t.personId !== group.teachers[group.teachers.length - 1].personId &&
                           ','}
                         {'  '}
                       </span>
@@ -177,24 +178,26 @@ export const SubjectsTable: React.FC = () => {
           <></>
         )}
         <Table.Column>
-          <span>{typeof g.totalPupils === 'number' && g.totalPupils}</span>
+          <span>{typeof group.totalPupils === 'number' && group.totalPupils}</span>
         </Table.Column>
         <Table.Column>
           <div className="flex items-center gap-2">
-            <span className="ml-8">{!g.presence ? '-' : `${g.presence}%`}</span>
+            <span className="ml-8">{!group.presence ? '-' : `${group.presence}%`}</span>
           </div>
         </Table.Column>
         <Table.Column>
           <div className="flex items-center gap-2">
             <span className="ml-8">
-              {g.totalPupils === g.notFilledIn ? (
+              {group.totalPupils === group.notFilledIn ? (
                 '-'
               ) : (
                 <Badge
                   inverted
                   rounded
-                  color={!g.approvedPupils ? 'tertiary' : 'gronsta'}
-                  counter={!g.approvedPupils ? 0 : typeof g?.approvedPupils === 'number' ? g?.approvedPupils : 0}
+                  color={!group.approvedPupils ? 'tertiary' : 'gronsta'}
+                  counter={
+                    !group.approvedPupils ? 0 : typeof group?.approvedPupils === 'number' ? group?.approvedPupils : 0
+                  }
                 />
               )}
             </span>
@@ -203,14 +206,14 @@ export const SubjectsTable: React.FC = () => {
         <Table.Column>
           <div className="flex items-center gap-2">
             <span className="ml-8">
-              {g.totalPupils === g.notFilledIn ? (
+              {group.totalPupils === group.notFilledIn ? (
                 '-'
               ) : (
                 <Badge
                   rounded
-                  inverted={!g.warningPupils}
-                  color={!g.warningPupils ? 'tertiary' : 'warning'}
-                  counter={!g.warningPupils ? 0 : typeof g.warningPupils === 'number' ? g.warningPupils : 0}
+                  inverted={!group.warningPupils}
+                  color={!group.warningPupils ? 'tertiary' : 'warning'}
+                  counter={!group.warningPupils ? 0 : typeof group.warningPupils === 'number' ? group.warningPupils : 0}
                 />
               )}
             </span>
@@ -219,14 +222,20 @@ export const SubjectsTable: React.FC = () => {
         <Table.Column>
           <div className="flex items-center gap-2">
             <span className="ml-8">
-              {g.totalPupils === g.notFilledIn ? (
+              {group.totalPupils === group.notFilledIn ? (
                 '-'
               ) : (
                 <Badge
                   rounded
-                  inverted={!g.unapprovedPupils}
-                  color={!g.unapprovedPupils ? 'tertiary' : 'error'}
-                  counter={!g.unapprovedPupils ? 0 : typeof g.unapprovedPupils === 'number' ? g.unapprovedPupils : 0}
+                  inverted={!group.unapprovedPupils}
+                  color={!group.unapprovedPupils ? 'tertiary' : 'error'}
+                  counter={
+                    !group.unapprovedPupils
+                      ? 0
+                      : typeof group.unapprovedPupils === 'number'
+                        ? group.unapprovedPupils
+                        : 0
+                  }
                 />
               )}
             </span>
@@ -237,9 +246,9 @@ export const SubjectsTable: React.FC = () => {
             <span className="ml-8">
               <Badge
                 rounded
-                inverted={!g.notFilledIn}
+                inverted={!group.notFilledIn}
                 color="tertiary"
-                counter={!g.notFilledIn ? 0 : typeof g.notFilledIn === 'number' ? g.notFilledIn : 0}
+                counter={!group.notFilledIn ? 0 : typeof group.notFilledIn === 'number' ? group.notFilledIn : 0}
               />
             </span>
           </div>
