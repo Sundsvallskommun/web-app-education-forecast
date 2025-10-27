@@ -49,6 +49,16 @@ export const getAllPeriods: (schoolType: string) => Promise<ServiceResponse<Peri
     }));
 };
 
+interface Options {
+  OrderBy: string;
+  OrderDirection: string;
+  PageNumber?: number | null;
+  PageSize?: number | null;
+  periodId?: number | null;
+  searchFilter?: string | null;
+  signal?: AbortSignal;
+}
+
 export const getSubjects: (
   schoolId: string,
   OrderBy: string,
@@ -80,25 +90,11 @@ export const getSubjects: (
     }));
 };
 
-export const getClasses: (
-  schoolId: string,
-  OrderBy: string,
-  OrderDirection: string,
-  PageNumber?: number | null,
-  PageSize?: number | null,
-  periodId?: number | null,
-  searchFilter?: string | null,
-  signal?: AbortSignal
-) => Promise<ServiceResponse<MetaGroup>> = (
+export const getClasses: (schoolId: string, options: Options) => Promise<ServiceResponse<MetaGroup>> = (
   schoolId,
-  OrderBy,
-  OrderDirection,
-  PageNumber,
-  PageSize,
-  periodId,
-  searchFilter,
-  signal
+  options
 ) => {
+  const { OrderBy, OrderDirection, PageNumber, PageSize, periodId, searchFilter, signal } = options;
   return apiService
     .get<ApiResponse<MetaGroup>>(`/pupilforecast/mygroups/${schoolId}`, {
       params: { OrderBy, OrderDirection, periodId, groupType: 'K', searchFilter, PageNumber, PageSize },
@@ -114,23 +110,10 @@ export const getClasses: (
 
 export const getClassesForSchools: (
   schools: { schoolId: string; schoolName: string }[],
-  OrderBy: string,
-  OrderDirection: string,
-  PageNumber?: number | null,
-  PageSize?: number | null,
-  periodId?: number | null,
-  searchFilter?: string | null,
-  signal?: AbortSignal
-) => Promise<ServiceResponse<SchoolClasses[]>> = async (
-  schools,
-  OrderBy,
-  OrderDirection,
-  PageNumber,
-  PageSize,
-  periodId,
-  searchFilter,
-  signal
-) => {
+  options: Options
+) => Promise<ServiceResponse<SchoolClasses[]>> = async (schools, options) => {
+  const { OrderBy, OrderDirection, PageNumber, PageSize, periodId, searchFilter, signal } = options;
+
   try {
     const params = {
       OrderBy,
@@ -470,15 +453,14 @@ export const usePupilForecastStore = createWithEqualityFn<
             await get().reset();
           }
           await set(() => ({ classesIsLoading: true }));
-          const res = await getClasses(
-            body.schoolId,
-            body.OrderBy,
-            body.OrderDirection,
-            body.PageNumber,
-            body.PageSize,
-            body.periodId,
-            body.searchFilter
-          );
+          const res = await getClasses(body.schoolId, {
+            OrderBy: body.OrderBy,
+            OrderDirection: body.OrderDirection,
+            PageNumber: body.PageNumber,
+            PageSize: body.PageSize,
+            periodId: body.periodId,
+            searchFilter: body.searchFilter,
+          });
           const data = (res.data && res.data) || initialState.myClasses;
           await set(() => ({ myClasses: data, classesIsLoading: false }));
           await set(() => ({
@@ -495,15 +477,14 @@ export const usePupilForecastStore = createWithEqualityFn<
             await get().reset();
           }
           await set(() => ({ schoolsClassesIsLoading: true }));
-          const res = await getClassesForSchools(
-            body.schools,
-            body.OrderBy,
-            body.OrderDirection,
-            body.PageNumber,
-            body.PageSize,
-            body.periodId,
-            body.searchFilter
-          );
+          const res = await getClassesForSchools(body.schools, {
+            OrderBy: body.OrderBy,
+            OrderDirection: body.OrderDirection,
+            PageNumber: body.PageNumber,
+            PageSize: body.PageSize,
+            periodId: body.periodId,
+            searchFilter: body.searchFilter,
+          });
           const data = res?.data || initialState.mySchoolsClasses;
           await set(() => ({ mySchoolsClasses: data, schoolsClassesIsLoading: false }));
           await set(() => ({
