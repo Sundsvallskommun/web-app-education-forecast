@@ -17,7 +17,7 @@ export const Menu = (): React.ReactElement => {
   const teacherNavItems = useTeacherNavItems();
   const mentorNavItems = useMentorNavItems();
 
-  let navItems: React.ReactNode[] = [];
+  const navItems: React.ReactNode[] = [];
 
   if (headmaster) navItems.push(...headmasterNavItems);
   else {

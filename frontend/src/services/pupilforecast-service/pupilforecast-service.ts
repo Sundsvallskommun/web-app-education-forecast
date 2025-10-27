@@ -28,6 +28,7 @@ import { createWithEqualityFn } from 'zustand/traditional';
 import { devtools, persist } from 'zustand/middleware';
 import { __DEV__ } from '@sk-web-gui/react';
 import { apiURL } from '@utils/api-url';
+import { isAxiosError } from 'axios';
 
 export const getCurrentPeriod: (schoolType: string) => Promise<ServiceResponse<Period>> = (schoolType) => {
   return apiService
@@ -148,10 +149,17 @@ export const getClassesForSchools: (
       .map((result) => result.value);
 
     return { data: responses };
-  } catch (e: any) {
+  } catch (err) {
+    if (isAxiosError(err)) {
+      return {
+        error: err.response?.status ?? 'UNKNOWN ERROR',
+        message: err.response?.data?.message ?? err.message,
+      };
+    }
+
     return {
-      message: e?.response?.data?.message,
-      error: e?.response?.status ?? 'UNKNOWN ERROR',
+      error: 'UNKNOWN ERROR',
+      message: err instanceof Error ? err.message : undefined,
     };
   }
 };
