@@ -7,7 +7,7 @@ import { useUserStore } from '@services/user-service/user-service';
 import { Spinner, useSnackbar } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import router from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 
 export const Index: React.FC = () => {
@@ -23,26 +23,22 @@ export const Index: React.FC = () => {
   const routerSchoolId = router.query['schoolId'];
   const schoolId = Array.isArray(routerSchoolId) ? routerSchoolId[0] : routerSchoolId;
   const toastMessage = useSnackbar();
-  const [myGroup, setMyGroup] = useState<ForeacastQueriesDto | null>(null);
+
+  const myGroup: ForeacastQueriesDto = {
+    schoolId: schoolId ?? '',
+    periodId: selectedPeriod?.periodId === 0 ? currentPeriod.periodId : selectedPeriod?.periodId,
+    OrderBy: 'GroupName',
+    OrderDirection: 'ASC',
+    PageSize: 10,
+  };
 
   useEffect(() => {
     if (schoolId) {
-      const group: ForeacastQueriesDto = {
-        schoolId: schoolId,
-        periodId: selectedPeriod?.periodId === 0 ? currentPeriod.periodId : selectedPeriod?.periodId,
-        OrderBy: 'GroupName',
-        OrderDirection: 'ASC',
-        PageSize: 10,
-      };
-
       if (user?.schools.map((school) => school.schoolId).includes(schoolId)) {
-        if (selectedSchool.schoolId === schoolId) {
-          setMyGroup(group);
-        } else {
+        if (selectedSchool.schoolId !== schoolId) {
           const newSchool = user.schools.find((school) => school.schoolId === routerSchoolId);
           if (newSchool) {
             setSelectedSchool(newSchool);
-            setMyGroup(group);
           } else {
             setSelectedSchool(user.schools[0]);
             router.push(`/mina-amnen-grupper/${user.schools[0].schoolId}`);
@@ -55,6 +51,7 @@ export const Index: React.FC = () => {
         router.push(`/mina-amnen-grupper/${selectedSchool.schoolId}`);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routerSchoolId, schoolId]);
 
   useEffect(() => {

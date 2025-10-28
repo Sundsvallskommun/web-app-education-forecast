@@ -1,8 +1,8 @@
 import { Icon, NavigationBar, PopupMenu } from '@sk-web-gui/react';
 import { useRouter } from 'next/router';
-import NextLink from 'next/link';
 import { useUserStore } from '@services/user-service/user-service';
 import { ChevronDown } from 'lucide-react';
+import Link from 'next/link';
 
 export const useTeacherNavItems = (): React.ReactNode[] => {
   const router = useRouter();
@@ -33,14 +33,14 @@ export const useTeacherNavItems = (): React.ReactNode[] => {
             <PopupMenu.Items>
               {link.children.map((childItem) => (
                 <PopupMenu.Item key={childItem.label}>
-                  <NextLink href={childItem.url}>{childItem.label}</NextLink>
+                  <Link href={childItem.url}>{childItem.label}</Link>
                 </PopupMenu.Item>
               ))}
             </PopupMenu.Items>
           </PopupMenu.Panel>
         </PopupMenu>
       ) : (
-        <NextLink href={link.url}>{link.label}</NextLink>
+        <Link href={link.url}>{link.label}</Link>
       )}
     </NavigationBar.Item>
   ));

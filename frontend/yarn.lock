@@ -1564,32 +1564,6 @@
     "@sk-web-gui/popup-menu" "3.1.8"
     "@sk-web-gui/utils" "2.2.2"
 
-"@sk-web-gui/next-card@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@sk-web-gui/next-card/-/next-card-1.1.0.tgz#acfb0d39928e071325029d93c07d231b1cb3a5bd"
-  integrity sha512-A4IQAbY9B7zZbltg807HmO3J6g29eHwo6Yu9L3QiMRfE0OnhdsjYmD5DCYfozz/TTdKcV22lysHbCW7wwYB+JA==
-  dependencies:
-    "@sk-web-gui/card" "2.0.0"
-    "@sk-web-gui/icon" "3.1.2"
-    "@sk-web-gui/utils" "2.2.2"
-    lucide-react "0.544.0"
-
-"@sk-web-gui/next-link@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@sk-web-gui/next-link/-/next-link-1.1.0.tgz#3e444a30aafffe0c41a725f1441fd3738d02f4b8"
-  integrity sha512-cTHdtJd+lctckArA5XvJWdO43a6F13FOOEJNlJ+mrdzrlevT14NVabvJLbHTaKQLjJQkZnoRRmZ3PlrLCyJs8A==
-  dependencies:
-    "@sk-web-gui/link" "1.2.7"
-    "@sk-web-gui/utils" "2.2.2"
-
-"@sk-web-gui/next@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@sk-web-gui/next/-/next-1.2.0.tgz#e9db0c767deb9ff25a65e287557d18c34ef003c5"
-  integrity sha512-ZGjaVLiawPot7kSnkvlJS/XljoZBpeJtp3rRLukqMyrZ4kqU0+K8/B149VGwpAfHhFaS7cfoC8NipMXKdxw6kw==
-  dependencies:
-    "@sk-web-gui/next-card" "1.1.0"
-    "@sk-web-gui/next-link" "1.1.0"
-
 "@sk-web-gui/pagination@1.1.9":
   version "1.1.9"
   resolved "https://registry.yarnpkg.com/@sk-web-gui/pagination/-/pagination-1.1.9.tgz#f23caffe24d66b81e827d216b8ab8a409a92bf1c"
@@ -5187,11 +5161,6 @@ lru-cache@^5.1.1:
   integrity sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==
   dependencies:
     yallist "^3.0.2"
-
-lucide-react@0.544.0:
-  version "0.544.0"
-  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.544.0.tgz#4719953c10fd53a64dd8343bb0ed16ec79f3eeef"
-  integrity sha512-t5tS44bqd825zAW45UQxpG2CvcC4urOwn2TrwSH8u+MjeE+1NnWl6QqeQ/6NdjMqdOygyiT9p3Ev0p1NJykxjw==
 
 lucide-react@^0.537.0:
   version "0.537.0"

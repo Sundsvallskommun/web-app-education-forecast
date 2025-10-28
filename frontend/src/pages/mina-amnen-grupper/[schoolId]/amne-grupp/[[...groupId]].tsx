@@ -55,6 +55,7 @@ export const Index: React.FC = () => {
         setSelectedSchool(newSchool);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schoolId]);
 
   useEffect(() => {

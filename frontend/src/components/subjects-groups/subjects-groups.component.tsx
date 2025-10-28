@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { useForm, FormProvider } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { SubjectsTable } from './components/subjects-table.components';
+import { SubjectsTable } from './components/subjects-table/subjects-table.components';
 import { useSnackbar } from '@sk-web-gui/react';
 
 interface SubjectsGroupsProps {

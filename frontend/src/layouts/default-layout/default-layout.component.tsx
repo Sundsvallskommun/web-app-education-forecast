@@ -3,7 +3,7 @@ import { useUserStore } from '@services/user-service/user-service';
 import { Breadcrumb, Header, Logo, Spinner } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import Head from 'next/head';
-import NextLink from 'next/link';
+import Link from 'next/link';
 import { shallow } from 'zustand/shallow';
 
 interface DefaultLayoutProps {
@@ -47,11 +47,6 @@ export default function DefaultLayout({
   const layoutTitle = `${process.env.NEXT_PUBLIC_APP_NAME}${headerSubtitle ? ` - ${headerSubtitle}` : ''}`;
   const fullTitle = postTitle ? `${layoutTitle} - ${postTitle}` : `${layoutTitle}`;
 
-  const setFocusToMain = () => {
-    const contentElement = document.getElementById('content');
-    contentElement?.focus();
-  };
-
   return (
     <div className="DefaultLayout full-page-layout">
       <Head>
@@ -59,11 +54,9 @@ export default function DefaultLayout({
         <meta name="description" content={`${process.env.NEXT_PUBLIC_APP_NAME}`} />
       </Head>
 
-      <NextLink href="#content" legacyBehavior passHref>
-        <a onClick={setFocusToMain} accessKey="s" className="next-link-a" data-cy="systemMessage-a">
-          Hoppa till innehåll
-        </a>
-      </NextLink>
+      <Link href="#content" className="next-link-a" data-cy="systemMessage-a">
+        Hoppa till innehåll
+      </Link>
 
       <Header
         data-cy="nav-header"
@@ -72,9 +65,9 @@ export default function DefaultLayout({
         subtitle={headerSubtitle() || ''}
         aria-label={`${headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME} ${headerSubtitle}`}
         logo={
-          <NextLink href={logoLinkHref}>
+          <Link href={logoLinkHref}>
             <Logo title={headerTitle ?? process.env.NEXT_PUBLIC_APP_NAME} />
-          </NextLink>
+          </Link>
         }
         userMenu={<Menu />}
         mobileMenu={<Menu />}
@@ -93,9 +86,7 @@ export default function DefaultLayout({
                       {crumb.currentPage ? (
                         <Breadcrumb.Link href={crumb.link}>{crumb.title}</Breadcrumb.Link>
                       ) : (
-                        <NextLink className="sk-link sk-link-primary" href={crumb.link}>
-                          {crumb.title}
-                        </NextLink>
+                        <Link href={crumb.link}>{crumb.title}</Link>
                       )}
                     </Breadcrumb.Item>
                   );
