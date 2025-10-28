@@ -34,6 +34,8 @@ yarn-error.log*
 .yarnrc
 
 # vercel
+.yarn
 .vercel
 .npmrc
 .yarnrc
+.yarnrc.*
