@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { useForm, FormProvider } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { SubjectsTable } from './components/subjects-table.components';
+import { SubjectsTable } from './components/subjects-table/subjects-table.components';
 import { useSnackbar } from '@sk-web-gui/react';
 
 interface SubjectsGroupsProps {
@@ -37,7 +37,6 @@ export interface ISubjectsTable {
 
 export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subjectsQueries }) => {
   const { mySubjects, getMySubjects } = usePupilForecastStore();
-  //const { mySubjects, grouplistTable, groupsListRendered, grouptable } = GroupTables('G', user, searchQuery);
   const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
@@ -80,9 +79,9 @@ export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subje
         status: 'error',
       });
     });
-
-    //eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortOrder, sortColumn, pageSize, page, searchQuery, selectedPeriod.periodId, selectedSchool]);
+
   return (
     <div>
       <FormProvider {...searchForm}>

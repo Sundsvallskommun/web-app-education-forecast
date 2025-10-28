@@ -64,13 +64,15 @@ export const useUserStore = createWithEqualityFn<State & Actions>()(
           } else {
             user = emptyUser;
           }
-          if (get().selectedSchool.schoolId && get().selectedSchool.schoolId !== '') {
-            set(() => ({ user: user, selectedSchool: get().selectedSchool }));
-          } else {
-            set(() => {
-              return { user: user, selectedSchool: user.schools[0] };
-            });
-          }
+          set(() => {
+            const oldSelectedSchool = get().selectedSchool;
+            const selectedSchool =
+              oldSelectedSchool?.schoolId &&
+              user.schools.map((school) => school.schoolId).includes(oldSelectedSchool.schoolId)
+                ? oldSelectedSchool
+                : user.schools[0];
+            return { user: user, selectedSchool };
+          });
         }
         return { data: user };
       },
