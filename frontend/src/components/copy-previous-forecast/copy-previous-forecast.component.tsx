@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { CopyPreviousForecastDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
+import { CopyCheck } from 'lucide-react';
 
 interface ICopyPreviousForecast {
   syllabusId: string;
@@ -88,7 +89,7 @@ export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabus
     <></>
   ) : (
     <div>
-      <Button size="md" onClick={openModalhandler} variant="secondary" leftIcon={<Icon name="copy-check" />}>
+      <Button size="md" onClick={openModalhandler} variant="secondary" leftIcon={<Icon icon={<CopyCheck />} />}>
         Kopiera föregående prognos
       </Button>
       <Modal className="max-w-[420px] w-full" show={isOpen} onClose={onCloseHandler} label="Innan du fortsätter">

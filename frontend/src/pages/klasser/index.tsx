@@ -14,14 +14,12 @@ export const Index: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
   const { headmaster } = hasRolePermission(user);
   const pageTitle = 'Klasser';
-  //const { schoolYear, currentMonthPeriod, termPeriod } = thisSchoolYearPeriod();
   const getClasses = usePupilForecastStore((s) => s.getMyClasses);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
 
   const toastMessage = useSnackbar();
 
-  //const currentPeriod = GR ? termPeriod : currentMonthPeriod;
   const classQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
     periodId: selectedPeriod.periodId,
@@ -31,14 +29,17 @@ export const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    !headmaster
-      ? router.push('/mina-amnen-grupper')
-      : getClasses(classQueries).catch(() => {
-          toastMessage({
-            message: 'Något gick fel vid hämtning av alla klasser',
-            status: 'error',
-          });
+    if (!headmaster) {
+      router.push('/mina-amnen-grupper');
+    } else {
+      getClasses(classQueries).catch(() => {
+        toastMessage({
+          message: 'Något gick fel vid hämtning av alla klasser',
+          status: 'error',
         });
+      });
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

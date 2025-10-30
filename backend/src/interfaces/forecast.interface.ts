@@ -120,3 +120,5 @@ export type MyMentorClassPupilGrid = {
   typeOfSchool?: string | null;
   forecasts: GridForecast[];
 };
+
+export type School = { schoolId: string; schoolName: string };

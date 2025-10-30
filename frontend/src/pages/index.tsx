@@ -17,7 +17,7 @@ export default function Index() {
   const { headmaster, teacher, mentor } = hasRolePermission(user);
   const router = useRouter();
 
-  const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedSchool = useUserStore((s) => s.selectedSchool, shallow);
 
   const teacherAndMentorRoutes = () => {
     const myGroup: ForeacastQueriesDto = {
@@ -30,13 +30,19 @@ export default function Index() {
       router.push('/mina-amnen-grupper');
     } else if (mentor && !teacher) {
       getMyClasses(myGroup).then((res) => {
-        res.data && router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+        if (res.data) {
+          router.push(`/min-mentorsklass/${res.data.data[0]?.groupId}`);
+        }
       });
     }
   };
 
   useEffect(() => {
-    headmaster ? router.push('/klasser') : teacherAndMentorRoutes();
+    if (headmaster) {
+      router.push('/klasser');
+    } else {
+      teacherAndMentorRoutes();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return <LoaderFullScreen />;

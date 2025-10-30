@@ -1,4 +1,5 @@
 import { Button, Icon, Spinner } from '@sk-web-gui/react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/router';
 
 interface RiffleProps {
@@ -36,7 +37,7 @@ export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsL
       {riffleObjects.length > 2 ? (
         <Button
           onClick={() => riffleHandler(prevRiffle.link)}
-          leftIcon={<Icon name="arrow-left" />}
+          leftIcon={<Icon icon={<ArrowLeft />} />}
           variant="secondary"
         >
           {prevRiffle?.title}
@@ -47,7 +48,7 @@ export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsL
 
       <Button
         onClick={() => riffleHandler(nextRiffle.link)}
-        rightIcon={<Icon name="arrow-right" />}
+        rightIcon={<Icon icon={<ArrowRight />} />}
         variant="secondary"
       >
         {nextRiffle?.title}

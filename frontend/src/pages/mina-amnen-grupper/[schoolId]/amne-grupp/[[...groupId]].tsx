@@ -18,13 +18,17 @@ interface Riffle {
 export const Index: React.FC = () => {
   const router = useRouter();
   const routersubjectId = router.query['groupId'];
+  const routerSchoolId = router.query['schoolId'];
+  const schoolId = Array.isArray(routerSchoolId) ? routerSchoolId[0] : (routerSchoolId as string);
+  const selectedSchool = useUserStore((state) => state.selectedSchool);
+  const setSelectedSchool = useUserStore((state) => state.setSelectedSchool);
+  const { schools } = useUserStore((state) => state.user);
   const routeId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
   const subjectId = routeId?.split('-syllabus-')[0];
   const syllabusId = routeId?.split('-syllabus-')[1];
-  const getSubjectWithPupils = usePupilForecastStore((s) => s.getSubjectWithPupils);
-  const getSubjects = usePupilForecastStore((s) => s.getMySubjects);
-  const selectedSchool = useUserStore((s) => s.selectedSchool);
-  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const getSubjectWithPupils = usePupilForecastStore((state) => state.getSubjectWithPupils);
+  const getSubjects = usePupilForecastStore((state) => state.getMySubjects);
+  const selectedPeriod = usePupilForecastStore((state) => state.selectedPeriod);
   const subjectsQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
     periodId: selectedPeriod.periodId,
@@ -33,16 +37,26 @@ export const Index: React.FC = () => {
     PageSize: 500,
   };
 
-  const subjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
+  const subjectIsLoading = usePupilForecastStore((state) => state.singleSubjectIsLoading);
   const [pageTitle, setPageTitle] = useState<string>();
 
-  const allSubjects = usePupilForecastStore((s) => s.mySubjects);
-  const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
+  const allSubjects = usePupilForecastStore((state) => state.mySubjects);
+  const subjectsIsLoading = usePupilForecastStore((state) => state.subjectsIsLoading);
   const [selectedId, setSelectedId] = useState<string>();
   const [selectedSyllabus, setSelectedSyllabus] = useState<string>();
   const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
 
   const toastMessage = useSnackbar();
+
+  useEffect(() => {
+    if (selectedSchool.schoolId !== schoolId) {
+      const newSchool = schools.find((school) => school.schoolId === schoolId);
+      if (newSchool) {
+        setSelectedSchool(newSchool);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schoolId]);
 
   useEffect(() => {
     const loadClass = async () => {
@@ -63,23 +77,15 @@ export const Index: React.FC = () => {
         });
         setSelectedId(subjectId);
         setSelectedSyllabus(syllabusId);
-      } else {
-        if (!subjectId) {
-          router.push('/mina-amnen-grupper');
-        }
       }
     };
 
-    if (router.isReady) {
+    if (router.isReady && selectedId !== subjectId) {
       loadClass();
     }
 
-    router.events.on('routeChangeComplete', loadClass);
-    return () => {
-      router.events.off('routeChangeComplete', loadClass);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.query, router.isReady]);
+  }, [router.isReady, subjectId]);
 
   useEffect(() => {
     if (selectedId && selectedSyllabus) {
@@ -99,23 +105,30 @@ export const Index: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedSyllabus, selectedPeriod.periodId]);
 
-  const breadcrumbLinks = [
-    { link: '/mina-amnen-grupper', title: 'Mina ämnen/grupper', currentPage: false },
-    { link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true },
-  ];
+  const breadCrumbMyGroups = { link: '/mina-amnen-grupper', title: 'Mina ämnen/grupper', currentPage: false };
+  const breadCrumbSchool = {
+    link: `/mina-amnen-grupper/${selectedSchool.schoolId}`,
+    title: selectedSchool.schoolName,
+    currentPage: false,
+  };
+
+  const breadcrumbLinks =
+    schools.length > 1
+      ? [breadCrumbMyGroups, breadCrumbSchool, { link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true }]
+      : [breadCrumbMyGroups, { link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true }];
 
   useEffect(() => {
     const riffleArray: Riffle[] = [];
 
-    allSubjects.data.filter((s) => {
+    allSubjects.data.filter((subject) => {
       riffleArray.push({
-        id: s.groupId,
-        link: `/mina-amnen-grupper/amne-grupp/${s.groupId}-syllabus-${s.syllabusId}`,
-        title: `${s.groupName}`,
+        id: subject.groupId,
+        link: `/mina-amnen-grupper/${selectedSchool.schoolId}/amne-grupp/${subject.groupId}-syllabus-${subject.syllabusId}`,
+        title: `${subject.groupName}`,
       });
     });
 
-    setRiffleSubjects(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
+    setRiffleSubjects(riffleArray.toSorted((a, b) => a.title.localeCompare(b.title)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSubjects]);
 

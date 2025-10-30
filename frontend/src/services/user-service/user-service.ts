@@ -12,7 +12,6 @@ const handleSetUserResponse: (res: ApiResponse<User>) => User = (res) => ({
   username: res.data.username,
   roles: res.data.roles,
   schools: res.data.schools,
-  // permissions: res.data.permissions,
 });
 
 const getMe: () => Promise<ServiceResponse<User>> = () => {
@@ -34,7 +33,7 @@ interface State {
 }
 interface Actions {
   setUser: (user: User) => void;
-  setSelectedShool: (selectedSchool: { schoolId: string; schoolName: string }) => void;
+  setSelectedSchool: (selectedSchool: { schoolId: string; schoolName: string }) => void;
   getMe: () => Promise<ServiceResponse<User>>;
   reset: () => void;
 }
@@ -52,15 +51,28 @@ export const useUserStore = createWithEqualityFn<State & Actions>()(
     (set, get) => ({
       ...initialState,
       setUser: (user) => set(() => ({ user })),
-      setSelectedShool: (selectedSchool) => set(() => ({ selectedSchool })),
+      setSelectedSchool: (selectedSchool) =>
+        set(() => {
+          return { selectedSchool };
+        }),
       getMe: async () => {
         let user = get().user;
         const res = await getMe();
         if (!res.error) {
-          res.data ? (user = res.data) : (user = emptyUser);
-          get().selectedSchool.schoolId && get().selectedSchool.schoolId !== ''
-            ? set(() => ({ user: user, selectedSchool: get().selectedSchool }))
-            : set(() => ({ user: user, selectedSchool: user.schools[0] }));
+          if (res.data) {
+            user = res.data;
+          } else {
+            user = emptyUser;
+          }
+          set(() => {
+            const oldSelectedSchool = get().selectedSchool;
+            const selectedSchool =
+              oldSelectedSchool?.schoolId &&
+              user.schools.map((school) => school.schoolId).includes(oldSelectedSchool.schoolId)
+                ? oldSelectedSchool
+                : user.schools[0];
+            return { user: user, selectedSchool };
+          });
         }
         return { data: user };
       },

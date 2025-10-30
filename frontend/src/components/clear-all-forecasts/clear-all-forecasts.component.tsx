@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { clearGroupForecastsDto } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
+import { Trash2 } from 'lucide-react';
 
 export const ClearAllForecasts: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +57,7 @@ export const ClearAllForecasts: React.FC = () => {
         onClick={openModalHandler}
         variant="tertiary"
         size="md"
-        leftIcon={<Icon name="trash-2" />}
+        leftIcon={<Icon icon={<Trash2 />} />}
       >
         Rensa alla
       </Button>

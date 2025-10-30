@@ -1,10 +1,6 @@
 import { User } from '@interfaces/user';
 import { ApiResponse } from '@services/api-service';
 
-// export const defaultPermissions: Permissions = {
-//   //   canEditSystemMessages: false,
-// };
-
 export const emptyUser: User = {
   personId: '',
   name: '',
@@ -16,7 +12,6 @@ export const emptyUser: User = {
     },
   ],
   schools: [{ schoolId: '', schoolName: '' }],
-  //   permissions: defaultPermissions,
 };
 
 export const emptyUserResponse: ApiResponse<User> = {

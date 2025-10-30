@@ -20,7 +20,7 @@ export default function Start() {
   const initalFocus = useRef<HTMLButtonElement>(null);
   const setInitalFocus = () => {
     setTimeout(() => {
-      initalFocus.current && initalFocus.current.focus();
+      initalFocus.current?.focus();
     });
   };
 
@@ -58,8 +58,8 @@ export default function Start() {
         setErrorMessage('Användaren saknar rätt attribut');
       } else if (failMessage === 'SAML_MISSING_PERMISSIONS') {
         setErrorMessage('Användaren saknar rättigheter');
-      } else {
-        failMessage && setErrorMessage(failMessage);
+      } else if (failMessage) {
+        setErrorMessage(failMessage);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -38,10 +38,6 @@ export const AllPupilsTable: React.FC = () => {
   const { watch, setValue, register, formState } = useFormContext<PupilsTableForm>();
   const sortOrder = watch('sortOrder');
   const sortColumn = watch('sortColumn');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const pageSize = watch('pageSize');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const totalPages = watch('totalPages');
   const page = watch('page');
 
   const TableSortOrder = sortOrder === 'ASC' ? SortMode.ASC : SortMode.DESC;
