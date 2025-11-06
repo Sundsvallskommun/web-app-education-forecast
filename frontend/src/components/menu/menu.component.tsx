@@ -26,7 +26,7 @@ export const Menu = (): React.ReactElement => {
   }
 
   return (
-    <NavigationBar className="flex-wrap justify-end" color="vattjom">
+    <NavigationBar className="flex-wrap justify-end" color="vattjom" data-cy="navigation-bar">
       {navItems}
       <NavigationBar.Item
         className="flex justify-end ml-32 max-phone-max:order-first max-phone-max:w-full"

@@ -22,7 +22,13 @@ export const SubjectsTableBadgeColumn: React.FC<SubjectsTableBadgeColumnProps> =
           {group.totalPupils === group.notFilledIn ? (
             '-'
           ) : (
-            <Badge rounded inverted={!group[property]} color={group[property] ? color : 'tertiary'} counter={count()} />
+            <Badge
+              rounded
+              inverted={!group[property]}
+              color={group[property] ? color : 'tertiary'}
+              counter={count()}
+              data-cy={`${property}-badge`}
+            />
           )}
         </span>
       </div>

@@ -194,8 +194,10 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
         >
           <Table.HeaderColumn scope="row" sticky>
             <div className="flex flex-col py-2 gap-6 min-w-[177px]">
-              <span>{getPupilLink(pupil)}</span>
-              <span>Närvaro: {typeof pupil.presence === 'number' && pupil.presence}%</span>
+              <span data-cy={`pupil-${idx}-name`}>{getPupilLink(pupil)}</span>
+              <span data-cy={`pupil-${idx}-presence`}>
+                Närvaro: {typeof pupil.presence === 'number' && pupil.presence}%
+              </span>
             </div>
           </Table.HeaderColumn>
           {subjectHeaders.map((subject, index) => {
@@ -261,6 +263,7 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
       dense={rowHeight === 'dense'}
       background={true}
       className={`${mentorclassRows.length > 10 && 'h-[800px] rounded-b-0 border-b-0 mb-28'}`}
+      data-cy="mentor-class-table"
     >
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
         {mentorClassHeaders}

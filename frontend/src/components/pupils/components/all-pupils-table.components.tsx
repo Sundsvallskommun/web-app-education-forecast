@@ -300,8 +300,9 @@ export const AllPupilsTable: React.FC = () => {
       dense={rowHeight === 'dense'}
       background={true}
       className={`${pupilRows.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-28'}`}
+      data-cy="pupils-table"
     >
-      <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
+      <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body" data-cy="pupils-table-header">
         {pupilHeaders}
       </Table.Header>
       <Table.Body>{pupilRows}</Table.Body>

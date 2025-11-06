@@ -119,7 +119,9 @@ export const ClassesTable: React.FC = () => {
               accent
             />
             <span className="ml-8 font-bold cursor-pointer">
-              <Link onClick={() => router.push(`/klasser/klass/${g.id}`)}>{g.groupName}</Link>
+              <Link onClick={() => router.push(`/klasser/klass/${g.id}`)} data-cy={`class-link-${g.id}`}>
+                {g.groupName}
+              </Link>
             </span>
           </div>
         </Table.HeaderColumn>
@@ -178,6 +180,7 @@ export const ClassesTable: React.FC = () => {
                   rounded
                   color={!g.approvedPupils ? 'tertiary' : 'gronsta'}
                   counter={!g.approvedPupils ? 0 : typeof g?.approvedPupils === 'number' ? g?.approvedPupils : 0}
+                  data-cy={`approved-pupils-badge-${g.id}`}
                 />
               )}
             </span>
@@ -282,8 +285,9 @@ export const ClassesTable: React.FC = () => {
       dense={rowHeight === 'dense'}
       background={true}
       className={`${groupRows.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-28'}`}
+      data-cy="classes-table"
     >
-      <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
+      <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body" data-cy="classes-table-header">
         {classesHeaders}
       </Table.Header>
       <Table.Body>{groupRows}</Table.Body>

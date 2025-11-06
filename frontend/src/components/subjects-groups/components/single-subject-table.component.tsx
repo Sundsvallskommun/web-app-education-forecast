@@ -154,6 +154,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
           } ${
             p.forecast === 2 && 'border-b-1 border-gray-300 bg-warning-background-200 hover:bg-warning-background-100'
           } ${p.forecast === 3 && 'border-b-1 border-gray-300 bg-error-background-200 hover:bg-error-background-100'}`}
+          data-cy={`single-subject-table-row-${idx}`}
         >
           <Table.HeaderColumn scope="row">
             <div className="flex items-center gap-2">
@@ -170,7 +171,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
                   <Link href={`/klasser/klass/elev/${p.id}`}>{p.pupil}</Link>
                 </span>
               ) : (
-                <span className="ml-8 font-bold">
+                <span className="ml-8 font-bold" data-cy={`single-subject-pupil`}>
                   {myClasses.data.find((x) => x.groupName === p.className) ? (
                     <Link href={`/min-mentorsklass/elev/${p.id}`}>{p.pupil}</Link>
                   ) : (
@@ -291,6 +292,7 @@ export const SingleSubjectTable: React.FC<ISingleSubjectTable> = ({ user, search
       dense={rowHeight === 'dense'}
       background={true}
       className={`${rowdata.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-48'}`}
+      data-cy="single-subject-table"
     >
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
         {groupHeaders}

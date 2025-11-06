@@ -58,6 +58,7 @@ export const ClearAllForecasts: React.FC = () => {
         variant="tertiary"
         size="md"
         leftIcon={<Icon icon={<Trash2 />} />}
+        data-cy="clear-all-button"
       >
         Rensa alla
       </Button>
