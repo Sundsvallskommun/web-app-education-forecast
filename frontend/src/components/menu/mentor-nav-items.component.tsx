@@ -55,14 +55,17 @@ export const useMentorNavItems = (): React.ReactNode[] => {
                 aria-labelledby={headingId}
                 key={`popupmenyitem-${schoolClasses.schoolId}`}
               >
-                <label className="text-label-medium px-8 pt-8" id={headingId}>
+                <label className="text-label-medium px-8 pt-8" id={headingId} data-cy="school-name">
                   {schoolClasses.schoolName}
                 </label>
                 <PopupMenu.Items autoFocus={index === 0}>
-                  {schoolClasses.classes.data.map((classLink) => {
+                  {schoolClasses.classes.data.map((classLink, idx) => {
                     return (
                       <PopupMenu.Item key={classLink.groupId}>
-                        <Link onClick={() => router.push(`/min-mentorsklass/${classLink.groupId}`)}>
+                        <Link
+                          onClick={() => router.push(`/min-mentorsklass/${classLink.groupId}`)}
+                          data-cy={`popup-menu-class-item-${idx}-link`}
+                        >
                           {classLink.groupName}
                         </Link>
                       </PopupMenu.Item>

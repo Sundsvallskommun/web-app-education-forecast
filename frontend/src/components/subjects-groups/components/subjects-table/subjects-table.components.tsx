@@ -119,8 +119,9 @@ export const SubjectsTable: React.FC = () => {
       dense={rowHeight === 'dense'}
       background={true}
       className={`${subjectsTable.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-28'}`}
+      data-cy="subjects-table"
     >
-      <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
+      <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body" data-cy="subjects-table-header">
         {subjectsHeaders}
       </Table.Header>
       <Table.Body>

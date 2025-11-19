@@ -79,6 +79,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
           aria-disabled={APPROVED || selectedPeriod.periodId !== currentPeriod.periodId}
           type="radio"
           name="forecast"
+          data-cy="radio-button-achieved"
         ></input>
         <span
           className={`${APPROVED ? (selectedPeriod.periodId === currentPeriod.periodId ? 'text-black font-semibold' : 'text-gray-400 font-semibold') : selectedPeriod.periodId === currentPeriod.periodId ? 'font-normal' : 'text-gray-600 font-normal'} text-small`}
@@ -103,6 +104,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
           aria-disabled={WARNINGS || selectedPeriod.periodId !== currentPeriod.periodId}
           type="radio"
           name="forecast"
+          data-cy="radio-button-noticed"
         ></input>
         <span
           className={`${WARNINGS ? (selectedPeriod.periodId === currentPeriod.periodId ? 'text-black font-semibold' : 'text-gray-400 font-semibold') : selectedPeriod.periodId === currentPeriod.periodId ? 'font-normal' : 'text-gray-600 font-normal'} text-small`}
@@ -127,6 +129,7 @@ export const EditForecast: React.FC<EditForecastprops> = ({ pupil, forecast }) =
           aria-disabled={UNNAPROVED || selectedPeriod.periodId !== currentPeriod.periodId}
           type="radio"
           name="forecast"
+          data-cy="radio-button-not-achieved"
         ></input>
         <span
           className={`${UNNAPROVED ? (selectedPeriod.periodId === currentPeriod.periodId ? 'text-black font-semibold' : 'text-gray-400 font-semibold') : selectedPeriod.periodId === currentPeriod.periodId ? 'font-normal' : 'text-gray-600 font-normal'} text-small`}

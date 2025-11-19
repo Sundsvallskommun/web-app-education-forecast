@@ -66,6 +66,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
         onSearch={onSearchHandler}
         placeholder={placeHolder}
         onReset={() => setValue('searchQuery', '')}
+        data-cy="search-field"
       />
     </FormControl>
   );
@@ -77,7 +78,9 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
             <span className="text-h3-sm font-normal">{selectedSchool.schoolName}</span>
           ) : null}
 
-          <h1 className={GeneralInformation ? 'mb-xs' : 'mb-0'}>{pageTitle}</h1>
+          <h1 className={GeneralInformation ? 'mb-xs' : 'mb-0'} data-cy="page-title">
+            {pageTitle}
+          </h1>
           <>{GeneralInformation}</>
         </div>
         <div className="large-device-min:w-[33%]">
