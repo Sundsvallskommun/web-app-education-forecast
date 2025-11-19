@@ -64,7 +64,8 @@ describe('Education forecast as Headmaster', () => {
 
     cy.get('[data-cy="popup-1-link-item-a-a-a-a-a"]')
       .should('include.text', 'Sundsvalls Grundskola 1')
-      .click({ multiple: true, force: true });
+      .eq(0)
+      .click({ force: true });
 
     cy.get('[data-cy="page-title"]').should('exist').should('include.text', 'Ämnen/grupper');
 
@@ -92,7 +93,8 @@ describe('Education forecast as Headmaster', () => {
     cy.get('[data-cy="navigation-bar"]').should('exist').contains('Elever').click();
     cy.get('[data-cy="popup-2-link-item-a-a-a-a-a"]')
       .should('include.text', 'Sundsvalls Grundskola 1')
-      .click({ multiple: true, force: true });
+      .eq(0)
+      .click({ force: true });
 
     cy.wait('@getPupils');
     cy.get('[data-cy="page-title"]').should('exist').should('include.text', 'Elever');
