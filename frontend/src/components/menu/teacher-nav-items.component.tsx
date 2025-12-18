@@ -31,9 +31,11 @@ export const useTeacherNavItems = (): React.ReactNode[] => {
           <PopupMenu.Button rightIcon={<Icon icon={<ChevronDown />} />}>{link.label}</PopupMenu.Button>
           <PopupMenu.Panel>
             <PopupMenu.Items>
-              {link.children.map((childItem) => (
+              {link.children.map((childItem, index) => (
                 <PopupMenu.Item key={childItem.label}>
-                  <Link href={childItem.url}>{childItem.label}</Link>
+                  <Link href={childItem.url} data-cy={`popup-menu-item-${index}-link`}>
+                    {childItem.label}
+                  </Link>
                 </PopupMenu.Item>
               ))}
             </PopupMenu.Items>

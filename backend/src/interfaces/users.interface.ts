@@ -4,14 +4,14 @@ export type User = {
   name: string;
   givenName: string;
   surname: string;
-  roles: [{ role: string; typeOfSchool: string }];
-  schools: [{ schoolId: string; schoolName: string }];
+  roles: { role: string; typeOfSchool: string }[];
+  schools: { schoolId: string; schoolName: string }[];
 };
 
 export type ClientUser = {
   personId: string;
   name: string;
   username: string;
-  roles: [{ role: string; typeOfSchool: string }];
-  schools: [{ schoolId: string; schoolName: string }];
+  roles: { role: string; typeOfSchool: string }[];
+  schools: { schoolId: string; schoolName: string }[];
 };

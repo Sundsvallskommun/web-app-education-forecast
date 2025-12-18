@@ -26,9 +26,9 @@ export const SubjectsTableRows: React.FC<SubjectsTableRowsProps> = ({ subjects }
     return `/mina-amnen-grupper/${selectedSchool.schoolId}/amne-grupp/${group.id}-syllabus-${group.syllabusId}`;
   };
 
-  return subjects.map((group) => {
+  return subjects.map((group, index) => {
     return (
-      <Table.Row key={`row-${group.id}`}>
+      <Table.Row key={`row-${group.id}`} data-cy={`subjects-table-row-${index}`}>
         <Table.HeaderColumn scope="row">
           <div className="flex items-center gap-2">
             <Avatar
@@ -39,7 +39,7 @@ export const SubjectsTableRows: React.FC<SubjectsTableRowsProps> = ({ subjects }
               accent
             />
             <span className="ml-8 font-bold cursor-pointer">
-              <Link className="sk-link sk-link-primary" href={getLink(group)}>
+              <Link className="sk-link sk-link-primary" href={getLink(group)} data-cy={`group-link-${group.id}`}>
                 {group.groupName}
               </Link>
             </span>

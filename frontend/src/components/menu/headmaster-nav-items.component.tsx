@@ -39,7 +39,7 @@ export const useHeadmasterNav = (): React.ReactNode[] => {
   }, [user]);
 
   return [
-    headMasterlinks.map((link) => {
+    headMasterlinks.map((link, index) => {
       return (
         <NavigationBar.Item current={link.url === activeURL} key={`menyitem-${link.label}`}>
           {headmasterSchools && headmasterSchools.length > 1 ? (
@@ -54,6 +54,7 @@ export const useHeadmasterNav = (): React.ReactNode[] => {
                           setSelectedSchool(s);
                           await router.push(link.url);
                         }}
+                        data-cy={`popup-${index}-link-item-${s.schoolId}`}
                       >
                         {s.schoolName}
                       </Link>
