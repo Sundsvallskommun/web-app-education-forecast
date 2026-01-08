@@ -1,8 +1,9 @@
 import { callbackType } from '@utils/callback-type';
-import { Label, Spinner } from '@sk-web-gui/react';
+import { cx, Label } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { Skeleton } from '@components/skeleton/skeleton.component';
 interface GeneralForecastInfoProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
@@ -31,8 +32,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
   const endDate = new Date(selectedPeriod?.endDate);
   const currentDate = new Date();
 
-  //const year = endDate === 'december' ? selectedSchoolYear : date.getFullYear();
-
   let forecastStatus;
 
   const daysLeft = (dat1: Date, date2: Date) => {
@@ -41,7 +40,7 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
 
   if (currentDate.toLocaleString() <= endDate.toLocaleString()) {
     forecastStatus = (
-      <span className="ml-6">
+      <span>
         <strong>
           Prognoser att fylla i senast {dayjs(endDate).format('DD/MM')} (
           {currentDate === endDate ? 'idag' : `om ${daysLeft(endDate, currentDate)} dagar`}){' '}
@@ -56,7 +55,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     );
   }
 
-  let isLoading;
   let numberOfNotFilledIn = 0;
   if (SUBJECTS) {
     mySubjects.data.forEach((g) => {
@@ -64,8 +62,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
         (g?.totalPupils || 0) - (g?.approvedPupils || 0) - (g?.warningPupils || 0) - (g?.unapprovedPupils || 0);
       numberOfNotFilledIn += notFilledIn;
     });
-
-    isLoading = subjectsIsLoading;
   }
 
   if (CLASSES) {
@@ -74,8 +70,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
         (g?.totalPupils || 0) - (g?.approvedPupils || 0) - (g?.warningPupils || 0) - (g?.unapprovedPupils || 0);
       numberOfNotFilledIn += notFilledIn;
     });
-
-    isLoading = classesIsLoading;
   }
 
   if (PUPILS) {
@@ -86,8 +80,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
           : 0;
       numberOfNotFilledIn += notFilledIn;
     });
-
-    isLoading = pupilsIsLoading;
   }
 
   if (SUBJECT) {
@@ -99,7 +91,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
       const notFilledIn = totalPupils ? totalPupils - (approved || 0) - (warnings || 0) - (unapproved || 0) : 0;
       numberOfNotFilledIn = notFilledIn;
     });
-    isLoading = singleSubjectIsLoading && subjectsIsLoading;
   }
 
   if (MENTORCLASS) {
@@ -107,7 +98,6 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
       const notFilledIn = p.forecasts?.filter((x) => x.forecast === null).length;
       numberOfNotFilledIn += notFilledIn;
     });
-    isLoading = mentorClassIsLoading;
   }
 
   if (PUPIL) {
@@ -115,9 +105,33 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
       const notFilledIn = pupil.length - (p.forecast !== null ? 1 : 0);
       numberOfNotFilledIn = notFilledIn;
     });
-    isLoading = singlePupilIsLoading;
   }
 
+  const isLoading = () => {
+    if (SUBJECTS) {
+      return subjectsIsLoading;
+    }
+
+    if (CLASSES) {
+      return classesIsLoading;
+    }
+
+    if (PUPILS) {
+      return pupilsIsLoading;
+    }
+
+    if (SUBJECT) {
+      return singleSubjectIsLoading && subjectsIsLoading;
+    }
+
+    if (MENTORCLASS) {
+      return mentorClassIsLoading;
+    }
+
+    if (PUPIL) {
+      return singlePupilIsLoading;
+    }
+  };
   useEffect(() => {
     if (allPeriods) {
       if (
@@ -134,28 +148,33 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
-  return (
+  const getLabelText = () => {
+    if (isLoading()) {
+      return 'Laddar period';
+    }
+    if (summerPeriod) {
+      return 'Prognoser till hösten är låsta under sommarperioden';
+    }
+    return numberOfNotFilledIn ?? 'Saknar';
+  };
+
+  return !isLoading() && numberOfNotFilledIn < 1 ? (
+    <> Inga prognoser att fylla i den här perioden</>
+  ) : (
     <div className="flex gap-10">
-      {!isLoading ? (
-        <span>
-          {numberOfNotFilledIn !== 0 ? (
-            <>
-              <Label rounded inverted={summerPeriod} color={summerPeriod ? 'juniskar' : 'tertiary'}>
-                {summerPeriod
-                  ? 'Prognoser till hösten är låsta under sommarperioden'
-                  : numberOfNotFilledIn
-                    ? numberOfNotFilledIn
-                    : 'Saknar'}
-              </Label>
-              {!summerPeriod && forecastStatus}
-            </>
-          ) : (
-            <> Inga prognoser att fylla i den här perioden</>
-          )}
-        </span>
-      ) : (
-        <Spinner size={3} />
-      )}
+      <span className="inline-flex gap-6">
+        <Label
+          rounded
+          className={cx({ ['skeleton w-24']: isLoading() })}
+          inverted={summerPeriod}
+          aria-busy={isLoading()}
+          color={summerPeriod ? 'juniskar' : 'tertiary'}
+        >
+          {getLabelText()}
+        </Label>
+
+        {isLoading() ? <Skeleton className="h-24 w-[20rem]" /> : !summerPeriod && forecastStatus}
+      </span>
     </div>
   );
 };

@@ -35,7 +35,7 @@ describe('Education forecast as Mentor', () => {
     rowA.find('[data-cy="group-link-a-a-a-a-a"]').should('have.text', 'A1').click();
 
     cy.get('[data-cy="single-subject-table"]').should('exist');
-    cy.get('[data-cy="clear-all-button"]').should('not.exist');
+    cy.get('[data-cy="clear-all-button"]').should('be.disabled');
 
     cy.intercept('GET', '**/pupilsbygroup/**', getSetPupilForecast()).as('getSetPupilForecast');
     const row = cy.get('[data-cy="single-subject-table-row-0"]');
