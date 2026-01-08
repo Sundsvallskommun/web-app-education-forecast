@@ -1,12 +1,12 @@
+import { CornerLoader } from '@components/corner-loader/corner-loader.component';
 import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
-import Loader from '@components/loader/loader';
-import { useEffect } from 'react';
 import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
-import { FormProvider, useForm } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
-import { AllPupilsTable } from './components/all-pupils-table.components';
 import { useSnackbar } from '@sk-web-gui/react';
+import { useEffect } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { AllPupilsTable } from './components/all-pupils-table.components';
 
 interface AllPupilsProps {
   pageTitle: string;
@@ -41,6 +41,7 @@ export interface PupilsTableForm {
 
 export const AllPupils: React.FC<AllPupilsProps> = ({ pageTitle, pupilsQueries }) => {
   const pupilsIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
+  const pupilsIsLoaded = usePupilForecastStore((s) => s.pupilsIsLoaded);
   const getAllPupils = usePupilForecastStore((s) => s.getAllPupils);
   const allPupils = usePupilForecastStore((s) => s.allPupils);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
@@ -90,29 +91,20 @@ export const AllPupils: React.FC<AllPupilsProps> = ({ pageTitle, pupilsQueries }
 
   return (
     <div>
+      {pupilsIsLoading && <CornerLoader />}
       <FormProvider {...searchForm}>
         <HeadingMenu
+          loaded={pupilsIsLoaded}
           pageTitle={fullTitle}
           callback="pupils"
           searchQuery={searchQuery}
           searchPlaceholder="Sök på elev eller klass..."
         />
       </FormProvider>
-      {!pupilsIsLoading ? (
-        <>
-          {allPupils.totalRecords !== 0 ? (
-            <FormProvider {...tableForm}>
-              <AllPupilsTable />
-            </FormProvider>
-          ) : (
-            <p>Inga sökresultat att visa</p>
-          )}
-        </>
-      ) : (
-        <div className="h-[500px] flex justify-center items-center">
-          <Loader />
-        </div>
-      )}
+
+      <FormProvider {...tableForm}>
+        <AllPupilsTable />
+      </FormProvider>
     </div>
   );
 };

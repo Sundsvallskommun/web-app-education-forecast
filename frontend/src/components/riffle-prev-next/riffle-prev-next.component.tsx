@@ -1,4 +1,4 @@
-import { Button, Icon, Spinner } from '@sk-web-gui/react';
+import { Button, cx, Icon } from '@sk-web-gui/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/router';
 
@@ -32,32 +32,33 @@ export const RifflePrevNext: React.FC<RiffleProps> = ({ riffleObjects, riffleIsL
     await router.push(link);
   };
 
-  return !riffleIsLoading ? (
+  return (
     <div className={`w-full flex ${riffleObjects.length > 2 ? 'justify-between' : 'justify-end'} mt-24`}>
       {riffleObjects.length > 2 ? (
         <Button
+          className={cx({ ['skeleton']: riffleIsLoading })}
+          disabled={riffleIsLoading}
+          aria-busy={riffleIsLoading}
           onClick={() => riffleHandler(prevRiffle.link)}
-          leftIcon={<Icon icon={<ArrowLeft />} />}
+          leftIcon={riffleIsLoading ? undefined : <Icon icon={<ArrowLeft />} />}
           variant="secondary"
         >
-          {prevRiffle?.title}
+          {riffleIsLoading ? <span className="text-transparent">Laddar tidigare</span> : prevRiffle?.title}
         </Button>
       ) : (
         <></>
       )}
 
       <Button
+        className={cx({ ['skeleton']: riffleIsLoading })}
+        disabled={riffleIsLoading}
+        aria-busy={riffleIsLoading}
         onClick={() => riffleHandler(nextRiffle.link)}
-        rightIcon={<Icon icon={<ArrowRight />} />}
+        rightIcon={riffleIsLoading ? undefined : <Icon icon={<ArrowRight />} />}
         variant="secondary"
       >
-        {nextRiffle?.title}
+        {riffleIsLoading ? <span className="text-transparent">Laddar senare</span> : nextRiffle?.title}
       </Button>
-    </div>
-  ) : (
-    <div className={`w-full flex justify-between mt-24`}>
-      <Spinner size={3} />
-      <Spinner size={3} />
     </div>
   );
 };

@@ -38,7 +38,7 @@ export const SubjectsTable: React.FC = () => {
   const { watch, setValue } = useFormContext<SubjectsTableForm>();
   const sortOrder = watch('sortOrder');
   const sortColumn = watch('sortColumn');
-
+  const subjectsIsLoaded = usePupilForecastStore((s) => s.subjectsIsLoaded);
   const TableSortOrder = sortOrder === 'ASC' ? SortMode.ASC : SortMode.DESC;
 
   useEffect(() => {
@@ -97,6 +97,7 @@ export const SubjectsTable: React.FC = () => {
         >
           {header.isColumnSortable ? (
             <Table.SortButton
+              disabled={!subjectsIsLoaded}
               isActive={sortColumn === header.property}
               aria-description={sortColumn === header.property ? undefined : 'sortera'}
               sortOrder={TableSortOrder}
@@ -114,7 +115,9 @@ export const SubjectsTable: React.FC = () => {
 
   //rows
 
-  return (
+  return subjectsIsLoaded && subjectsTable.length < 1 ? (
+    <p>Inga sökresultat att visa</p>
+  ) : (
     <Table
       dense={rowHeight === 'dense'}
       background={true}

@@ -13,9 +13,11 @@ interface ICopyPreviousForecast {
 export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabusId }) => {
   const subject = usePupilForecastStore((s) => s.subject);
   const copyPreviousForecast = usePupilForecastStore((s) => s.copyPreviousForecast);
+  const subjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const [isOpen, setisOpen] = useState(false);
   const [summerPeriod, setSummerPeriod] = useState(false);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
   const allPeriods = usePupilForecastStore((s) => s.allPeriods);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const currentDate = new Date();
@@ -89,7 +91,17 @@ export const CopyPreviousForecast: React.FC<ICopyPreviousForecast> = ({ syllabus
     <></>
   ) : (
     <div>
-      <Button size="md" onClick={openModalhandler} variant="secondary" leftIcon={<Icon icon={<CopyCheck />} />}>
+      <Button
+        size="md"
+        disabled={
+          !subject.every((pupil) => pupil.forecast === null) ||
+          selectedPeriod.endDate !== currentPeriod.endDate ||
+          subjectIsLoading
+        }
+        onClick={openModalhandler}
+        variant="secondary"
+        leftIcon={<Icon icon={<CopyCheck />} />}
+      >
         Kopiera föregående prognos
       </Button>
       <Modal className="max-w-[420px] w-full" show={isOpen} onClose={onCloseHandler} label="Innan du fortsätter">

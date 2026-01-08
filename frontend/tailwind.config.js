@@ -7,6 +7,20 @@ module.exports = {
     './node_modules/@sk-web-gui/*/dist/**/*.js',
   ],
   theme: {
+    extend: {
+      backgroundImage: {
+        'gradient-to-45': 'linear-gradient(45deg, var(--tw-gradient-stops))',
+      },
+      animation: {
+        skeleton: 'skeleton 2s ease infinite',
+      },
+      keyframes: {
+        skeleton: {
+          '0%, 50%': { 'background-position': '0% 50%' },
+          '75%': { 'background-position': '100% 50%' },
+        },
+      },
+    },
     // extend: {
     // if you want to override max content width
     // maxWidth: {

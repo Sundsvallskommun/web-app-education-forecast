@@ -1,6 +1,7 @@
 import Menu from '@components/menu/menu.component';
+import { Skeleton } from '@components/skeleton/skeleton.component';
 import { useUserStore } from '@services/user-service/user-service';
-import { Breadcrumb, Header, Logo, Spinner } from '@sk-web-gui/react';
+import { Breadcrumb, Header, Logo } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -78,25 +79,24 @@ export default function DefaultLayout({
       <div className={`main-container flex-grow relative w-full flex flex-col`}>
         {breadcrumbLinks && (
           <div className="w-full bg-vattjom-background-200 py-16 px-24">
-            {!breadcrumbsIsLoading ? (
-              <Breadcrumb className="container">
-                {breadcrumbLinks.map((crumb) => {
-                  return (
-                    <Breadcrumb.Item currentPage={crumb.currentPage} key={`link-${crumb.link}`}>
-                      {crumb.currentPage ? (
-                        <Breadcrumb.Link href={crumb.link}>{crumb.title}</Breadcrumb.Link>
-                      ) : (
-                        <Link href={crumb.link}>{crumb.title}</Link>
-                      )}
-                    </Breadcrumb.Item>
-                  );
-                })}
-              </Breadcrumb>
-            ) : (
-              <div className="container">
-                <Spinner size={2} />
-              </div>
-            )}
+            <Breadcrumb className="container">
+              {breadcrumbLinks.map((crumb) => {
+                return (
+                  <Breadcrumb.Item currentPage={crumb.currentPage} key={`link-${crumb.link}`}>
+                    {crumb.currentPage ? (
+                      <Breadcrumb.Link href={crumb.link}>{crumb.title}</Breadcrumb.Link>
+                    ) : (
+                      <Link href={crumb.link}>{crumb.title}</Link>
+                    )}
+                  </Breadcrumb.Item>
+                );
+              })}
+              {breadcrumbsIsLoading && (
+                <Breadcrumb.Item>
+                  <Skeleton className="w-80" />
+                </Breadcrumb.Item>
+              )}
+            </Breadcrumb>
           </div>
         )}
         <div className="main-content-padding">{children}</div>

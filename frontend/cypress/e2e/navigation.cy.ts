@@ -18,11 +18,7 @@ describe('Education forecast navigation', () => {
   const setHeadMasterIntercepts = () => {
     cy.intercept('GET', '**/currentperiod/GR', getCurrentPeriod());
     cy.intercept('GET', '**/allperiods/GR', getAllPeriods());
-    cy.intercept(
-      'GET',
-      '**/mygroups/*?OrderBy=GroupName&OrderDirection=ASC&periodId=*&groupType=K*&PageSize=10',
-      getClassAsHeadmaster()
-    );
+    cy.intercept('GET', '**/mygroups/**', getClassAsHeadmaster());
 
     cy.visit('http://localhost:3000');
     cy.get('[data-cy="page-title"]').should('exist').contains('Klasser');

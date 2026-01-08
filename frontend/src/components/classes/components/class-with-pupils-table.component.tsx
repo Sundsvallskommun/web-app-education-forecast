@@ -1,11 +1,14 @@
-import { User } from '@interfaces/user';
-import { SortMode, Table, Select, Pagination, Input, Icon } from '@sk-web-gui/react';
-import { hasRolePermission } from '@utils/has-role-permission';
-import { useEffect, useState } from 'react';
+import { Skeleton } from '@components/skeleton/skeleton.component';
+import { TableFooter } from '@components/table/footer/table-footer.component';
+import { SkeletonTableColumns } from '@components/table/skeleton/skeleton-table-rows.component';
 import { GridForecast, KeyStringTable } from '@interfaces/forecast/forecast';
+import { User } from '@interfaces/user';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { Icon, SortMode, Table } from '@sk-web-gui/react';
+import { hasRolePermission } from '@utils/has-role-permission';
 import { Check, Minus, X } from 'lucide-react';
 import NextLink from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface MentorClassHeaders {
   label: string;
@@ -15,14 +18,28 @@ interface MentorClassHeaders {
 interface IMentorClassTable {
   user: User;
   searchQuery: string;
+  loaded: boolean;
 }
 
-export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuery }) => {
+export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuery, loaded }) => {
   const { headmaster, mentor } = hasRolePermission(user);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
   const [mentorClassData, setMentorClassData] = useState<KeyStringTable[]>([]);
   const [subjectHeaders, setSubjectHeaders] = useState<MentorClassHeaders[]>([]);
-  const [pageSize] = useState<number>(mentor || headmaster ? mentorClass.length : 10);
+  const [pageSize, setPageSize] = useState<number>(mentor || headmaster ? mentorClass.length || 10 : 10);
+  const [sortOrder, setSortOrder] = useState(SortMode.ASC);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [rowHeight, setRowHeight] = useState<string>('normal');
+
+  const [sortColumn, setSortColumn] = useState<string>('pupil');
+
+  useEffect(() => {
+    if (mentorClass.length > pageSize) {
+      setPageSize(mentorClass.length);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, mentorClass]);
 
   useEffect(() => {
     const tableArr: KeyStringTable[] = [];
@@ -63,17 +80,11 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     }
 
     setSubjectHeaders(subjectArr);
+
     setMentorClassData(tableArr);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mentorClass]);
-
-  const [_pageSize, setPageSize] = useState<number>(pageSize);
-
-  const [sortOrder, setSortOrder] = useState(SortMode.ASC);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [rowHeight, setRowHeight] = useState<string>('normal');
-
-  const [sortColumn, setSortColumn] = useState<string>('pupil');
 
   const handleSort = (column: string) => {
     if (sortColumn !== column) {
@@ -83,11 +94,20 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     }
   };
 
-  const mentorclassGridHeaderLabels = [{ label: 'Namn', property: 'pupil', isColumnSortable: true }, ...subjectHeaders];
+  const loadingHeaders = [2, 4, 2, 6, 3, 3, 4].map((nameLength, index) => (
+    <Table.HeaderColumn key={`loadingHeader-${index}-${nameLength}`}>
+      <Skeleton className="h-24" style={{ width: `${nameLength}rem` }}>
+        -
+      </Skeleton>
+    </Table.HeaderColumn>
+  ));
 
-  const classHeaderLabels = mentorclassGridHeaderLabels;
+  const mentorclassGridHeaderLabels = [
+    { label: 'Namn', property: 'pupil', isColumnSortable: true },
+    ...(loaded ? subjectHeaders : []),
+  ];
 
-  const mentorClassHeaders = classHeaderLabels.map((h, idx) => {
+  const mentorClassHeaders = mentorclassGridHeaderLabels.map((h, idx) => {
     return (
       <Table.HeaderColumn
         sticky={h.label === 'Namn'}
@@ -98,6 +118,7 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
         {idx === 0 ? (
           <div className={`${mentor || (headmaster && 'min-w-[174px]')}`}>
             <Table.SortButton
+              disabled={!loaded}
               isActive={sortColumn === h.property}
               aria-description={sortColumn === h.property ? undefined : 'sortera'}
               sortOrder={sortOrder}
@@ -116,13 +137,18 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     );
   });
 
-  const mentorClassListSearchFiltered = mentorClassData.filter((p) => {
-    if (searchQuery && searchQuery !== '') {
-      return p?.pupil?.toString().toLowerCase().includes(searchQuery?.toLowerCase());
-    } else return p;
-  });
+  const allHeaders = [...mentorClassHeaders, ...(loaded ? [] : loadingHeaders)];
 
-  const mentorClassListRendered: KeyStringTable[] | string[] = mentorClassListSearchFiltered;
+  const mentorClassListSearchFiltered = mentorClassData
+    .filter((p) => {
+      if (searchQuery && searchQuery !== '') {
+        return p?.pupil?.toString().toLowerCase().includes(searchQuery?.toLowerCase());
+      } else return p;
+    })
+    .sort((a, b) => {
+      const order = sortOrder === SortMode.ASC ? -1 : 1;
+      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
+    });
 
   const iconType = (prop: number) => {
     if (prop === 1) {
@@ -174,12 +200,10 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     );
   };
 
-  const mentorclassRows = mentorClassListRendered
-    .sort((a, b) => {
-      const order = sortOrder === SortMode.ASC ? -1 : 1;
-      return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
-    })
-    .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
+  const loadingCols = [{ minSize: 7, maxSize: 20 }];
+
+  const mentorclassRows = mentorClassListSearchFiltered
+    .slice((currentPage - 1) * pageSize, currentPage * pageSize)
     .map((pupil, idx: number) => {
       return (
         <Table.Row
@@ -211,69 +235,38 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
       );
     });
 
-  const footer = (
-    <Table.Footer
-      className={mentorclassRows.length > pageSize ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}
-    >
-      <div className="sk-table-bottom-section">
-        <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
-          Rader per sida:
-        </label>
-        <Input
-          size="sm"
-          id="pagePageSize"
-          type="number"
-          min={1}
-          max={100}
-          className="max-w-[6rem]"
-          value={`${_pageSize}`}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            event.target.value && setPageSize(parseInt(event.target.value))
-          }
-        />
-      </div>
-
-      <div className="sk-table-paginationwrapper">
-        <Pagination
-          className="sk-table-pagination"
-          pages={Math.ceil(mentorClassListRendered.length / _pageSize)}
-          activePage={currentPage}
-          showConstantPages
-          pagesAfter={1}
-          pagesBefore={1}
-          changePage={(page: number) => setCurrentPage(page)}
-          fitContainer
-        />
-      </div>
-      <div className="sk-table-bottom-section">
-        <label className="sk-table-bottom-section-label" htmlFor="pagiRowHeight">
-          Radhöjd:
-        </label>
-        <Select id="pagiRowHeight" size="sm" value={rowHeight} onSelectValue={(value: string) => setRowHeight(value)}>
-          <Select.Option value={'normal'}>Normal</Select.Option>
-          <Select.Option value={'dense'}>Tät</Select.Option>
-        </Select>
-      </div>
-    </Table.Footer>
-  );
-
-  return mentorClassListRendered.length > 0 ? (
+  return loaded && mentorClassListSearchFiltered.length < 1 ? (
+    <div className="flex justify-center">
+      <p className="max-w-[1600px] w-full">Inga sökresultat att visa</p>
+    </div>
+  ) : (
     <Table
       scrollable
       dense={rowHeight === 'dense'}
       background={true}
-      className={`${mentorclassRows.length > 10 && 'h-[800px] rounded-b-0 border-b-0 mb-28'}`}
+      className={`${mentorClassListSearchFiltered.length > 10 && 'h-[800px] rounded-b-0 border-b-0 mb-28'}`}
       data-cy="mentor-class-table"
     >
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
-        {mentorClassHeaders}
+        {allHeaders}
       </Table.Header>
-      <Table.Body>{mentorclassRows}</Table.Body>
-      {footer}
+      <Table.Body>{loaded ? mentorclassRows : <SkeletonTableColumns cols={loadingCols} />}</Table.Body>
+      <Table.Footer
+        className={
+          mentorClassListSearchFiltered.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''
+        }
+      >
+        <TableFooter
+          pageSize={pageSize}
+          onChangePageSize={setPageSize}
+          pages={Math.ceil(mentorClassListSearchFiltered.length / pageSize)}
+          activePage={currentPage}
+          onChangePage={setCurrentPage}
+          rowHeight={rowHeight}
+          onChangeRowHeight={setRowHeight}
+          loaded={loaded}
+        />
+      </Table.Footer>
     </Table>
-  ) : (
-    <div className="flex justify-center">
-      <p className="max-w-[1600px] w-full">Inga sökresultat att visa</p>
-    </div>
   );
 };

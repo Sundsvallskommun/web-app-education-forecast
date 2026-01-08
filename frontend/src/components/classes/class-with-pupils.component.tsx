@@ -1,19 +1,20 @@
-import { shallow } from 'zustand/shallow';
-import { useUserStore } from '@services/user-service/user-service';
 import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
-import Loader from '@components/loader/loader';
-import { Spinner } from '@sk-web-gui/react';
+import { Skeleton } from '@components/skeleton/skeleton.component';
 import Main from '@layouts/main/main.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { MentorClassTable } from './components/class-with-pupils-table.component';
+import { useUserStore } from '@services/user-service/user-service';
 import { FormProvider, useForm } from 'react-hook-form';
+import { shallow } from 'zustand/shallow';
+import { MentorClassTable } from './components/class-with-pupils-table.component';
+import { CornerLoader } from '@components/corner-loader/corner-loader.component';
 
 export const ClassWithPupils: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
+  const mentorClassIsLoaded = usePupilForecastStore((s) => s.mentorClassIsLoaded);
   const mentorClassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);
 
-  const fullTitle = !mentorClassIsLoading ? `Klass ${mentorClass[0]?.className}` : 'Klass';
+  const fullTitle = mentorClassIsLoaded ? `Klass ${mentorClass[0]?.className}` : 'Klass';
 
   const searchForm = useForm<SearchTableForm>({
     defaultValues: {
@@ -30,13 +31,15 @@ export const ClassWithPupils: React.FC = () => {
         <strong>{mentorClass.length}</strong> elever
       </span>
     ) : (
-      <Spinner size={2} />
+      <Skeleton className="w-64 h-24">Laddar klass</Skeleton>
     );
   return (
     <div>
+      {mentorClassIsLoading && <CornerLoader />}
       <Main>
         <FormProvider {...searchForm}>
           <HeadingMenu
+            loaded={mentorClassIsLoaded}
             pageTitle={fullTitle}
             GeneralInformation={generalInformation}
             teachers={[
@@ -53,21 +56,14 @@ export const ClassWithPupils: React.FC = () => {
           />
         </FormProvider>
       </Main>
-      {!mentorClassIsLoading ? (
-        <>
-          {mentorClass.length !== 0 ? (
-            <div className="max-w-[4000px] w-full">
-              <MentorClassTable user={user} searchQuery={searchQuery} />
-            </div>
-          ) : (
-            <p>Inga sökresultat att visa</p>
-          )}
-        </>
-      ) : (
-        <div className="h-[500px] flex justify-center items-center">
-          <Loader />
-        </div>
-      )}
+
+      <div className="max-w-[4000px] w-full">
+        <MentorClassTable
+          loaded={mentorClassIsLoaded && !mentorClassIsLoading && mentorClass?.length !== 0}
+          user={user}
+          searchQuery={searchQuery}
+        />
+      </div>
     </div>
   );
 };

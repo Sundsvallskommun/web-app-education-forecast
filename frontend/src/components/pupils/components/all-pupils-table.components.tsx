@@ -1,11 +1,14 @@
-import { Avatar, Link, Table, SortMode, Pagination, Select, Input, Badge } from '@sk-web-gui/react';
-import { useEffect, useState } from 'react';
-import { initialsFunction } from '@utils/initials';
+import { Skeleton } from '@components/skeleton/skeleton.component';
+import { TableFooter } from '@components/table/footer/table-footer.component';
+import { SkeletonTableColumns } from '@components/table/skeleton/skeleton-table-rows.component';
 import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { IAllPupilsTable, PupilsTableForm } from '../all-pupils.component';
-import { useFormContext } from 'react-hook-form';
+import { Avatar, Badge, Link, SortMode, Table } from '@sk-web-gui/react';
+import { initialsFunction } from '@utils/initials';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { IAllPupilsTable, PupilsTableForm } from '../all-pupils.component';
 
 interface PupilHeaders {
   label: string;
@@ -33,12 +36,13 @@ interface IPupil {
 export const AllPupilsTable: React.FC = () => {
   const router = useRouter();
   const allPupils = usePupilForecastStore((s) => s.allPupils);
+  const loaded = usePupilForecastStore((s) => s.pupilsIsLoaded);
   const [allPupilsTable, setAllPupilTable] = useState<IPupil[]>([]);
 
-  const { watch, setValue, register, formState } = useFormContext<PupilsTableForm>();
+  const { watch, setValue } = useFormContext<PupilsTableForm>();
   const sortOrder = watch('sortOrder');
   const sortColumn = watch('sortColumn');
-  const page = watch('page');
+  const pageSize = watch('pageSize');
 
   const TableSortOrder = sortOrder === 'ASC' ? SortMode.ASC : SortMode.DESC;
 
@@ -102,6 +106,7 @@ export const AllPupilsTable: React.FC = () => {
       <Table.HeaderColumn key={`headercol-${idx}`} aria-sort={sortColumn === h.property ? TableSortOrder : 'none'}>
         {h.isColumnSortable ? (
           <Table.SortButton
+            disabled={!loaded}
             isActive={sortColumn === h.property}
             aria-description={sortColumn === h.property ? undefined : 'sortera'}
             sortOrder={TableSortOrder}
@@ -115,6 +120,24 @@ export const AllPupilsTable: React.FC = () => {
       </Table.HeaderColumn>
     );
   });
+
+  const loadingCols = [
+    { minSize: 7, maxSize: 20 },
+    { minSize: 3, maxSize: 7 },
+    {
+      element: (
+        <div className="flex flex-col max-w-[300px] items-start gap-2">
+          <Skeleton className="h-18 w-[18rem]">Laddar mentorer...</Skeleton>
+          <Skeleton className="h-18 w-[25rem]">-</Skeleton>
+        </div>
+      ),
+    },
+    { minSize: 2, maxSize: 4, height: 1.8 },
+    { element: <Skeleton className="h-24 w-24 !rounded-full">-</Skeleton> },
+    { element: <Skeleton className="h-24 w-24 !rounded-full">-</Skeleton> },
+    { element: <Skeleton className="h-24 w-24 !rounded-full">-</Skeleton> },
+    { element: <Skeleton className="h-24 w-24 !rounded-full">-</Skeleton> },
+  ];
 
   //rows all pupils
   const pupilRows = allPupilsTable.map((p, idx: number) => {
@@ -249,53 +272,9 @@ export const AllPupilsTable: React.FC = () => {
     );
   });
 
-  const footer = (
-    <Table.Footer className={pupilRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
-      <div className="sk-table-bottom-section">
-        <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
-          Rader per sida:
-        </label>
-        <Input
-          autoFocus={formState.dirtyFields.pageSize}
-          {...register('pageSize')}
-          size="sm"
-          id="pageSize"
-          type="number"
-          min={1}
-          max={1000}
-          className="max-w-[6rem]"
-        />
-      </div>
-
-      <div className="sk-table-paginationwrapper">
-        <Pagination
-          className="sk-table-pagination"
-          showFirst
-          showLast
-          pages={allPupils.totalPages}
-          activePage={page}
-          showConstantPages
-          pagesAfter={1}
-          pagesBefore={1}
-          changePage={(page) => {
-            setValue('page', page === 1 ? 1 : page);
-          }}
-          fitContainer
-        />
-      </div>
-      <div className="sk-table-bottom-section">
-        <label className="sk-table-bottom-section-label" htmlFor="pagiRowHeight">
-          Radhöjd:
-        </label>
-        <Select id="pagiRowHeight" size="sm" value={rowHeight} onSelectValue={(value: string) => setRowHeight(value)}>
-          <Select.Option value={'normal'}>Normal</Select.Option>
-          <Select.Option value={'dense'}>Tät</Select.Option>
-        </Select>
-      </div>
-    </Table.Footer>
-  );
-
-  return (
+  return loaded && allPupils?.data?.length < 1 ? (
+    <p>Inga sökresultat att visa</p>
+  ) : (
     <Table
       dense={rowHeight === 'dense'}
       background={true}
@@ -305,8 +284,21 @@ export const AllPupilsTable: React.FC = () => {
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body" data-cy="pupils-table-header">
         {pupilHeaders}
       </Table.Header>
-      <Table.Body>{pupilRows}</Table.Body>
-      {footer}
+      <Table.Body>{loaded ? pupilRows : <SkeletonTableColumns cols={loadingCols} />}</Table.Body>
+      <Table.Footer className={pupilRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
+        <TableFooter
+          loaded={loaded}
+          pageSize={pageSize}
+          onChangePageSize={(value) => setValue('pageSize', value)}
+          pages={allPupils.totalPages}
+          activePage={allPupils.pageNumber}
+          onChangePage={(page) => {
+            setValue('page', page === 1 ? 1 : page);
+          }}
+          rowHeight={rowHeight}
+          onChangeRowHeight={setRowHeight}
+        />
+      </Table.Footer>
     </Table>
   );
 };

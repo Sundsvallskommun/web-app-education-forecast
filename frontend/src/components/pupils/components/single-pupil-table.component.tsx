@@ -1,13 +1,16 @@
 import { User } from '@interfaces/user';
-import { Avatar, Button, Icon, Label, Link, Table, SortMode, Input, Pagination, Select } from '@sk-web-gui/react';
+import { Avatar, Button, Icon, Label, Link, SortMode, Table } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { useEffect, useState } from 'react';
 
-import { useRouter } from 'next/router';
+import { Skeleton } from '@components/skeleton/skeleton.component';
+import { TableFooter } from '@components/table/footer/table-footer.component';
+import { SkeletonTableColumns } from '@components/table/skeleton/skeleton-table-rows.component';
 import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { ArrowRight } from 'lucide-react';
 import { useUserStore } from '@services/user-service/user-service';
+import { ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/router';
 import { shallow } from 'zustand/shallow';
 export interface TablePupil extends Pupil {
   id?: string | null;
@@ -39,12 +42,14 @@ interface TablePupilHeaders {
 interface ISinglePupilTable {
   user: User;
   searchQuery: string;
+  loaded: boolean;
 }
 
-export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuery }) => {
+export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuery, loaded }) => {
   const router = useRouter();
   const { headmaster, teacher } = hasRolePermission(user);
-  const [pageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(10);
+
   const pupil = usePupilForecastStore((s) => s.pupil);
   const [pupilTable, setPupilTable] = useState<TablePupil[]>([]);
   const selectedSchool = useUserStore((state) => state.selectedSchool, shallow);
@@ -60,7 +65,6 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
     setPupilTable(pupilArr);
   }, [pupil]);
 
-  const [_pageSize, setPageSize] = useState<number>(pageSize);
   const [sortColumn, setSortColumn] = useState<keyof TablePupil>('courseName');
   const [sortOrder, setSortOrder] = useState(SortMode.ASC);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -85,6 +89,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
     return (
       <Table.HeaderColumn key={`headercol-${idx}`} aria-sort={sortColumn === h.property ? sortOrder : 'none'}>
         <Table.SortButton
+          disabled={!loaded}
           isActive={sortColumn === h.property}
           aria-description={sortColumn === h.property ? undefined : 'sortera'}
           sortOrder={sortOrder}
@@ -102,15 +107,28 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
     } else return p;
   });
 
-  const singlepPupilListRendered = singlePupilListSearchFiltered;
+  const loadingCols = [
+    {
+      element: (
+        <div className="flex items-center gap-2">
+          <Skeleton className="w-32 h-32 !rounded-full">-</Skeleton>
+          <Skeleton className="h-24 w-80">Laddar</Skeleton>
+        </div>
+      ),
+    },
+    { minSize: 8, maxSize: 24 },
+    { minSize: 2, maxSize: 4, height: 1.8 },
+    { element: <Label className="skeleton">Laddar</Label> },
+    { element: <Skeleton className="!rounded-button h-40 px-24">Laddar</Skeleton> },
+  ];
 
   // rows single pupil
-  const pupilRows = singlepPupilListRendered
+  const pupilRows = singlePupilListSearchFiltered
     .sort((a: TablePupil, b: TablePupil) => {
       const order = sortOrder === SortMode.ASC ? -1 : 1;
       return `${a[sortColumn]}` < `${b[sortColumn]}` ? order : `${a[sortColumn]}` > `${b[sortColumn]}` ? order * -1 : 0;
     })
-    .slice((currentPage - 1) * _pageSize, currentPage * _pageSize)
+    .slice((currentPage - 1) * pageSize, currentPage * pageSize)
     .map((p, idx: number) => {
       return (
         <Table.Row
@@ -246,62 +264,30 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
       );
     });
 
-  const rowdata = pupilRows;
-  const footer = (
-    <Table.Footer className={rowdata.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
-      <div className="sk-table-bottom-section">
-        <label className="sk-table-bottom-section-label" htmlFor="pagiPageSize">
-          Rader per sida:
-        </label>
-        <Input
-          size="sm"
-          id="pagePageSize"
-          type="number"
-          min={1}
-          max={100}
-          className="max-w-[6rem]"
-          value={`${_pageSize}`}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            event.target.value && setPageSize(parseInt(event.target.value))
-          }
-        />
-      </div>
-
-      <div className="sk-table-paginationwrapper">
-        <Pagination
-          className="sk-table-pagination"
-          pages={Math.ceil(singlepPupilListRendered.length / _pageSize)}
-          activePage={currentPage}
-          showConstantPages
-          pagesAfter={1}
-          pagesBefore={1}
-          changePage={(page: number) => setCurrentPage(page)}
-          fitContainer
-        />
-      </div>
-      <div className="sk-table-bottom-section">
-        <label className="sk-table-bottom-section-label" htmlFor="pagiRowHeight">
-          Radhöjd:
-        </label>
-        <Select id="pagiRowHeight" size="sm" value={rowHeight} onSelectValue={(value: string) => setRowHeight(value)}>
-          <Select.Option value={'normal'}>Normal</Select.Option>
-          <Select.Option value={'dense'}>Tät</Select.Option>
-        </Select>
-      </div>
-    </Table.Footer>
-  );
-
-  return (
+  return loaded && singlePupilListSearchFiltered.length < 1 ? (
+    <p>Inga sökresultat att visa</p>
+  ) : (
     <Table
       dense={rowHeight === 'dense'}
       background={true}
-      className={`${rowdata.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-48'}`}
+      className={`${pupilRows.length > 10 && 'h-[689px] rounded-b-0 border-b-0 mb-48'}`}
     >
       <Table.Header sticky className="border-b-1 border-gray-500 bg-inverted-body">
         {pupilHeaders}
       </Table.Header>
-      <Table.Body>{pupilRows}</Table.Body>
-      {footer}
+      <Table.Body>{loaded ? pupilRows : <SkeletonTableColumns cols={loadingCols} />}</Table.Body>
+      <Table.Footer className={pupilRows.length > 10 ? 'border-0 outline outline-1 outline-gray-300 rounded-b-18' : ''}>
+        <TableFooter
+          pageSize={pageSize}
+          onChangePageSize={setPageSize}
+          pages={Math.ceil(singlePupilListSearchFiltered.length / pageSize)}
+          onChangePage={setCurrentPage}
+          activePage={currentPage}
+          rowHeight={rowHeight}
+          onChangeRowHeight={setRowHeight}
+          loaded={loaded}
+        />
+      </Table.Footer>
     </Table>
   );
 };

@@ -21,3 +21,14 @@ body {
 .main-container {
   flex: 1 0 auto;
 }
+
+*.skeleton {
+  background-size: 400%;
+  color: transparent !important;
+  background-color: transparent !important;
+  @apply animate-skeleton;
+  @apply overflow-hidden;
+  @apply bg-gradient-to-45 from-background-color-mixin-2 from-25% via-background-color-mixin-1 via-50% to-background-color-mixin-2 to-75%;
+  @apply inline-flex;
+  @apply border-0;
+}

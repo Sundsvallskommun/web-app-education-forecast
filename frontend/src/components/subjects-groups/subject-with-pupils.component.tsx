@@ -2,12 +2,12 @@ import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
 import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import Loader from '@components/loader/loader';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { Spinner } from '@sk-web-gui/react';
 import { SingleSubjectTable } from './components/single-subject-table.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Skeleton } from '@components/skeleton/skeleton.component';
+import { CornerLoader } from '@components/corner-loader/corner-loader.component';
 
 interface SubjectWithPupilsProps {
   setPageTitle: Dispatch<SetStateAction<string | undefined>>;
@@ -19,6 +19,7 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const user = useUserStore((s) => s.user, shallow);
   const { teacher } = hasRolePermission(user);
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
+  const singleSubjectIsLoaded = usePupilForecastStore((s) => s.singleSubjectIsLoaded);
   const singleSubject = usePupilForecastStore((s) => s.subject);
 
   const searchForm = useForm<SearchTableForm>({
@@ -31,14 +32,14 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
   const { searchQuery } = watchSearch();
 
   useEffect(() => {
-    if (!singleSubjectIsLoading) {
+    if (singleSubjectIsLoaded) {
       setPageTitle(singleSubject[0]?.courseName ? singleSubject[0]?.courseName : '');
     } else {
-      setPageTitle('Ämne/grupp');
+      setPageTitle('');
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [singleSubjectIsLoading, singleSubject]);
+  }, [singleSubjectIsLoaded, singleSubject]);
 
   const generalInformation =
     singleSubject.length !== 0 ? (
@@ -46,13 +47,15 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
         <strong>{singleSubject.length}</strong> elever
       </span>
     ) : (
-      <Spinner size={2} />
+      <Skeleton className="h-24">Laddar elever</Skeleton>
     );
 
   return (
     <div>
+      {singleSubjectIsLoading && <CornerLoader />}
       <FormProvider {...searchForm}>
         <HeadingMenu
+          loaded={singleSubjectIsLoaded}
           syllabusId={selectedSyllabus}
           pageTitle={singleSubject.length !== 0 ? pageTitle : 'Ämne/grupp'}
           GeneralInformation={generalInformation}
@@ -73,19 +76,13 @@ export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTit
           searchPlaceholder="Sök på elev eller klass..."
         />
       </FormProvider>
-      {!singleSubjectIsLoading ? (
-        <>
-          {singleSubject.length !== 0 ? (
-            <SingleSubjectTable user={user} searchQuery={searchQuery} selectedSyllabus={selectedSyllabus || ''} />
-          ) : (
-            <p>Inga sökresultat att visa</p>
-          )}
-        </>
-      ) : (
-        <div className="h-[500px] flex justify-center items-center">
-          <Loader />
-        </div>
-      )}
+
+      <SingleSubjectTable
+        loaded={singleSubjectIsLoaded}
+        user={user}
+        searchQuery={searchQuery}
+        selectedSyllabus={selectedSyllabus || ''}
+      />
     </div>
   );
 };
