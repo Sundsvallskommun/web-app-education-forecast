@@ -279,12 +279,18 @@ interface State {
   currentPeriodIsLoading: boolean;
   allPeriodsIsLoading: boolean;
   subjectsIsLoading: boolean;
+  subjectsIsLoaded: boolean;
   classesIsLoading: boolean;
+  classesIsLoaded: boolean;
   schoolsClassesIsLoading: boolean;
   mentorClassIsLoading: boolean;
+  mentorClassIsLoaded: boolean;
   pupilsIsLoading: boolean;
+  pupilsIsLoaded: boolean;
   singlePupilIsLoading: boolean;
+  singlePupilIsLoaded: boolean;
   singleSubjectIsLoading: boolean;
+  singleSubjectIsLoaded: boolean;
   mySubjects: MetaGroup;
   subject: Pupil[];
   myClasses: MetaGroup;
@@ -305,6 +311,7 @@ interface Actions {
   setSubjects: (mySubjects: MetaGroup | ((prevState: MetaGroup) => MetaGroup)) => Promise<unknown>;
   setClasses: (myClasses: MetaGroup | ((prevState: MetaGroup) => MetaGroup) | undefined) => Promise<unknown>;
   setSingleSubject: (subject: Pupil[] | ((prevState: Pupil[]) => Pupil[])) => Promise<unknown>;
+  clearSingleSubject: () => void;
   setMentorClass: (
     mentorClass: MentorClassPupilGrid[] | ((prevState: MentorClassPupilGrid[]) => MentorClassPupilGrid[])
   ) => Promise<unknown>;
@@ -334,13 +341,19 @@ interface Actions {
 const initialState: State = {
   currentPeriodIsLoading: true,
   allPeriodsIsLoading: true,
-  subjectsIsLoading: true,
-  classesIsLoading: true,
+  subjectsIsLoading: false,
+  subjectsIsLoaded: false,
+  classesIsLoading: false,
+  classesIsLoaded: false,
   schoolsClassesIsLoading: true,
-  mentorClassIsLoading: true,
-  pupilsIsLoading: true,
-  singlePupilIsLoading: true,
-  singleSubjectIsLoading: true,
+  mentorClassIsLoading: false,
+  mentorClassIsLoaded: false,
+  pupilsIsLoading: false,
+  pupilsIsLoaded: false,
+  singlePupilIsLoading: false,
+  singlePupilIsLoaded: false,
+  singleSubjectIsLoading: false,
+  singleSubjectIsLoaded: false,
   mySubjects: {
     pageNumber: 0,
     pageSize: 0,
@@ -473,6 +486,7 @@ export const usePupilForecastStore = createWithEqualityFn<
           await set(() => ({ myClasses: data, classesIsLoading: false }));
           await set(() => ({
             classesIsLoading: false,
+            classesIsLoaded: true,
           }));
           return { data, error: res.error };
         },
@@ -524,11 +538,8 @@ export const usePupilForecastStore = createWithEqualityFn<
             body.searchFilter
           );
           const data = (res.data && res.data) || initialState.mySubjects;
-          await set(() => ({ mySubjects: data, subjectsIsLoading: false }));
+          await set(() => ({ mySubjects: data, subjectsIsLoaded: true, subjectsIsLoading: false }));
 
-          await set(() => ({
-            subjectsIsLoading: false,
-          }));
           return { data, error: res.error };
         },
         setAllPupils: async (allPupils) =>
@@ -573,6 +584,7 @@ export const usePupilForecastStore = createWithEqualityFn<
               data: dataArr,
             },
             pupilsIsLoading: false,
+            pupilsIsLoaded: true,
           }));
           return { data, error: res.error };
         },
@@ -592,17 +604,15 @@ export const usePupilForecastStore = createWithEqualityFn<
           await set(() => ({ mentorClassIsLoading: true }));
           const res = await getMentorClass(groupId, periodId);
           const data = (res.data && res.data) || initialState.mentorClass;
-          await set(() => ({ mentorClass: data, mentorClassIsLoading: false }));
+          await set(() => ({ mentorClass: data, mentorClassIsLoaded: true, mentorClassIsLoading: false }));
 
-          await set(() => ({
-            mentorClassIsLoading: false,
-          }));
           return { data, error: res.error };
         },
         setSingleSubject: async (subject) =>
           await set((s) => ({
             subject: typeof subject === 'function' ? subject(s.subject) : subject,
           })),
+        clearSingleSubject: () => set(() => ({ subject: [], singleSubjectIsLoaded: false })),
         getSubjectWithPupils: async (groupId: string, syllabusId: string, periodId?: number | null) => {
           const dataArr: Pupil[] = [];
           if (groupId == null) {
@@ -622,11 +632,7 @@ export const usePupilForecastStore = createWithEqualityFn<
               image: img.length === 0 || !img ? null : img,
             });
           });
-          await set(() => ({ subject: dataArr, singleSubjectIsLoading: false }));
-
-          await set(() => ({
-            singleSubjectIsLoading: false,
-          }));
+          await set(() => ({ subject: dataArr, singleSubjectIsLoaded: true, singleSubjectIsLoading: false }));
 
           return { data, error: res.error };
         },
@@ -644,11 +650,8 @@ export const usePupilForecastStore = createWithEqualityFn<
           await set(() => ({ singlePupilIsLoading: true }));
           const res = await getPupil(schoolId, pupilId, periodId);
           const data = (res.data && res.data) || initialState.pupil;
-          await set(() => ({ pupil: data, singlePupilIsLoading: false }));
-          // await get().getMentorClass(data[0].classGroupId, {
-          //   period: get().selectedPeriod,
-          //   schoolYear: get().selectedSchoolYear,
-          // });
+          await set(() => ({ pupil: data, singlePupilIsLoaded: true, singlePupilIsLoading: false }));
+
           return { data, error: res.error };
         },
         setForecast: async (forecast: SetForecastDto, schoolId) => {

@@ -1,12 +1,12 @@
-import { useUserStore } from '@services/user-service/user-service';
 import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
-import Loader from '@components/loader/loader';
-import { useEffect } from 'react';
 import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
-import { useForm, FormProvider } from 'react-hook-form';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { SubjectsTable } from './components/subjects-table/subjects-table.components';
+import { useUserStore } from '@services/user-service/user-service';
 import { useSnackbar } from '@sk-web-gui/react';
+import { useEffect } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { SubjectsTable } from './components/subjects-table/subjects-table.components';
+import { CornerLoader } from '@components/corner-loader/corner-loader.component';
 
 interface SubjectsGroupsProps {
   pageTitle: string;
@@ -37,6 +37,7 @@ export interface ISubjectsTable {
 
 export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subjectsQueries }) => {
   const { mySubjects, getMySubjects } = usePupilForecastStore();
+  const subjectsIsLoaded = usePupilForecastStore((s) => s.subjectsIsLoaded);
   const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
@@ -84,29 +85,20 @@ export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subje
 
   return (
     <div>
+      {subjectsIsLoading && <CornerLoader />}
       <FormProvider {...searchForm}>
         <HeadingMenu
+          loaded={subjectsIsLoaded}
           pageTitle={fullTitle}
           callback="subjects"
           searchQuery={searchQuery}
           searchPlaceholder="Sök på ämne/grupp..."
         />
       </FormProvider>
-      {!subjectsIsLoading ? (
-        <>
-          {mySubjects.totalRecords !== 0 ? (
-            <FormProvider {...tableForm}>
-              <SubjectsTable />
-            </FormProvider>
-          ) : (
-            <p>Inga sökresultat att visa</p>
-          )}
-        </>
-      ) : (
-        <div className="h-[500px] flex justify-center items-center">
-          <Loader />
-        </div>
-      )}
+
+      <FormProvider {...tableForm}>
+        <SubjectsTable />
+      </FormProvider>
     </div>
   );
 };
