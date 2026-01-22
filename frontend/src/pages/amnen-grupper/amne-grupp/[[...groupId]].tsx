@@ -21,7 +21,7 @@ export const Index: React.FC = () => {
   const routeId = routersubjectId && Array.isArray(routersubjectId) ? routersubjectId.pop() : null;
   const subId = routeId?.split('-syllabus-')[0];
   const syllabusId = routeId?.split('-syllabus-')[1];
-  const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
+  const singleSubjectIsLoaded = usePupilForecastStore((s) => s.singleSubjectIsLoaded);
   const getSubjectWithPupils = usePupilForecastStore((s) => s.getSubjectWithPupils);
   const geMySubjects = usePupilForecastStore((s) => s.getMySubjects);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
@@ -90,10 +90,8 @@ export const Index: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod.periodId, selectedSchool.schoolId]);
 
-  const breadcrumbLinks = [
-    { link: '/amnen-grupper', title: 'Ämnen/grupper', currentPage: false },
-    { link: '', title: pageTitle ? pageTitle : '...', currentPage: true },
-  ];
+  const breadcrumbLinks = [{ link: '/amnen-grupper', title: 'Ämnen/grupper', currentPage: false }];
+  const currentBreadcrumbLinks = [{ link: '', title: pageTitle ?? '...', currentPage: true }];
 
   useEffect(() => {
     const riffleArray: Riffle[] = [];
@@ -112,8 +110,8 @@ export const Index: React.FC = () => {
 
   return (
     <DefaultLayout
-      breadcrumbsIsLoading={singleSubjectIsLoading}
-      breadcrumbLinks={breadcrumbLinks}
+      breadcrumbsIsLoading={!singleSubjectIsLoaded}
+      breadcrumbLinks={[...breadcrumbLinks, ...(singleSubjectIsLoaded ? currentBreadcrumbLinks : [])]}
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}
     >
       <Main>
@@ -124,7 +122,7 @@ export const Index: React.FC = () => {
         />
         <RifflePrevNext
           currentId={selectedId}
-          riffleIsLoading={singleSubjectIsLoading}
+          riffleIsLoading={!singleSubjectIsLoaded}
           riffleObjects={riffleSubjects}
           callback="subject"
         />

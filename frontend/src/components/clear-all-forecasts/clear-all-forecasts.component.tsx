@@ -11,6 +11,8 @@ export const ClearAllForecasts: React.FC = () => {
   const allSubjects = usePupilForecastStore((s) => s.mySubjects);
   const clearAll = usePupilForecastStore((s) => s.clearGroupForecasts);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
+  const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
+  const currentPeriod = usePupilForecastStore((s) => s.currentPeriod);
 
   const message = useSnackbar();
 
@@ -40,6 +42,7 @@ export const ClearAllForecasts: React.FC = () => {
           });
         }
       });
+      setIsOpen(false);
     }
   };
 
@@ -53,6 +56,7 @@ export const ClearAllForecasts: React.FC = () => {
   return (
     <div className="max-medium-device:w-full">
       <Button
+        disabled={subject.every((pupil) => !pupil.forecast) || selectedPeriod.endDate !== currentPeriod.endDate}
         className="max-medium-device:w-full"
         onClick={openModalHandler}
         variant="tertiary"

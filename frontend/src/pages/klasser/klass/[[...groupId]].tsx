@@ -27,7 +27,7 @@ export const Index: React.FC = () => {
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const classes = usePupilForecastStore((s) => s.myClasses);
-  const classesIsLoading = usePupilForecastStore((s) => s.classesIsLoading);
+  const classesIsLoaded = usePupilForecastStore((s) => s.classesIsLoaded);
   const [riffleClasses, setRiffleClasses] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
 
@@ -115,7 +115,7 @@ export const Index: React.FC = () => {
       {riffleClasses.length > 1 ? (
         <RifflePrevNext
           currentId={selectedId}
-          riffleIsLoading={classesIsLoading}
+          riffleIsLoading={!classesIsLoaded}
           riffleObjects={riffleClasses}
           callback="mentorclass"
         />

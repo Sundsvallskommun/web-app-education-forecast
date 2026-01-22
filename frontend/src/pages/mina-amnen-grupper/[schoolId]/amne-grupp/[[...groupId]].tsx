@@ -28,6 +28,7 @@ export const Index: React.FC = () => {
   const syllabusId = routeId?.split('-syllabus-')[1];
   const getSubjectWithPupils = usePupilForecastStore((state) => state.getSubjectWithPupils);
   const getSubjects = usePupilForecastStore((state) => state.getMySubjects);
+  const clearSubject = usePupilForecastStore((state) => state.clearSingleSubject);
   const selectedPeriod = usePupilForecastStore((state) => state.selectedPeriod);
   const subjectsQueries: ForeacastQueriesDto = {
     schoolId: selectedSchool.schoolId,
@@ -37,11 +38,11 @@ export const Index: React.FC = () => {
     PageSize: 500,
   };
 
-  const subjectIsLoading = usePupilForecastStore((state) => state.singleSubjectIsLoading);
+  const subjectIsLoaded = usePupilForecastStore((state) => state.singleSubjectIsLoaded);
   const [pageTitle, setPageTitle] = useState<string>();
 
   const allSubjects = usePupilForecastStore((state) => state.mySubjects);
-  const subjectsIsLoading = usePupilForecastStore((state) => state.subjectsIsLoading);
+  const subjectsIsLoaded = usePupilForecastStore((state) => state.subjectsIsLoaded);
   const [selectedId, setSelectedId] = useState<string>();
   const [selectedSyllabus, setSelectedSyllabus] = useState<string>();
   const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
@@ -62,7 +63,7 @@ export const Index: React.FC = () => {
     const loadClass = async () => {
       if (subjectId && syllabusId) {
         if (router.pathname.includes(subjectId)) return;
-
+        clearSubject();
         await getSubjects(subjectsQueries).catch(() => {
           toastMessage({
             message: 'Något gick fel vid hämtning av alla dina ämnen/grupper',
@@ -112,10 +113,12 @@ export const Index: React.FC = () => {
     currentPage: false,
   };
 
-  const breadcrumbLinks =
-    schools.length > 1
-      ? [breadCrumbMyGroups, breadCrumbSchool, { link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true }]
-      : [breadCrumbMyGroups, { link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true }];
+  const breadcrumbDefaults = schools.length > 1 ? [breadCrumbMyGroups, breadCrumbSchool] : [breadCrumbMyGroups];
+
+  const breadcrumbLinks = [
+    ...breadcrumbDefaults,
+    ...(subjectIsLoaded ? [{ link: '', title: pageTitle ?? 'Ämne/grupp', currentPage: true }] : []),
+  ];
 
   useEffect(() => {
     const riffleArray: Riffle[] = [];
@@ -134,7 +137,7 @@ export const Index: React.FC = () => {
 
   return (
     <DefaultLayout
-      breadcrumbsIsLoading={subjectIsLoading}
+      breadcrumbsIsLoading={!subjectIsLoaded}
       breadcrumbLinks={breadcrumbLinks}
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}`}
     >
@@ -147,7 +150,7 @@ export const Index: React.FC = () => {
         {riffleSubjects.length > 1 && (
           <RifflePrevNext
             currentId={selectedId}
-            riffleIsLoading={subjectsIsLoading}
+            riffleIsLoading={!subjectsIsLoaded}
             riffleObjects={riffleSubjects}
             callback="subject"
           />

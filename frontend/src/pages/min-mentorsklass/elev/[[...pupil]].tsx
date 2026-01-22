@@ -20,13 +20,13 @@ export const Index: React.FC = () => {
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
   const pupil = usePupilForecastStore((s) => s.pupil);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
-  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
+  const singlePupilIsLoaded = usePupilForecastStore((s) => s.singlePupilIsLoaded);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const getPupil = usePupilForecastStore((s) => s.getPupil);
   const getMentorClass = usePupilForecastStore((s) => s.getMentorClass);
 
   const mentorclass = usePupilForecastStore((s) => s.mentorClass);
-  const mentorclassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
+  const mentorclassIsLoaded = usePupilForecastStore((s) => s.mentorClassIsLoaded);
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
 
@@ -39,7 +39,7 @@ export const Index: React.FC = () => {
         if (router.pathname.includes(pupilId)) return;
         await getPupil(selectedSchool.schoolId, pupilId, selectedPeriod.periodId).then(async (p) => {
           if (p.data) {
-            await getMentorClass(p.data[0].classGroupId || '', selectedPeriod.periodId);
+            await getMentorClass(p.data[0]?.classGroupId || '', selectedPeriod?.periodId);
           }
         });
 
@@ -64,7 +64,7 @@ export const Index: React.FC = () => {
 
   useEffect(() => {
     if (selectedId && selectedPeriod) {
-      getMentorClass(pupil[0].classGroupId || '', selectedPeriod.periodId).catch(() => {
+      getMentorClass(pupil[0]?.classGroupId || '', selectedPeriod?.periodId).catch(() => {
         toastMessage({
           message: 'Något gick fel vid hämtning av din mentorsklass',
           status: 'error',
@@ -82,6 +82,8 @@ export const Index: React.FC = () => {
 
   const breadcrumbLinks = [
     { link: `/min-mentorsklass/${pupil[0]?.classGroupId}`, title: pupil[0]?.className ?? 'Klass', currentPage: false },
+  ];
+  const currentBreadcrumbLink = [
     { link: '', title: `${pupil[0]?.givenname} ${pupil[0]?.lastname}`, currentPage: true },
   ];
 
@@ -101,15 +103,15 @@ export const Index: React.FC = () => {
 
   return (
     <DefaultLayout
-      breadcrumbsIsLoading={singlePupilIsLoading}
-      breadcrumbLinks={breadcrumbLinks}
+      breadcrumbsIsLoading={!singlePupilIsLoaded}
+      breadcrumbLinks={[...breadcrumbLinks, ...(singlePupilIsLoaded ? currentBreadcrumbLink : [])]}
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - Elev ${pupil[0]?.givenname} ${pupil[0]?.lastname}}`}
     >
       <Main>
         <Pupil />
         <RifflePrevNext
           currentId={selectedId}
-          riffleIsLoading={mentorclassIsLoading}
+          riffleIsLoading={!mentorclassIsLoaded}
           riffleObjects={rifflePupils}
           callback="pupil"
         />

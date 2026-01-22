@@ -161,6 +161,13 @@ const samlStrategy = new Strategy(
         });
       }
 
+      if (!schools || schools?.length < 1) {
+        return done({
+          name: 'SAML_MISSING_PERMISSIONS',
+          message: 'Failed to fetch user roles from education API',
+        });
+      }
+
       const findUser = {
         personId: personId,
         username: username,

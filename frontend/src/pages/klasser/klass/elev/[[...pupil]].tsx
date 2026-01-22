@@ -1,13 +1,13 @@
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { Pupil } from '@components/pupils/pupil.component';
+import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
+import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
 import DefaultLayout from '@layouts/default-layout/default-layout.component';
 import Main from '@layouts/main/main.component';
-import { Pupil } from '@components/pupils/pupil.component';
-import { ForeacastQueriesDto } from '@interfaces/forecast/forecast';
-import { RifflePrevNext } from '@components/riffle-prev-next/riffle-prev-next.component';
-import { useUserStore } from '@services/user-service/user-service';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
+import { useUserStore } from '@services/user-service/user-service';
 import { useSnackbar } from '@sk-web-gui/react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
 interface Riffle {
   id: string;
@@ -22,7 +22,7 @@ export const Index: React.FC = () => {
   const pupilId = routerpupilId && Array.isArray(routerpupilId) ? routerpupilId.pop() : null;
 
   const pupil = usePupilForecastStore((s) => s.pupil);
-  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
+  const singlePupilIsLoaded = usePupilForecastStore((s) => s.singlePupilIsLoaded);
 
   const getPupil = usePupilForecastStore((s) => s.getPupil);
   const getAllPupils = usePupilForecastStore((s) => s.getAllPupils);
@@ -30,7 +30,7 @@ export const Index: React.FC = () => {
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
 
   const allPupils = usePupilForecastStore((s) => s.allPupils);
-  const pupilsIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
+  const pupilsIsLoaded = usePupilForecastStore((s) => s.pupilsIsLoaded);
   const [rifflePupils, setRifflePupils] = useState<Riffle[]>([]);
   const [selectedId, setSelectedId] = useState<string>();
 
@@ -109,6 +109,9 @@ export const Index: React.FC = () => {
       title: pupil[0]?.className ?? 'Elev',
       currentPage: false,
     },
+  ];
+
+  const currentBreadCrumblink = [
     {
       link: `/klasser/klass/elev/${pupil[0]?.pupil}`,
       title: `${pupil[0]?.givenname} ${pupil[0]?.lastname}`,
@@ -118,15 +121,15 @@ export const Index: React.FC = () => {
 
   return (
     <DefaultLayout
-      breadcrumbLinks={breadcrumbLinks}
-      breadcrumbsIsLoading={singlePupilIsLoading}
+      breadcrumbLinks={[...breadcrumbLinks, ...(singlePupilIsLoaded ? currentBreadCrumblink : [])]}
+      breadcrumbsIsLoading={!singlePupilIsLoaded}
       title={`${process.env.NEXT_PUBLIC_APP_NAME} - Elev ${pupil[0]?.givenname} ${pupil[0]?.lastname}}`}
     >
       <Main>
         <Pupil />
         <RifflePrevNext
           currentId={selectedId}
-          riffleIsLoading={pupilsIsLoading}
+          riffleIsLoading={!pupilsIsLoaded}
           riffleObjects={rifflePupils}
           callback="pupil"
         />

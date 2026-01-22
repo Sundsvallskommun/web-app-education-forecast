@@ -1,18 +1,17 @@
-import { shallow } from 'zustand/shallow';
-import { useUserStore } from '@services/user-service/user-service';
 import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
-import { Spinner } from '@sk-web-gui/react';
-import { hasRolePermission } from '@utils/has-role-permission';
-import Loader from '@components/loader/loader';
+import { Skeleton } from '@components/skeleton/skeleton.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { SinglePupilTable } from './components/single-pupil-table.component';
+import { useUserStore } from '@services/user-service/user-service';
+import { hasRolePermission } from '@utils/has-role-permission';
 import { FormProvider, useForm } from 'react-hook-form';
+import { shallow } from 'zustand/shallow';
+import { SinglePupilTable } from './components/single-pupil-table.component';
+import { CornerLoader } from '@components/corner-loader/corner-loader.component';
 
 export const Pupil: React.FC = () => {
   const user = useUserStore((s) => s.user, shallow);
   const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
-  const mentorClassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
-  const pupilsIsLoading = usePupilForecastStore((s) => s.pupilsIsLoading);
+  const singlePupilIsLoaded = usePupilForecastStore((s) => s.singlePupilIsLoaded);
   const pupil = usePupilForecastStore((s) => s.pupil);
   const { headmaster } = hasRolePermission(user);
 
@@ -30,7 +29,13 @@ export const Pupil: React.FC = () => {
   const generalInformation = (
     <div className="flex gap-14">
       <span className="flex gap-4 items-center">
-        <strong>{pupil.length !== 0 ? pupil.length : <Spinner size={2} />}</strong> ämnen
+        {singlePupilIsLoaded ? (
+          <>
+            <strong>{pupil.length ?? 0}</strong> ämnen
+          </>
+        ) : (
+          <Skeleton className="h-24 w-80">Laddar ämnen</Skeleton>
+        )}
       </span>
     </div>
   );
@@ -44,8 +49,10 @@ export const Pupil: React.FC = () => {
 
   return (
     <div>
+      {singlePupilIsLoading && <CornerLoader />}
       <FormProvider {...searchForm}>
         <HeadingMenu
+          loaded={singlePupilIsLoaded}
           pageTitle={pageTitle}
           imageWithTextProperties={imageWithText}
           GeneralInformation={generalInformation}
@@ -54,20 +61,8 @@ export const Pupil: React.FC = () => {
           searchPlaceholder="Sök på ämne eller lärare..."
         />
       </FormProvider>
-      {(!headmaster && !mentorClassIsLoading && !singlePupilIsLoading && pupil.length !== 0) ||
-      (headmaster && !pupilsIsLoading && !singlePupilIsLoading && pupil.length !== 0) ? (
-        <>
-          {pupil.length !== 0 ? (
-            <SinglePupilTable user={user} searchQuery={searchQuery} />
-          ) : (
-            <p>Inga sökresultat att visa</p>
-          )}
-        </>
-      ) : (
-        <div className="h-[500px] flex justify-center items-center">
-          <Loader />
-        </div>
-      )}
+
+      <SinglePupilTable user={user} searchQuery={searchQuery} loaded={singlePupilIsLoaded} />
     </div>
   );
 };

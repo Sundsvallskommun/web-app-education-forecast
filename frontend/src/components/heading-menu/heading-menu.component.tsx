@@ -1,6 +1,6 @@
 import { PeriodPicker } from '@components/period-picker/period-picker.component';
 import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
-import { Avatar, Divider, FormControl, Link, SearchField, Spinner } from '@sk-web-gui/react';
+import { Avatar, cx, Divider, FormControl, Link, SearchField, Spinner } from '@sk-web-gui/react';
 import { initialsFunction } from '@utils/initials';
 import { callbackType } from '@utils/callback-type';
 import { CopyPreviousForecast } from '@components/copy-previous-forecast/copy-previous-forecast.component';
@@ -32,6 +32,7 @@ interface HeadingMenuProps {
   searchQuery?: string;
   searchPlaceholder?: string;
   syllabusId?: string;
+  loaded: boolean;
 }
 
 export const HeadingMenu: React.FC<HeadingMenuProps> = ({
@@ -42,15 +43,14 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   callback,
   searchPlaceholder,
   syllabusId,
+  loaded,
 }) => {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
   const selectedSchool = useUserStore((s) => s.selectedSchool);
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher, headmaster } = hasRolePermission(user);
-  const subject = usePupilForecastStore((s) => s.subject);
-  const subjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
-  const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
+  const singlePupilIsLoaded = usePupilForecastStore((s) => s.singlePupilIsLoaded);
   const placeHolder = searchPlaceholder ? searchPlaceholder : 'Sök i listan...';
 
   const { watch: watchSearch, setValue } = useFormContext<SearchTableForm>();
@@ -58,18 +58,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   const { searchQuery } = watchSearch();
 
   const onSearchHandler = () => ({});
-  const searchForm = (
-    <FormControl className="max-medium-device:w-full">
-      <SearchField
-        value={searchQuery}
-        onChange={(e) => setValue('searchQuery', e.target.value)}
-        onSearch={onSearchHandler}
-        placeholder={placeHolder}
-        onReset={() => setValue('searchQuery', '')}
-        data-cy="search-field"
-      />
-    </FormControl>
-  );
+
   return (
     <div className="flex w-full flex-col mb-20">
       <div className="flex flex-wrap max-medium-device-max:gap-24 w-full justify-between items-center mb-20">
@@ -78,7 +67,13 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
             <span className="text-h3-sm font-normal">{selectedSchool.schoolName}</span>
           ) : null}
 
-          <h1 className={GeneralInformation ? 'mb-xs' : 'mb-0'} data-cy="page-title">
+          <h1
+            className={cx(GeneralInformation ? 'mb-xs' : 'mb-0', {
+              ['skeleton !block rounded-groups']: !loaded,
+            })}
+            data-cy="page-title"
+            aria-busy={!loaded}
+          >
             {pageTitle}
           </h1>
           <>{GeneralInformation}</>
@@ -95,7 +90,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
             {callback === 'pupil' && (
               <>
                 <div className="flex gap-10 items-center">
-                  {!singlePupilIsLoading && imageWithTextProperties?.initials ? (
+                  {imageWithTextProperties?.initials ? (
                     <Avatar
                       rounded
                       accent
@@ -106,7 +101,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
                     <Avatar rounded accent color="vattjom" initials={''} />
                   )}
 
-                  {imageWithTextProperties?.imageText && !singlePupilIsLoading ? (
+                  {imageWithTextProperties?.imageText && singlePupilIsLoaded ? (
                     <span className={imageWithTextProperties?.textLink ? 'font-bold' : ''}>
                       {imageWithTextProperties?.textLink ? (
                         <Link
@@ -152,47 +147,20 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
 
       <div className="flex flex-wrap justify-between items-center mt-20 gap-24">
         <GeneralForecastInfo callback={callback} />
-        {SUBJECT && (teacher || (headmaster && teacher)) ? (
-          <>
-            {subject.find((x) => x.forecast !== null) ? (
-              <>
-                {!subjectIsLoading ? (
-                  <div className="flex justify-center items-center">
-                    {subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null) ? (
-                      <CopyPreviousForecast syllabusId={syllabusId || ''} />
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-                ) : (
-                  <Spinner size={3} />
-                )}
-                <div className="flex flex-wrap justify-end items-center gap-24">
-                  <ClearAllForecasts />
-                  <FormControl className="max-medium-device:w-full">{searchForm}</FormControl>
-                </div>
-              </>
-            ) : (
-              <>
-                {!subjectIsLoading ? (
-                  <div className="flex justify-center items-center">
-                    {subject.find((x) => x.forecast === null) && subject.find((x) => x.previousForecast !== null) && (
-                      <CopyPreviousForecast syllabusId={syllabusId || ''} />
-                    )}
-                  </div>
-                ) : (
-                  <Spinner size={3} />
-                )}
-
-                <div>
-                  <FormControl className="max-medium-device:w-full">{searchForm}</FormControl>
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          <FormControl className="max-medium-device:w-full">{searchForm}</FormControl>
-        )}
+        {SUBJECT && teacher && <CopyPreviousForecast syllabusId={syllabusId || ''} />}
+        <div className="flex gap-24 items-center">
+          {SUBJECT && teacher && <ClearAllForecasts />}
+          <FormControl className="max-medium-device:w-full">
+            <SearchField
+              value={searchQuery}
+              onChange={(e) => setValue('searchQuery', e.target.value)}
+              onSearch={onSearchHandler}
+              placeholder={placeHolder}
+              onReset={() => setValue('searchQuery', '')}
+              data-cy="search-field"
+            />
+          </FormControl>
+        </div>
       </div>
     </div>
   );
