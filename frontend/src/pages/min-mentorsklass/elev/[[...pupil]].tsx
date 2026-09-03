@@ -98,7 +98,6 @@ export const Index: React.FC = () => {
     });
 
     setRifflePupils(riffleArray);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mentorclass]);
 
   return (

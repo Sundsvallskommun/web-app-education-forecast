@@ -67,7 +67,6 @@ export const ClassesTable: React.FC = () => {
 
     setClassTable(tableArr);
     setLoaded(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myClasses]);
 
   const [rowHeight, setRowHeight] = useState<string>('normal');

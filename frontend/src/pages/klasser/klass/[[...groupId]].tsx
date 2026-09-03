@@ -94,7 +94,6 @@ export const Index: React.FC = () => {
     });
 
     setRiffleClasses(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classes, selectedPeriod.periodId]);
 
   const breadcrumbLinks = [

@@ -35,6 +35,8 @@ export const SkeletonTableColumns: React.FC<SkeletonTableRowsProps> = (props) =>
   } = props;
   const id = useId();
   const getLength = (max: number, min: number) => {
+    // TODO This should be fixed.
+    // eslint-disable-next-line react-hooks/purity
     return Math.random() * (max - min + 1) + min;
   };
 

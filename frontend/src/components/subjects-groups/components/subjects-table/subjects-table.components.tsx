@@ -64,7 +64,6 @@ export const SubjectsTable: React.FC = () => {
     }
 
     setSubjectsTable(tableArr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mySubjects]);
 
   const [rowHeight, setRowHeight] = useState<'normal' | 'dense'>('normal');
