@@ -2,7 +2,6 @@ import LoaderFullScreen from '@components/loader/loader-fullscreen';
 import { useUserStore } from '@services/user-service/user-service';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { shallow } from 'zustand/shallow';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { ForeacastQueriesDto, Period } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
@@ -12,12 +11,12 @@ export interface SelectedPeriodForm {
 }
 
 export default function Index() {
-  const user = useUserStore((s) => s.user, shallow);
-  const { getMyClasses } = usePupilForecastStore();
+  const user = useUserStore((s) => s.user);
+  const getMyClasses = usePupilForecastStore((s) => s.getMyClasses);
   const { headmaster, teacher, mentor } = hasRolePermission(user);
   const router = useRouter();
 
-  const selectedSchool = useUserStore((s) => s.selectedSchool, shallow);
+  const selectedSchool = useUserStore((s) => s.selectedSchool);
 
   const teacherAndMentorRoutes = () => {
     const myGroup: ForeacastQueriesDto = {

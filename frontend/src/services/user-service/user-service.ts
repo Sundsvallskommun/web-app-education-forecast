@@ -1,6 +1,6 @@
 import { User } from '@interfaces/user';
 import { ApiResponse, apiService } from '../api-service';
-import { createWithEqualityFn } from 'zustand/traditional';
+import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { __DEV__ } from '@sk-web-gui/react';
 import { emptyUser } from './defaults';
@@ -46,7 +46,7 @@ const initialState: State = {
   },
 };
 
-export const useUserStore = createWithEqualityFn<State & Actions>()(
+export const useUserStore = create<State & Actions>()(
   devtools(
     (set, get) => ({
       ...initialState,

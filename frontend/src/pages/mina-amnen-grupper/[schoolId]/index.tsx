@@ -8,10 +8,9 @@ import { Spinner, useSnackbar } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import router from 'next/router';
 import { useEffect } from 'react';
-import { shallow } from 'zustand/shallow';
 
 export const Index: React.FC = () => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user);
   const { teacher, mentor, headmaster } = hasRolePermission(user);
   const pageTitle = 'Mina ämnen/grupper';
   const selectedSchool = useUserStore((s) => s.selectedSchool);

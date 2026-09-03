@@ -5,7 +5,6 @@ import { Breadcrumb, Header, Logo } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
 import Head from 'next/head';
 import Link from 'next/link';
-import { shallow } from 'zustand/shallow';
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -35,7 +34,7 @@ export default function DefaultLayout({
   breadcrumbLinks,
   breadcrumbsIsLoading,
 }: DefaultLayoutProps) {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user);
   const { headmaster } = hasRolePermission(user);
 
   const headerSubtitle = () => {

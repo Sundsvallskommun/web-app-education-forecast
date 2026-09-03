@@ -24,7 +24,7 @@ import {
   handleGetPeriod,
   handleSendForecast,
 } from './data-handlers/pupilforecast';
-import { createWithEqualityFn } from 'zustand/traditional';
+import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { __DEV__ } from '@sk-web-gui/react';
 import { apiURL } from '@utils/api-url';
@@ -405,7 +405,7 @@ const initialState: State = {
   selectedId: '',
 };
 
-export const usePupilForecastStore = createWithEqualityFn<
+export const usePupilForecastStore = create<
   State & Actions,
   [
     ['zustand/devtools', never],
@@ -422,58 +422,58 @@ export const usePupilForecastStore = createWithEqualityFn<
       (set, get) => ({
         ...initialState,
         setSelectedPeriod: async (selectedPeriod) => {
-          await set(() => ({
+          set(() => ({
             selectedPeriod: selectedPeriod,
           }));
         },
         setCurrentPeriod: async (currentPeriod) => await set(() => ({ currentPeriod })),
         getCurrentPeriod: async (schoolType) => {
           if (schoolType == null) {
-            await set(() => ({
+            set(() => ({
               currentPeriod: initialState.currentPeriod,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ currentPeriodIsLoading: true }));
+          set(() => ({ currentPeriodIsLoading: true }));
           const res = await getCurrentPeriod(schoolType);
           const data = (res.data && res.data) || initialState.currentPeriod;
-          await set(() => ({ currentPeriod: data, currentPeriodIsLoading: false }));
+          set(() => ({ currentPeriod: data, currentPeriodIsLoading: false }));
 
-          await set(() => ({
+          set(() => ({
             currentPeriodIsLoading: false,
           }));
           return { data, error: res.error };
         },
         getAllPeriods: async (schoolType) => {
           if (schoolType) {
-            await set(() => ({
+            set(() => ({
               allPeriods: initialState.allPeriods,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ allPeriodsIsLoading: true }));
+          set(() => ({ allPeriodsIsLoading: true }));
           const res = await getAllPeriods(schoolType);
           const data = (res.data && res.data) || initialState.allPeriods;
-          await set(() => ({ allPeriods: data, allPeriodsIsLoading: false }));
+          set(() => ({ allPeriods: data, allPeriodsIsLoading: false }));
 
-          await set(() => ({
+          set(() => ({
             allPeriodsIsLoading: false,
           }));
           return { data, error: res.error };
         },
         setClasses: async (myClasses) =>
-          await set((s) => ({
+          set((s) => ({
             myClasses: typeof myClasses === 'function' ? myClasses(s.myClasses) : myClasses,
           })),
         getMyClasses: async (body: ForeacastQueriesDto) => {
           const fPeriod = body.periodId || get().selectedPeriod;
           if (fPeriod == null) {
-            await set(() => ({
+            set(() => ({
               myClasses: initialState.myClasses,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ classesIsLoading: true }));
+          set(() => ({ classesIsLoading: true }));
           const res = await getClasses(body.schoolId, {
             OrderBy: body.OrderBy,
             OrderDirection: body.OrderDirection,
@@ -483,8 +483,8 @@ export const usePupilForecastStore = createWithEqualityFn<
             searchFilter: body.searchFilter,
           });
           const data = (res.data && res.data) || initialState.myClasses;
-          await set(() => ({ myClasses: data, classesIsLoading: false }));
-          await set(() => ({
+          set(() => ({ myClasses: data, classesIsLoading: false }));
+          set(() => ({
             classesIsLoading: false,
             classesIsLoaded: true,
           }));
@@ -493,12 +493,12 @@ export const usePupilForecastStore = createWithEqualityFn<
         getMySchoolsClasses: async (body: QuerySchoolsClasses) => {
           const fPeriod = body.periodId || get().selectedPeriod;
           if (fPeriod == null) {
-            await set(() => ({
+            set(() => ({
               mySchoolsClasses: initialState.mySchoolsClasses,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ schoolsClassesIsLoading: true }));
+          set(() => ({ schoolsClassesIsLoading: true }));
           const res = await getClassesForSchools(body.schools, {
             OrderBy: body.OrderBy,
             OrderDirection: body.OrderDirection,
@@ -508,26 +508,26 @@ export const usePupilForecastStore = createWithEqualityFn<
             searchFilter: body.searchFilter,
           });
           const data = res?.data || initialState.mySchoolsClasses;
-          await set(() => ({ mySchoolsClasses: data, schoolsClassesIsLoading: false }));
-          await set(() => ({
+          set(() => ({ mySchoolsClasses: data, schoolsClassesIsLoading: false }));
+          set(() => ({
             schoolsClassesIsLoading: false,
           }));
           return { data, error: res.error };
         },
         setSubjects: async (mySubjects) =>
-          await set((s) => ({
+          set((s) => ({
             mySubjects: typeof mySubjects === 'function' ? mySubjects(s.mySubjects) : mySubjects,
           })),
         getMySubjects: async (body: ForeacastQueriesDto) => {
           const fPeriod = body.periodId || get().selectedPeriod;
 
           if (fPeriod == null) {
-            await set(() => ({
+            set(() => ({
               mySubjects: initialState.mySubjects,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ subjectsIsLoading: true }));
+          set(() => ({ subjectsIsLoading: true }));
           const res = await getSubjects(
             body.schoolId,
             body.OrderBy,
@@ -538,24 +538,24 @@ export const usePupilForecastStore = createWithEqualityFn<
             body.searchFilter
           );
           const data = (res.data && res.data) || initialState.mySubjects;
-          await set(() => ({ mySubjects: data, subjectsIsLoaded: true, subjectsIsLoading: false }));
+          set(() => ({ mySubjects: data, subjectsIsLoaded: true, subjectsIsLoading: false }));
 
           return { data, error: res.error };
         },
         setAllPupils: async (allPupils) =>
-          await set((s) => ({
+          set((s) => ({
             allPupils: typeof allPupils === 'function' ? allPupils(s.allPupils) : allPupils,
           })),
         getAllPupils: async (queries: ForeacastQueriesDto) => {
           const fPeriod = queries.periodId || get().selectedPeriod;
           const dataArr: Pupil[] = [];
           if (fPeriod == null) {
-            await set(() => ({
+            set(() => ({
               allPupils: initialState.allPupils,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ pupilsIsLoading: true }));
+          set(() => ({ pupilsIsLoading: true }));
           const res = await getAllPupils(
             queries.schoolId,
             queries.OrderBy,
@@ -575,7 +575,7 @@ export const usePupilForecastStore = createWithEqualityFn<
             });
           });
 
-          await set(() => ({
+          set(() => ({
             allPupils: {
               pageNumber: data.pageNumber,
               pageSize: data.pageNumber,
@@ -589,39 +589,39 @@ export const usePupilForecastStore = createWithEqualityFn<
           return { data, error: res.error };
         },
         setMentorClass: async (mentorClass) =>
-          await set((s) => ({
+          set((s) => ({
             mentorClass: typeof mentorClass === 'function' ? mentorClass(s.mentorClass) : mentorClass,
           })),
         getMentorClass: async (groupId: string, periodId?: number | null) => {
           const fPeriod = periodId || get().selectedPeriod;
 
           if (fPeriod == null) {
-            await set(() => ({
+            set(() => ({
               mentorClass: initialState.mentorClass,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ mentorClassIsLoading: true }));
+          set(() => ({ mentorClassIsLoading: true }));
           const res = await getMentorClass(groupId, periodId);
           const data = (res.data && res.data) || initialState.mentorClass;
-          await set(() => ({ mentorClass: data, mentorClassIsLoaded: true, mentorClassIsLoading: false }));
+          set(() => ({ mentorClass: data, mentorClassIsLoaded: true, mentorClassIsLoading: false }));
 
           return { data, error: res.error };
         },
         setSingleSubject: async (subject) =>
-          await set((s) => ({
+          set((s) => ({
             subject: typeof subject === 'function' ? subject(s.subject) : subject,
           })),
         clearSingleSubject: () => set(() => ({ subject: [], singleSubjectIsLoaded: false })),
         getSubjectWithPupils: async (groupId: string, syllabusId: string, periodId?: number | null) => {
           const dataArr: Pupil[] = [];
           if (groupId == null) {
-            await set(() => ({
+            set(() => ({
               subject: initialState.subject,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ singleSubjectIsLoading: true }));
+          set(() => ({ singleSubjectIsLoading: true }));
           const res = await getSubjectWithPupils(groupId ?? get().subject[0].groupId ?? '', syllabusId, periodId);
 
           const data = (res.data && res.data) || initialState.subject;
@@ -632,25 +632,25 @@ export const usePupilForecastStore = createWithEqualityFn<
               image: img.length === 0 || !img ? null : img,
             });
           });
-          await set(() => ({ subject: dataArr, singleSubjectIsLoaded: true, singleSubjectIsLoading: false }));
+          set(() => ({ subject: dataArr, singleSubjectIsLoaded: true, singleSubjectIsLoading: false }));
 
           return { data, error: res.error };
         },
         setPupil: async (pupil) =>
-          await set((s) => ({
+          set((s) => ({
             pupil: typeof pupil === 'function' ? pupil(s.pupil) : pupil,
           })),
         getPupil: async (schoolId: string, pupilId: string, periodId?: number | null) => {
           if (pupilId == null) {
-            await set(() => ({
+            set(() => ({
               pupil: initialState.pupil,
             }));
-            await get().reset();
+            get().reset();
           }
-          await set(() => ({ singlePupilIsLoading: true }));
+          set(() => ({ singlePupilIsLoading: true }));
           const res = await getPupil(schoolId, pupilId, periodId);
           const data = (res.data && res.data) || initialState.pupil;
-          await set(() => ({ pupil: data, singlePupilIsLoaded: true, singlePupilIsLoading: false }));
+          set(() => ({ pupil: data, singlePupilIsLoaded: true, singlePupilIsLoading: false }));
 
           return { data, error: res.error };
         },

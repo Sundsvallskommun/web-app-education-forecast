@@ -3,7 +3,6 @@ import { Icon, Link, NavigationBar, PopupMenu } from '@sk-web-gui/react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
-import { shallow } from 'zustand/shallow';
 import NextLink from 'next/link';
 
 type School = { schoolId: string; schoolName: string };
@@ -27,7 +26,7 @@ export const useHeadmasterNav = (): React.ReactNode[] => {
   const router = useRouter();
   const activeURL = router.pathname;
 
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user);
   const setSelectedSchool = useUserStore((s) => s.setSelectedSchool);
 
   const headmasterSchools: School[] = useMemo(() => {
