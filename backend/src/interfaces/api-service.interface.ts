@@ -4,3 +4,5 @@ export interface ApiResponse<T> {
 }
 
 export default ApiResponse;
+
+export type EmptyResponse = ApiResponse<Record<string, never>>;
