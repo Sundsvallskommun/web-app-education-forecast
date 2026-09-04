@@ -1,10 +1,9 @@
 import { useUserStore } from '@services/user-service/user-service';
 import router from 'next/router';
-import { shallow } from 'zustand/shallow';
 
 export const Index = () => {
-  const user = useUserStore((state) => state.user, shallow);
-  const selectedSchool = useUserStore((state) => state.selectedSchool, shallow);
+  const user = useUserStore((state) => state.user);
+  const selectedSchool = useUserStore((state) => state.selectedSchool);
 
   if (selectedSchool?.schoolId) {
     router.push(`/mina-amnen-grupper/${selectedSchool.schoolId}`);

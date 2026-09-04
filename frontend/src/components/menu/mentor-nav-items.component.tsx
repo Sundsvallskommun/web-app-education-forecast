@@ -5,15 +5,14 @@ import { Icon, Link, NavigationBar, PopupMenu, useSnackbar } from '@sk-web-gui/r
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo } from 'react';
-import { shallow } from 'zustand/shallow';
 
 export const useMentorNavItems = (): React.ReactNode[] => {
   const router = useRouter();
   const activeURL = router.pathname;
 
-  const { getMySchoolsClasses, mySchoolsClasses } = usePupilForecastStore();
-  const schools = useUserStore((s) => s.user.schools, shallow);
-
+  const getMySchoolsClasses = usePupilForecastStore((s) => s.getMySchoolsClasses);
+  const mySchoolsClasses = usePupilForecastStore((s) => s.mySchoolsClasses);
+  const schools = useUserStore((s) => s.user.schools);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const toastMessage = useSnackbar();
 

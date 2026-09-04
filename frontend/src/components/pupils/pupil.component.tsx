@@ -4,12 +4,11 @@ import { usePupilForecastStore } from '@services/pupilforecast-service/pupilfore
 import { useUserStore } from '@services/user-service/user-service';
 import { hasRolePermission } from '@utils/has-role-permission';
 import { FormProvider, useForm } from 'react-hook-form';
-import { shallow } from 'zustand/shallow';
 import { SinglePupilTable } from './components/single-pupil-table.component';
 import { CornerLoader } from '@components/corner-loader/corner-loader.component';
 
 export const Pupil: React.FC = () => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user);
   const singlePupilIsLoading = usePupilForecastStore((s) => s.singlePupilIsLoading);
   const singlePupilIsLoaded = usePupilForecastStore((s) => s.singlePupilIsLoaded);
   const pupil = usePupilForecastStore((s) => s.pupil);

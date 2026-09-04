@@ -72,7 +72,6 @@ export const AllPupilsTable: React.FC = () => {
     }
 
     setAllPupilTable(tableArr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allPupils]);
 
   const [rowHeight, setRowHeight] = useState<string>('normal');
