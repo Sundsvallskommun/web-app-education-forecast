@@ -9,7 +9,7 @@ import { useUserStore } from '@services/user-service/user-service';
 import { ClearAllForecasts } from '@components/clear-all-forecasts/clear-all-forecasts.component';
 import { GeneralForecastInfo } from '@components/general-forecast-info/general-forecast-info.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useFormContext } from 'react-hook-form';
 import { ReactNode } from 'react';
 

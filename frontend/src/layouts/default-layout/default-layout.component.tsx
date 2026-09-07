@@ -3,8 +3,8 @@ import { Skeleton } from '@components/skeleton/skeleton.component';
 import { useUserStore } from '@services/user-service/user-service';
 import { Breadcrumb, Header, Logo } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
-import Head from 'next/head';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -46,14 +46,14 @@ export default function DefaultLayout({
   };
   const layoutTitle = `${process.env.NEXT_PUBLIC_APP_NAME}${headerSubtitle ? ` - ${headerSubtitle}` : ''}`;
   const fullTitle = postTitle ? `${layoutTitle} - ${postTitle}` : `${layoutTitle}`;
+  const documentTitle = title ? title : fullTitle;
+
+  useEffect(() => {
+    document.title = documentTitle;
+  }, [documentTitle]);
 
   return (
     <div className="DefaultLayout full-page-layout">
-      <Head>
-        <title>{title ? title : fullTitle}</title>
-        <meta name="description" content={`${process.env.NEXT_PUBLIC_APP_NAME}`} />
-      </Head>
-
       <Link href="#content" className="next-link-a" data-cy="systemMessage-a">
         Hoppa till innehåll
       </Link>
