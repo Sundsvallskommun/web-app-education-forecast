@@ -1,5 +1,5 @@
 import { Table } from '@sk-web-gui/react';
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { Skeleton } from '../../skeleton/skeleton.component';
 
 interface SkeletonTableColumn {
@@ -34,26 +34,26 @@ export const SkeletonTableColumns: React.FC<SkeletonTableRowsProps> = (props) =>
     rows = 10,
   } = props;
   const id = useId();
-  const getLength = (max: number, min: number) => {
-    // TODO This should be fixed.
-    // eslint-disable-next-line react-hooks/purity
-    return Math.random() * (max - min + 1) + min;
-  };
 
-  return Array.from(new Array(rows)).map((row) => (
-    <Table.Row key={`skeletonrow-${id}-${row}`}>
-      {cols?.map((col, index) => {
+  const [widths] = useState(() =>
+    Array.from({ length: rows }, () =>
+      cols.map((col) => {
         const minSize = col?.minSize ?? col?.maxSize ?? 10;
         const maxSize = col?.maxSize ?? col?.minSize ?? 25;
-        const height = col?.height ?? 2.4;
-        return (
-          <Table.Column key={`skeletonrow-${id}-${row}-${index}`}>
-            {col.element ?? (
-              <Skeleton style={{ width: `${getLength(maxSize, minSize)}rem`, height: `${height}rem` }}>-</Skeleton>
-            )}
-          </Table.Column>
-        );
-      })}
+        return Math.random() * (maxSize - minSize + 1) + minSize;
+      })
+    )
+  );
+
+  return widths.map((rowWidths, rowIndex) => (
+    <Table.Row key={`skeletonrow-${id}-${rowIndex}`}>
+      {cols.map((col, colIndex) => (
+        <Table.Column key={`skeletonrow-${id}-${rowIndex}-${colIndex}`}>
+          {col.element ?? (
+            <Skeleton style={{ width: `${rowWidths[colIndex]}rem`, height: `${col?.height ?? 2.4}rem` }}>-</Skeleton>
+          )}
+        </Table.Column>
+      ))}
     </Table.Row>
   ));
 };
