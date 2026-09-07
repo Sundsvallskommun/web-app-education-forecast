@@ -23,8 +23,7 @@
       "@layouts/*": ["src/layouts/*"],
       "@styles/*": ["src/styles/*"],
       "@utils/*": ["src/utils/*"],
-      "@pages/*": ["src/pages/*"],
-      "@middlewares/*": ["src/utils/middlewares/*"],
+      "@app/*": ["src/app/*"],
       "@public/*": ["public/*"],
       "@jestRoot/*": [".jest/*"]
     },
