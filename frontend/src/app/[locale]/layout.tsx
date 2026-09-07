@@ -39,9 +39,8 @@ export const generateMetadata = async ({ params }: LocaleLayoutProps) => {
         .map((s) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`.replace('-', ' '))
         .join(', ');
 
-  const title = path
-    ? `${process.env.NEXT_PUBLIC_APP_NAME} - ${t(`paths:${path}.title`, { defaultValue: pathName })}`
-    : process.env.NEXT_PUBLIC_APP_NAME;
+  const pageTitle = t(`paths:${path}.title`, { defaultValue: pathName });
+  const title = path ? `${process.env.NEXT_PUBLIC_APP_NAME} - ${pageTitle}` : process.env.NEXT_PUBLIC_APP_NAME;
   const description = t(`paths:${path}.description`, { defaultValue: '' });
 
   return {
