@@ -127,7 +127,8 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
               <div className="w-fit float-right">
                 {teachers?.map((t) => {
                   const secondletterInLastName = t.lastname && t?.lastname.split('').slice(1, 2);
-                  const abbreviation = `${initialsFunction(`${t?.givenname} ${t?.lastname}`)}${secondletterInLastName}`;
+                  const fullName = `${t?.givenname} ${t?.lastname}`;
+                  const abbreviation = `${initialsFunction(fullName)}${secondletterInLastName}`;
                   const lastObject = teachers[teachers.length - 1];
                   return (
                     <span key={`ansvarig-${t?.personId}`} className="mr-4">

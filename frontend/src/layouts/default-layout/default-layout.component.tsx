@@ -44,9 +44,12 @@ export default function DefaultLayout({
       return user.schools[0].schoolName;
     }
   };
-  const layoutTitle = `${process.env.NEXT_PUBLIC_APP_NAME}${headerSubtitle ? ` - ${headerSubtitle}` : ''}`;
+  const subtitle = headerSubtitle();
+  const layoutTitle = subtitle
+    ? `${process.env.NEXT_PUBLIC_APP_NAME} - ${subtitle}`
+    : `${process.env.NEXT_PUBLIC_APP_NAME}`;
   const fullTitle = postTitle ? `${layoutTitle} - ${postTitle}` : `${layoutTitle}`;
-  const documentTitle = title ? title : fullTitle;
+  const documentTitle = title || fullTitle;
 
   useEffect(() => {
     document.title = documentTitle;
@@ -61,9 +64,9 @@ export default function DefaultLayout({
       <Header
         data-cy="nav-header"
         className="flex flex-wrap"
-        title={headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME}
+        title={headerTitle || process.env.NEXT_PUBLIC_APP_NAME}
         subtitle={headerSubtitle() || ''}
-        aria-label={`${headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME} ${headerSubtitle}`}
+        aria-label={`${headerTitle || process.env.NEXT_PUBLIC_APP_NAME} ${headerSubtitle()}`}
         logo={
           <Link href={logoLinkHref}>
             <Logo title={headerTitle ?? process.env.NEXT_PUBLIC_APP_NAME} />

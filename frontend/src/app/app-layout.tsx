@@ -35,7 +35,7 @@ dayjs.updateLocale('sv', {
   monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
 });
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
   const { GR, GY } = hasRolePermission(user);

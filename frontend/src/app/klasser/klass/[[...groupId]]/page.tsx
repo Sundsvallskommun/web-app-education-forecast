@@ -80,14 +80,14 @@ export default function Page() {
       });
     });
 
-    setRiffleClasses(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
+    setRiffleClasses(riffleArray.toSorted((a, b) => a.title.localeCompare(b.title)));
   }, [classes, selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
     { link: '/klasser', title: 'Klasser', currentPage: false },
     {
       link: '',
-      title: `${mentorClass[0]?.className ? `Klass ${mentorClass[0]?.className}` : '...'}`,
+      title: mentorClass[0]?.className ? `Klass ${mentorClass[0].className}` : '...',
       currentPage: true,
     },
   ];

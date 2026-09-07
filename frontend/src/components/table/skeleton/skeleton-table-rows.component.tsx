@@ -36,11 +36,12 @@ export const SkeletonTableColumns: React.FC<SkeletonTableRowsProps> = (props) =>
   const id = useId();
 
   const [widths] = useState(() =>
-    Array.from({ length: rows }, () =>
-      cols.map((col) => {
+    Array.from({ length: rows }, (_, rowIndex) =>
+      cols.map((col, colIndex) => {
         const minSize = col?.minSize ?? col?.maxSize ?? 10;
         const maxSize = col?.maxSize ?? col?.minSize ?? 25;
-        return Math.random() * (maxSize - minSize + 1) + minSize;
+        const step = (rowIndex * 7 + colIndex * 3) % 5;
+        return minSize + ((maxSize - minSize) * step) / 4;
       })
     )
   );

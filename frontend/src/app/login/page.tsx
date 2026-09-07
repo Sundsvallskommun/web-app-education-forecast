@@ -40,19 +40,17 @@ export default function Page() {
     setTimeout(() => setMounted(true), 500); // to not flash the login-screen on autologin
     if (isLoggedOut) {
       router.replace('/login');
-    } else {
-      if (!failMessage && autoLogin) {
-        // autologin
-        onLogin();
-      } else if (failMessage === 'SAML_MISSING_GROUP') {
-        setErrorMessage('Användaren saknar rätt grupper');
-      } else if (failMessage === 'SAML_MISSING_ATTRIBUTES') {
-        setErrorMessage('Användaren saknar rätt attribut');
-      } else if (failMessage === 'SAML_MISSING_PERMISSIONS') {
-        setErrorMessage('Användaren saknar rättigheter');
-      } else if (failMessage) {
-        setErrorMessage(failMessage);
-      }
+    } else if (!failMessage && autoLogin) {
+      // autologin
+      onLogin();
+    } else if (failMessage === 'SAML_MISSING_GROUP') {
+      setErrorMessage('Användaren saknar rätt grupper');
+    } else if (failMessage === 'SAML_MISSING_ATTRIBUTES') {
+      setErrorMessage('Användaren saknar rätt attribut');
+    } else if (failMessage === 'SAML_MISSING_PERMISSIONS') {
+      setErrorMessage('Användaren saknar rättigheter');
+    } else if (failMessage) {
+      setErrorMessage(failMessage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

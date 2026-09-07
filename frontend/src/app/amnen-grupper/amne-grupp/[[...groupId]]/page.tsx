@@ -96,7 +96,7 @@ export default function Page() {
       });
     });
 
-    setRiffleSubjects(riffleArray.sort((a, b) => a.title.localeCompare(b.title)));
+    setRiffleSubjects(riffleArray.toSorted((a, b) => a.title.localeCompare(b.title)));
   }, [allSubjects]);
 
   return (
