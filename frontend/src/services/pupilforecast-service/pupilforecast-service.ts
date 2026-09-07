@@ -688,8 +688,8 @@ export const usePupilForecastStore = create<
           const subject = get().subject;
           if (!res.error) {
             await get().getSubjectWithPupils(
-              subject[0].groupId ? subject[0].groupId : '',
-              subject[0].syllabusId ? subject[0].syllabusId : '',
+              subject[0].groupId || '',
+              subject[0].syllabusId || '',
               get().selectedPeriod.periodId
             );
             await get().getMySubjects({

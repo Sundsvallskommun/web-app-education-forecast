@@ -51,7 +51,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher, headmaster } = hasRolePermission(user);
   const singlePupilIsLoaded = usePupilForecastStore((s) => s.singlePupilIsLoaded);
-  const placeHolder = searchPlaceholder ? searchPlaceholder : 'Sök i listan...';
+  const placeHolder = searchPlaceholder || 'Sök i listan...';
 
   const { watch: watchSearch, setValue } = useFormContext<SearchTableForm>();
 

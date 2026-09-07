@@ -34,7 +34,7 @@ export default function Page() {
   const [riffleSubjects, setRiffleSubjects] = useState<Riffle[]>([]);
 
   const selectedSchool = useUserStore((s) => s.selectedSchool);
-  const [syllabus] = useState<string>(syllabusId ? syllabusId : '');
+  const [syllabus] = useState<string>(syllabusId || '');
   const [subjectId] = useState(subId);
 
   const [selectedId, setSelectedId] = useState<string>();
