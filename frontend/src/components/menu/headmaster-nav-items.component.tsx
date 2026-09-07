@@ -1,7 +1,7 @@
 import { useUserStore } from '@services/user-service/user-service';
 import { Icon, Link, NavigationBar, PopupMenu } from '@sk-web-gui/react';
 import { ChevronDown } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import NextLink from 'next/link';
 
@@ -24,7 +24,7 @@ const headMasterlinks = [
 
 export const useHeadmasterNav = (): React.ReactNode[] => {
   const router = useRouter();
-  const activeURL = router.pathname;
+  const activeURL = usePathname();
 
   const user = useUserStore((s) => s.user);
   const setSelectedSchool = useUserStore((s) => s.setSelectedSchool);

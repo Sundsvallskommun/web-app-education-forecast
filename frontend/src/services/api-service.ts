@@ -1,5 +1,4 @@
 import axios, { AxiosError } from 'axios';
-import Router from 'next/router';
 import { apiURL } from '@utils/api-url';
 
 export interface ApiResponse<T> {
@@ -7,18 +6,21 @@ export interface ApiResponse<T> {
   message: string;
 }
 
+type Navigator = (href: string) => void;
+
+let navigate: Navigator | undefined;
+
+export const registerNavigator = (fn: Navigator) => {
+  navigate = fn;
+};
+
 export const handleError = (error: AxiosError) => {
-  if (error?.response?.status === 401 && !Router.pathname.includes('login')) {
-    Router.push(
-      {
-        pathname: `/login?path=${window.location.pathname}`,
-        query: {
-          path: window.location.pathname,
-          failMessage: error.message,
-        },
-      },
-      `/login?path=${window.location.pathname}`
-    );
+  if (error?.response?.status === 401 && typeof window !== 'undefined' && !window.location.pathname.includes('login')) {
+    const query = new URLSearchParams({
+      path: window.location.pathname,
+      failMessage: error.message,
+    });
+    navigate?.(`/login?${query.toString()}`);
   }
 
   throw error;

@@ -3,8 +3,8 @@ import { Skeleton } from '@components/skeleton/skeleton.component';
 import { useUserStore } from '@services/user-service/user-service';
 import { Breadcrumb, Header, Logo } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
-import Head from 'next/head';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -44,16 +44,19 @@ export default function DefaultLayout({
       return user.schools[0].schoolName;
     }
   };
-  const layoutTitle = `${process.env.NEXT_PUBLIC_APP_NAME}${headerSubtitle ? ` - ${headerSubtitle}` : ''}`;
+  const subtitle = headerSubtitle();
+  const layoutTitle = subtitle
+    ? `${process.env.NEXT_PUBLIC_APP_NAME} - ${subtitle}`
+    : `${process.env.NEXT_PUBLIC_APP_NAME}`;
   const fullTitle = postTitle ? `${layoutTitle} - ${postTitle}` : `${layoutTitle}`;
+  const documentTitle = title || fullTitle;
+
+  useEffect(() => {
+    document.title = documentTitle;
+  }, [documentTitle]);
 
   return (
     <div className="DefaultLayout full-page-layout">
-      <Head>
-        <title>{title ? title : fullTitle}</title>
-        <meta name="description" content={`${process.env.NEXT_PUBLIC_APP_NAME}`} />
-      </Head>
-
       <Link href="#content" className="next-link-a" data-cy="systemMessage-a">
         Hoppa till innehåll
       </Link>
@@ -61,9 +64,9 @@ export default function DefaultLayout({
       <Header
         data-cy="nav-header"
         className="flex flex-wrap"
-        title={headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME}
+        title={headerTitle || process.env.NEXT_PUBLIC_APP_NAME}
         subtitle={headerSubtitle() || ''}
-        aria-label={`${headerTitle ? headerTitle : process.env.NEXT_PUBLIC_APP_NAME} ${headerSubtitle}`}
+        aria-label={`${headerTitle || process.env.NEXT_PUBLIC_APP_NAME} ${headerSubtitle()}`}
         logo={
           <Link href={logoLinkHref}>
             <Logo title={headerTitle ?? process.env.NEXT_PUBLIC_APP_NAME} />
@@ -81,9 +84,9 @@ export default function DefaultLayout({
             <Breadcrumb className="container">
               {breadcrumbLinks.map((crumb) => {
                 return (
-                  <Breadcrumb.Item currentPage={crumb.currentPage} key={`link-${crumb.link}`}>
+                  <Breadcrumb.Item currentPage={crumb.currentPage} key={`crumb-${crumb.link}-${crumb.title}`}>
                     {crumb.currentPage ? (
-                      <Breadcrumb.Link href={crumb.link}>{crumb.title}</Breadcrumb.Link>
+                      <Breadcrumb.Link>{crumb.title}</Breadcrumb.Link>
                     ) : (
                       <Link href={crumb.link}>{crumb.title}</Link>
                     )}

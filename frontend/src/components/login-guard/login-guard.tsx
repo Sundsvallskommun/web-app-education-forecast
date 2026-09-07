@@ -1,12 +1,17 @@
+'use client';
+
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
+import { useAppContext } from '@contexts/app.context';
 import { useUserStore } from '@services/user-service/user-service';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import { hasRolePermission } from '@utils/has-role-permission';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export const LoginGuard: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const user = useUserStore((s) => s.user);
   const getMe = useUserStore((s) => s.getMe);
+  const resetUser = useUserStore((s) => s.reset);
+  const { setDefaults } = useAppContext();
   const {
     canViewAllSubjectsGroups,
     canViewMySubjectsGroups,
@@ -16,28 +21,39 @@ export const LoginGuard: React.FC<{ children?: React.ReactNode }> = ({ children 
   } = hasRolePermission(user);
 
   const router = useRouter();
+  const pathname = usePathname() ?? '';
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    getMe();
+    getMe().then((res) => {
+      if (res.error && res.error !== 401 && !window.location.pathname.includes('/login')) {
+        setDefaults();
+        resetUser();
+        localStorage.clear();
+        const failMessage = res.message || String(res.error);
+        router.push(`/login?failMessage=${encodeURIComponent(failMessage)}`);
+      }
+    });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!mounted || (!user.name && !router.pathname.includes('/login'))) {
-    return <LoaderFullScreen />;
-  }
-
   // Routes by permissions
-  if (
-    (router.pathname == '/mina-amnen-grupper' && !canViewMySubjectsGroups) ||
-    (router.pathname == '/amnen-grupper' && !canViewAllSubjectsGroups) ||
-    (router.pathname == '/min-mentorsklass' && !canViewMyMentorClass) ||
-    (router.pathname == '/klasser' && !canViewAllClasses) ||
-    (router.pathname == '/elever' && !canViewAllPupils)
-  ) {
-    router.push('/');
+  const isForbidden =
+    (pathname === '/mina-amnen-grupper' && !canViewMySubjectsGroups) ||
+    (pathname === '/amnen-grupper' && !canViewAllSubjectsGroups) ||
+    (pathname === '/min-mentorsklass' && !canViewMyMentorClass) ||
+    (pathname === '/klasser' && !canViewAllClasses) ||
+    (pathname === '/elever' && !canViewAllPupils);
+
+  useEffect(() => {
+    if (mounted && isForbidden) {
+      router.push('/');
+    }
+  }, [mounted, isForbidden, router]);
+
+  if (!mounted || (!user.name && !pathname.includes('/login')) || isForbidden) {
     return <LoaderFullScreen />;
   }
 

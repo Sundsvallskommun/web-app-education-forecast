@@ -23,12 +23,23 @@
       "@layouts/*": ["src/layouts/*"],
       "@styles/*": ["src/styles/*"],
       "@utils/*": ["src/utils/*"],
-      "@pages/*": ["src/pages/*"],
-      "@middlewares/*": ["src/utils/middlewares/*"],
+      "@app/*": ["src/app/*"],
       "@public/*": ["public/*"],
       "@jestRoot/*": [".jest/*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "node_modules/dayjs/plugin/utc.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "node_modules/dayjs/plugin/utc.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

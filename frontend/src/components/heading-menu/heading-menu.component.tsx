@@ -9,7 +9,7 @@ import { useUserStore } from '@services/user-service/user-service';
 import { ClearAllForecasts } from '@components/clear-all-forecasts/clear-all-forecasts.component';
 import { GeneralForecastInfo } from '@components/general-forecast-info/general-forecast-info.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useFormContext } from 'react-hook-form';
 import { ReactNode } from 'react';
 
@@ -51,7 +51,7 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   const { SUBJECT, PUPIL } = callbackType(callback);
   const { teacher, headmaster } = hasRolePermission(user);
   const singlePupilIsLoaded = usePupilForecastStore((s) => s.singlePupilIsLoaded);
-  const placeHolder = searchPlaceholder ? searchPlaceholder : 'Sök i listan...';
+  const placeHolder = searchPlaceholder || 'Sök i listan...';
 
   const { watch: watchSearch, setValue } = useFormContext<SearchTableForm>();
 
@@ -127,7 +127,8 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
               <div className="w-fit float-right">
                 {teachers?.map((t) => {
                   const secondletterInLastName = t.lastname && t?.lastname.split('').slice(1, 2);
-                  const abbreviation = `${initialsFunction(`${t?.givenname} ${t?.lastname}`)}${secondletterInLastName}`;
+                  const fullName = `${t?.givenname} ${t?.lastname}`;
+                  const abbreviation = `${initialsFunction(fullName)}${secondletterInLastName}`;
                   const lastObject = teachers[teachers.length - 1];
                   return (
                     <span key={`ansvarig-${t?.personId}`} className="mr-4">
