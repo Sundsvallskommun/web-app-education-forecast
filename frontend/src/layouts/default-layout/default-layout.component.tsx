@@ -81,9 +81,9 @@ export default function DefaultLayout({
             <Breadcrumb className="container">
               {breadcrumbLinks.map((crumb) => {
                 return (
-                  <Breadcrumb.Item currentPage={crumb.currentPage} key={`link-${crumb.link}`}>
+                  <Breadcrumb.Item currentPage={crumb.currentPage} key={`crumb-${crumb.link}-${crumb.title}`}>
                     {crumb.currentPage ? (
-                      <Breadcrumb.Link href={crumb.link}>{crumb.title}</Breadcrumb.Link>
+                      <Breadcrumb.Link>{crumb.title}</Breadcrumb.Link>
                     ) : (
                       <Link href={crumb.link}>{crumb.title}</Link>
                     )}
