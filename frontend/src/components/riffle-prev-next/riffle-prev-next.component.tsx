@@ -1,6 +1,6 @@
 import { Button, cx, Icon } from '@sk-web-gui/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 interface RiffleProps {
   callback: 'classes' | 'pupils' | 'subjects' | 'mentorclass' | 'pupil' | 'subject';

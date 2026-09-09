@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import { useEffect } from 'react';
 
 interface EmptyLayout {
   title: string;
@@ -7,12 +7,13 @@ interface EmptyLayout {
 
 export default function EmptyLayout(props: EmptyLayout) {
   const { title, children } = props;
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+
   return (
     <div className="EmptyLayout">
-      <Head>
-        <title>{title}</title>
-      </Head>
-
       <div className="min-h-screen">{children}</div>
     </div>
   );

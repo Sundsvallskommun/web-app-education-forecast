@@ -6,7 +6,7 @@ import { usePupilForecastStore } from '@services/pupilforecast-service/pupilfore
 import { useUserStore } from '@services/user-service/user-service';
 import { Avatar, Badge, Link, SortMode, Table } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ClassesTableForm, IClassesTable } from '../classes.component';

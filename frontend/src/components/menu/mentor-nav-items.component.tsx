@@ -3,12 +3,12 @@ import { usePupilForecastStore } from '@services/pupilforecast-service/pupilfore
 import { useUserStore } from '@services/user-service/user-service';
 import { Icon, Link, NavigationBar, PopupMenu, useSnackbar } from '@sk-web-gui/react';
 import { ChevronDown } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
 export const useMentorNavItems = (): React.ReactNode[] => {
   const router = useRouter();
-  const activeURL = router.pathname;
+  const activeURL = usePathname();
 
   const getMySchoolsClasses = usePupilForecastStore((s) => s.getMySchoolsClasses);
   const mySchoolsClasses = usePupilForecastStore((s) => s.mySchoolsClasses);

@@ -5,7 +5,7 @@ import { ForecastMyGroupTeacher } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { Avatar, Badge, Link, SortMode, Table } from '@sk-web-gui/react';
 import { initialsFunction } from '@utils/initials';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { IAllPupilsTable, PupilsTableForm } from '../all-pupils.component';

@@ -10,7 +10,7 @@ import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 export interface TablePupil extends Pupil {
   id?: string | null;
   pupil?: string | null;
