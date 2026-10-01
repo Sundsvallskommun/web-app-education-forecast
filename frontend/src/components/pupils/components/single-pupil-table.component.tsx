@@ -10,8 +10,7 @@ import { ForecastMyGroupTeacher, Pupil } from '@interfaces/forecast/forecast';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/router';
-import { shallow } from 'zustand/shallow';
+import { useRouter } from 'next/navigation';
 export interface TablePupil extends Pupil {
   id?: string | null;
   pupil?: string | null;
@@ -52,7 +51,7 @@ export const SinglePupilTable: React.FC<ISinglePupilTable> = ({ user, searchQuer
 
   const pupil = usePupilForecastStore((s) => s.pupil);
   const [pupilTable, setPupilTable] = useState<TablePupil[]>([]);
-  const selectedSchool = useUserStore((state) => state.selectedSchool, shallow);
+  const selectedSchool = useUserStore((state) => state.selectedSchool);
 
   useEffect(() => {
     const pupilArr: TablePupil[] = [];

@@ -2,10 +2,9 @@ import { useUserStore } from '@services/user-service/user-service';
 import { Icon, PopupMenu } from '@sk-web-gui/react';
 import { UserIcon, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { shallow } from 'zustand/shallow';
 
 export const UserMenu: React.FC = () => {
-  const user = useUserStore((state) => state.user, shallow);
+  const user = useUserStore((state) => state.user);
   return (
     <PopupMenu>
       <PopupMenu.Button leftIcon={<Icon icon={<UserIcon />} />}>

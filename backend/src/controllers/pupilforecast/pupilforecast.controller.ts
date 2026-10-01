@@ -4,7 +4,7 @@ import ApiService from '@/services/api.service';
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, QueryParam, Req, UseBefore } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { RequestWithUser } from '@/interfaces/auth.interface';
-import ApiResponse from '@/interfaces/api-service.interface';
+import ApiResponse, { EmptyResponse } from '@/interfaces/api-service.interface';
 import {
   PupilsApiResponse,
   PupilApiResponse,
@@ -170,7 +170,7 @@ export class PupilForecastController {
   @Post(`${API_PREFIX}/setforecast`)
   @OpenAPI({ summary: 'Set forecast grade on a pupil' })
   @UseBefore(authMiddleware, validationMiddleware(setForecastDto, 'body'))
-  async setForecast(@Req() req: RequestWithUser, @Body() body: setForecastDto): Promise<ApiResponse<{}>> {
+  async setForecast(@Req() req: RequestWithUser, @Body() body: setForecastDto): Promise<EmptyResponse> {
     const { personId } = req.user;
     const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast`;
     return await this.apiService.post({ url, data: { ...body, teacherId: personId } });
@@ -182,7 +182,7 @@ export class PupilForecastController {
   async copyPreviousForecast(
     @Req() req: RequestWithUser,
     @Body() body: copyPreviousForecastDto,
-  ): Promise<ApiResponse<{}>> {
+  ): Promise<EmptyResponse> {
     const { personId } = req.user;
     const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/copy`;
     return await this.apiService.post({ url, data: { ...body, teacherId: personId } });
@@ -196,7 +196,7 @@ export class PupilForecastController {
     @Req() req: RequestWithUser,
     @Param('groupId') groupId: string,
     @Param('syllabusId') syllabusId: string,
-  ): Promise<ApiResponse<{}>> {
+  ): Promise<ApiResponse<unknown>> {
     const { personId } = req.user;
     const url = `${this.api.name}/${this.api.version}/${MUNICIPALITY_ID}/forecast/${groupId}/${syllabusId}`;
     return await this.apiService.delete({

@@ -3,10 +3,7 @@
 /node_modules
 
 # code formatter
-.eslintrc
-.eslintignore
 .editorconfig
-.huskyrc
 .lintstagedrc.json
 .prettierrc
 

@@ -3,7 +3,7 @@ import { ForeacastQueriesDto, ForecastMyGroupTeacher } from '@interfaces/forecas
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { useSnackbar } from '@sk-web-gui/react';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SubjectsTable } from './components/subjects-table/subjects-table.components';
 import { CornerLoader } from '@components/corner-loader/corner-loader.component';
@@ -36,7 +36,8 @@ export interface ISubjectsTable {
 }
 
 export const SubjectsGroups: React.FC<SubjectsGroupsProps> = ({ pageTitle, subjectsQueries }) => {
-  const { mySubjects, getMySubjects } = usePupilForecastStore();
+  const mySubjects = usePupilForecastStore((s) => s.mySubjects);
+  const getMySubjects = usePupilForecastStore((s) => s.getMySubjects);
   const subjectsIsLoaded = usePupilForecastStore((s) => s.subjectsIsLoaded);
   const subjectsIsLoading = usePupilForecastStore((s) => s.subjectsIsLoading);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);

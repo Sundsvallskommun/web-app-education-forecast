@@ -1,4 +1,3 @@
-import { shallow } from 'zustand/shallow';
 import { useUserStore } from '@services/user-service/user-service';
 import { HeadingMenu, SearchTableForm } from '@components/heading-menu/heading-menu.component';
 import { Dispatch, SetStateAction, useEffect } from 'react';
@@ -16,7 +15,7 @@ interface SubjectWithPupilsProps {
 }
 
 export const SubjectWithPupils: React.FC<SubjectWithPupilsProps> = ({ setPageTitle, pageTitle, selectedSyllabus }) => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user);
   const { teacher } = hasRolePermission(user);
   const singleSubjectIsLoading = usePupilForecastStore((s) => s.singleSubjectIsLoading);
   const singleSubjectIsLoaded = usePupilForecastStore((s) => s.singleSubjectIsLoaded);

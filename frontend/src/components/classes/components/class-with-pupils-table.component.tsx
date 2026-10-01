@@ -80,10 +80,7 @@ export const MentorClassTable: React.FC<IMentorClassTable> = ({ user, searchQuer
     }
 
     setSubjectHeaders(subjectArr);
-
     setMentorClassData(tableArr);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mentorClass]);
 
   const handleSort = (column: string) => {

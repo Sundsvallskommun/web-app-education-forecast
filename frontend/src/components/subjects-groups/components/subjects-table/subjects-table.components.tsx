@@ -33,7 +33,7 @@ export interface ISubjects {
 export const SubjectsTable: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const { mentor, teacher } = hasRolePermission(user);
-  const { mySubjects } = usePupilForecastStore();
+  const mySubjects = usePupilForecastStore((s) => s.mySubjects);
   const [subjectsTable, setSubjectsTable] = useState<ISubjects[]>([]);
   const { watch, setValue } = useFormContext<SubjectsTableForm>();
   const sortOrder = watch('sortOrder');
@@ -64,7 +64,6 @@ export const SubjectsTable: React.FC = () => {
     }
 
     setSubjectsTable(tableArr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mySubjects]);
 
   const [rowHeight, setRowHeight] = useState<'normal' | 'dense'>('normal');
