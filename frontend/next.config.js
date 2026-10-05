@@ -24,8 +24,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 module.exports = withBundleAnalyzer({
   output: 'standalone',
   images: {
+    // Upgrade Next to 16.3.3 before re-enabling.
+    unoptimized: true,
     remotePatterns: [{ hostname: process.env.DOMAIN_NAME }],
-    formats: ['image/avif', 'image/webp'],
   },
   basePath: process.env.BASE_PATH,
   sassOptions: {
