@@ -1,7 +1,6 @@
 import { useUserStore } from '@services/user-service/user-service';
 import { Avatar, Table } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { shallow } from 'zustand/shallow';
 import { ISubjects } from '../subjects-table.components';
 import { SubjectsTableBadgeColumn } from './subjects-table-badgecolumn.component';
 import { SubjectsTableTeacherColumns } from './subjects-table-teachercolumn.component';
@@ -21,7 +20,7 @@ export interface SubjectsTableGroupProps {
 export const SubjectsTableRows: React.FC<SubjectsTableRowsProps> = ({ subjects }) => {
   const user = useUserStore((state) => state.user);
   const { headmaster, mentor, teacher } = hasRolePermission(user);
-  const selectedSchool = useUserStore((state) => state.selectedSchool, shallow);
+  const selectedSchool = useUserStore((state) => state.selectedSchool);
   const loaded = usePupilForecastStore((s) => s.subjectsIsLoaded);
   const getLink = (group: ISubjects) => {
     if (headmaster) {

@@ -36,7 +36,8 @@ export interface ClassesTableForm {
 }
 
 export const Classes: React.FC<ClassesProps> = ({ pageTitle, classQueries }) => {
-  const { myClasses, getMyClasses } = usePupilForecastStore();
+  const myClasses = usePupilForecastStore((s) => s.myClasses);
+  const getMyClasses = usePupilForecastStore((s) => s.getMyClasses);
   const classesIsLoading = usePupilForecastStore((s) => s.classesIsLoading);
   const classesIsLoaded = usePupilForecastStore((s) => s.classesIsLoaded);
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);

@@ -23,18 +23,17 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 module.exports = withBundleAnalyzer({
   output: 'standalone',
-  i18n: {
-    locales: ['sv'],
-    defaultLocale: 'sv',
-  },
   images: {
-    domains: [process.env.DOMAIN_NAME],
-    formats: ['image/avif', 'image/webp'],
+    // Upgrade Next to 16.3.3 before re-enabling.
+    unoptimized: true,
+    remotePatterns: [{ hostname: process.env.DOMAIN_NAME }],
   },
   basePath: process.env.BASE_PATH,
   sassOptions: {
     prependData: `$basePath: '${process.env.BASE_PATH}';`,
   },
+  turbopack: { root: __dirname },
+
   async rewrites() {
     return [{ source: '/napi/:path*', destination: '/api/:path*' }];
   },

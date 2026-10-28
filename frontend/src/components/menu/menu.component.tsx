@@ -1,6 +1,5 @@
 import React from 'react';
 import { NavigationBar } from '@sk-web-gui/react';
-import { shallow } from 'zustand/shallow';
 
 import { UserMenu } from '@components/user-menu/user-menu.component';
 import { useUserStore } from '@services/user-service/user-service';
@@ -11,7 +10,7 @@ import { useMentorNavItems } from './mentor-nav-items.component';
 import { useTeacherNavItems } from './teacher-nav-items.component';
 
 export const Menu = (): React.ReactElement => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user);
   const { headmaster, mentor, teacher } = hasRolePermission(user);
   const headmasterNavItems = useHeadmasterNav();
   const teacherNavItems = useTeacherNavItems();

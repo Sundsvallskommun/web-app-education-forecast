@@ -1,0 +1,26 @@
+{
+  "/login": {
+    "title": "Logga in",
+    "description": "Inloggning till Resultatprognoser"
+  },
+  "/logout": {
+    "title": "Logga ut",
+    "description": ""
+  },
+  "/klasser": {
+    "title": "Klasser",
+    "description": "Alla klasser på skolan"
+  },
+  "/elever": {
+    "title": "Elever",
+    "description": "Alla elever på skolan"
+  },
+  "/amnen-grupper": {
+    "title": "Ämnen/grupper",
+    "description": "Alla ämnen och grupper på skolan"
+  },
+  "/mina-amnen-grupper": {
+    "title": "Mina ämnen/grupper",
+    "description": "Dina ämnen och grupper"
+  }
+}

@@ -6,7 +6,7 @@ import { usePupilForecastStore } from '@services/pupilforecast-service/pupilfore
 import { useUserStore } from '@services/user-service/user-service';
 import { Avatar, Badge, Link, SortMode, Table } from '@sk-web-gui/react';
 import { hasRolePermission } from '@utils/has-role-permission';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ClassesTableForm, IClassesTable } from '../classes.component';
@@ -34,7 +34,7 @@ export const ClassesTable: React.FC = () => {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
   const { mentor, teacher } = hasRolePermission(user);
-  const { myClasses } = usePupilForecastStore();
+  const myClasses = usePupilForecastStore((s) => s.myClasses);
   const [classTable, setClassTable] = useState<IClasses[]>([]);
   const [loaded, setLoaded] = useState<boolean>(false);
   const { watch, setValue } = useFormContext<ClassesTableForm>();
@@ -67,7 +67,6 @@ export const ClassesTable: React.FC = () => {
 
     setClassTable(tableArr);
     setLoaded(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myClasses]);
 
   const [rowHeight, setRowHeight] = useState<string>('normal');

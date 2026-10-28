@@ -4,12 +4,11 @@ import Main from '@layouts/main/main.component';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { useUserStore } from '@services/user-service/user-service';
 import { FormProvider, useForm } from 'react-hook-form';
-import { shallow } from 'zustand/shallow';
 import { MentorClassTable } from './components/class-with-pupils-table.component';
 import { CornerLoader } from '@components/corner-loader/corner-loader.component';
 
 export const ClassWithPupils: React.FC = () => {
-  const user = useUserStore((s) => s.user, shallow);
+  const user = useUserStore((s) => s.user);
   const mentorClassIsLoaded = usePupilForecastStore((s) => s.mentorClassIsLoaded);
   const mentorClassIsLoading = usePupilForecastStore((s) => s.mentorClassIsLoading);
   const mentorClass = usePupilForecastStore((s) => s.mentorClass);

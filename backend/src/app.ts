@@ -44,19 +44,18 @@ import { routingControllersToSpec } from 'routing-controllers-openapi';
 import createFileStore from 'session-file-store';
 import swaggerUi from 'swagger-ui-express';
 import { APIS } from './config/api-config';
-import { HttpException } from './exceptions/HttpException';
-import { Profile } from './interfaces/profile.interface';
+import { HttpException } from '@exceptions/HttpException';
+import { Profile } from '@interfaces/profile.interface';
 import ApiService from './services/api.service';
-import { additionalConverters } from './utils/custom-validation-classes';
-import { isValidOrigin } from './utils/isValidOrigin';
-import { isValidUrl } from './utils/util';
+import { additionalConverters } from '@utils/custom-validation-classes';
+import { isValidOrigin } from '@utils/isValidOrigin';
+import { isValidUrl } from '@utils/util';
 import rateLimit from 'express-rate-limit';
-import { getRelayState } from './utils/getRelayState';
-import { getRedirects } from './utils/getRedirects';
-import { School } from './interfaces/forecast.interface';
+import { getRelayState } from '@utils/getRelayState';
+import { getRedirects } from '@utils/getRedirects';
+import { School } from '@interfaces/forecast.interface';
 
 const corsWhitelist = ORIGIN?.split(',');
-const defaultRedirect = SAML_SUCCESS_REDIRECT ?? '/';
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
 // NOTE: memory uses ms while file uses seconds
@@ -116,7 +115,7 @@ const samlStrategy = new Strategy(
     try {
       let personId = '';
       let schools: School[] = [];
-      const roles: {}[] = [];
+      const roles: Record<string, unknown>[] = [];
       const employeeApi = APIS.find(api => api.name === 'employee');
 
       const employeeDetails = await apiService.get<any>({
@@ -133,17 +132,17 @@ const samlStrategy = new Strategy(
 
       if (userRole.data) {
         userRole.data.forEach(user => {
-          user &&
+          if (user) {
             schools.push({
               schoolId: user.schoolId,
               schoolName: user.schoolName,
             });
 
-          user &&
             roles.push({
               role: user.role,
               typeOfSchool: user.typeOfSchool,
             });
+          }
         });
       } else {
         return done({
@@ -197,7 +196,7 @@ class App {
   public port: string | number;
   public swaggerEnabled: boolean;
 
-  constructor(Controllers: Function[]) {
+  constructor(Controllers: NewableFunction[]) {
     this.app = express();
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
@@ -369,7 +368,7 @@ class App {
     );
   }
 
-  private initializeRoutes(controllers: Function[]) {
+  private initializeRoutes(controllers: NewableFunction[]) {
     useExpressServer(this.app, {
       routePrefix: BASE_URL_PREFIX,
       cors: {
@@ -382,7 +381,7 @@ class App {
     });
   }
 
-  private initializeSwagger(controllers: Function[]) {
+  private initializeSwagger(controllers: NewableFunction[]) {
     const schemas = validationMetadatasToSchemas({
       classTransformerMetadataStorage: defaultMetadataStorage,
       refPointerPrefix: '#/components/schemas/',

@@ -1,9 +1,10 @@
 import { callbackType } from '@utils/callback-type';
 import { cx, Label } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePupilForecastStore } from '@services/pupilforecast-service/pupilforecast-service';
 import { Skeleton } from '@components/skeleton/skeleton.component';
+import { useShallow } from 'zustand/react/shallow';
 interface GeneralForecastInfoProps {
   callback: 'classes' | 'mentorclass' | 'subjects' | 'subject' | 'pupils' | 'pupil';
 }
@@ -24,7 +25,22 @@ export const GeneralForecastInfo: React.FC<GeneralForecastInfoProps> = ({ callba
     pupilsIsLoading,
     singleSubjectIsLoading,
     singlePupilIsLoading,
-  } = usePupilForecastStore();
+  } = usePupilForecastStore(
+    useShallow((s) => ({
+      mySubjects: s.mySubjects,
+      myClasses: s.myClasses,
+      subject: s.subject,
+      pupil: s.pupil,
+      allPupils: s.allPupils,
+      mentorClass: s.mentorClass,
+      subjectsIsLoading: s.subjectsIsLoading,
+      classesIsLoading: s.classesIsLoading,
+      mentorClassIsLoading: s.mentorClassIsLoading,
+      pupilsIsLoading: s.pupilsIsLoading,
+      singleSubjectIsLoading: s.singleSubjectIsLoading,
+      singlePupilIsLoading: s.singlePupilIsLoading,
+    }))
+  );
   const selectedPeriod = usePupilForecastStore((s) => s.selectedPeriod);
   const allPeriods = usePupilForecastStore((s) => s.allPeriods);
   const [summerPeriod, setSummerPeriod] = useState<boolean>(false);

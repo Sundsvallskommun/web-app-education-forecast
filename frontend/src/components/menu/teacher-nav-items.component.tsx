@@ -1,12 +1,11 @@
 import { Icon, NavigationBar, PopupMenu } from '@sk-web-gui/react';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 import { useUserStore } from '@services/user-service/user-service';
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 
 export const useTeacherNavItems = (): React.ReactNode[] => {
-  const router = useRouter();
-  const activeURL = router.pathname;
+  const activeURL = usePathname();
   const selectedSchool = useUserStore((state) => state.selectedSchool);
   const user = useUserStore((state) => state.user);
   const teacherLinks = [
