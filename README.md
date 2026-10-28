@@ -1,4 +1,4 @@
-# Projektnamn
+# Resultatprognoser
 
 ## APIer som används
 
