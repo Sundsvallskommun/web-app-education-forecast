@@ -1,21 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { apiService } from '@services/api-service';
+import axios from 'axios';
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+
+import { createHealthConfig, isHealthRequestAuthorized } from '@utils/health-config';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
-  const requireAuth = process.env.HEALTH_AUTH === 'true';
-  const expected = Buffer.from(`${process.env.HEALTH_USERNAME}:${process.env.HEALTH_PASSWORD}`).toString('base64');
+export const GET = async () => {
+  let healthConfig: ReturnType<typeof createHealthConfig>;
 
-  if (requireAuth && req.headers.get('authorization') !== `Basic ${expected}`) {
-    return new NextResponse('Not Authorized', { status: 401 });
+  try {
+    healthConfig = createHealthConfig(process.env);
+  } catch {
+    return NextResponse.json({ status: 'MISCONFIGURED' }, { status: 500 });
+  }
+
+  const headersList = await headers();
+
+  if (!isHealthRequestAuthorized(headersList.get('authorization'), healthConfig)) {
+    return new NextResponse('NOT_AUTHORIZED', { status: 401 });
   }
 
   try {
-    const health = await apiService.get('health/up').then((res) => res.data);
-    return NextResponse.json(health);
-  } catch (error) {
-    console.log('health error', error);
-    return NextResponse.json({ status: 'ERROR!' }, { status: 500 });
+    // TLS certificates are validated by default. For a self-signed backend in local dev,
+    // start Node with NODE_TLS_REJECT_UNAUTHORIZED=0 rather than disabling it in code.
+    const health = await axios
+      .get<unknown>(healthConfig.backendHealthUrl, { timeout: healthConfig.requestTimeoutMs })
+      .then((response) => response.data);
+
+    return NextResponse.json(health, { status: 200 });
+  } catch {
+    return NextResponse.json({ status: 'UNAVAILABLE' }, { status: 503 });
   }
-}
+};
