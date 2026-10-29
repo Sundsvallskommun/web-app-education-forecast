@@ -54,6 +54,7 @@ import rateLimit from 'express-rate-limit';
 import { getRelayState } from '@utils/getRelayState';
 import { getRedirects } from '@utils/getRedirects';
 import { School } from '@interfaces/forecast.interface';
+import { livenessHandler } from '@/routes/liveness.route';
 
 const corsWhitelist = ORIGIN?.split(',');
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
@@ -204,6 +205,7 @@ class App {
 
     this.initializeDataFolders();
 
+    this.initializeLivenessRoute();
     this.initializeMiddlewares();
     this.initializeRoutes(Controllers);
     if (this.swaggerEnabled) {
@@ -223,6 +225,10 @@ class App {
 
   public getServer() {
     return this.app;
+  }
+
+  private initializeLivenessRoute() {
+    this.app.get('/health', livenessHandler);
   }
 
   private initializeMiddlewares() {
