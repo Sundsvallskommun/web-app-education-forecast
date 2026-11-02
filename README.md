@@ -59,3 +59,36 @@ eventuellt redigera `.env.development.local` för behov. URLer, nycklar och cert
 - `SAML_ENTRY_SSO` behöver pekas till en SAML IDP
 - `SAML_IDP_PUBLIC_CERT` ska stämma överens med IDPens cert
 - `SAML_PRIVATE_KEY` och `SAML_PUBLIC_KEY` behöver bara fyllas i korrekt om man kör mot en riktig IDP
+
+### Session-hantering (Memory / File / Redis)
+
+Backend använder `express-session` för sessionshantering. Session store väljs via miljövariabeln `SESSION_STORE`.
+
+| Värde    | Beskrivning                          | Rekommenderad miljö   |
+| -------- | ------------------------------------ | --------------------- |
+| `memory` | In-memory store (default)            | Lokal utveckling      |
+| `file`   | Filbaserad store (`./data/sessions`) | Lokal test / legacy   |
+| `redis`  | Redis-baserad store                  | OpenShift / multi-pod |
+
+I OpenShift används Redis för sessioner, vilket gör backend stateless så att flera poddar kan köras. I produktion med Redis delas även OAuth-token mot API-gatewayn mellan poddarna via Redis (`src/services/api-token-service/redis-api-token.service.ts`).
+
+Följande miljövariabler sätts via Deployment / Helm / ArgoCD:
+
+```
+SESSION_STORE=redis
+REDIS_HOST=<redis-hostname>
+REDIS_PORT=6379
+REDIS_PASSWORD=<secret>
+```
+
+Redis initieras endast när `SESSION_STORE=redis` (`src/utils/initRedis.ts`). Saknas `REDIS_HOST` när Redis är vald kraschar applikationen direkt vid start med:
+
+```
+Failed to start app: Error: SESSION_STORE=redis but REDIS_HOST is not set
+```
+
+Lokal utveckling kräver ingen Redis, samma kodbas används i alla miljöer.
+
+### Liveness-routes
+
+Backend svarar på `GET /health` (utan `BASE_URL_PREFIX`) och frontend på `GET /api/health` med `{ "status": "OK" }` utan att anropa några beroenden. Dessa används som liveness-probes i OpenShift. `GET /api/health/up` i frontend anropar backend via `INTERNAL_API_URL` och kontrollerar hela kedjan.
