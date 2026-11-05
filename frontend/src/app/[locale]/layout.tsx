@@ -14,7 +14,7 @@ export const generateStaticParams = () => i18nConfig.locales.map((locale) => ({ 
 export const dynamicParams = false;
 
 // Every namespace listed here must exist in locales/<locale>/.
-const namespaces = ['common', 'paths'];
+const namespaces = ['common', 'paths', 'login'];
 
 const LocaleLayout = async ({ children, params }: LocaleLayoutProps) => {
   const { locale } = await params;

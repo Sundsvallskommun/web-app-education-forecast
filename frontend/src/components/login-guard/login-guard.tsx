@@ -39,13 +39,17 @@ export const LoginGuard: React.FC<{ children?: React.ReactNode }> = ({ children 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Routes by permissions
+  // Routes by permissions. Only evaluated once the user is loaded: on a fresh page load the
+  // store is empty and every permission is false, which would bounce the user to the start
+  // page before the real roles arrive and loop between the two pages.
+  const userLoaded = !!user.name;
   const isForbidden =
-    (pathname === '/mina-amnen-grupper' && !canViewMySubjectsGroups) ||
-    (pathname === '/amnen-grupper' && !canViewAllSubjectsGroups) ||
-    (pathname === '/min-mentorsklass' && !canViewMyMentorClass) ||
-    (pathname === '/klasser' && !canViewAllClasses) ||
-    (pathname === '/elever' && !canViewAllPupils);
+    userLoaded &&
+    ((pathname === '/mina-amnen-grupper' && !canViewMySubjectsGroups) ||
+      (pathname === '/amnen-grupper' && !canViewAllSubjectsGroups) ||
+      (pathname === '/min-mentorsklass' && !canViewMyMentorClass) ||
+      (pathname === '/klasser' && !canViewAllClasses) ||
+      (pathname === '/elever' && !canViewAllPupils));
 
   useEffect(() => {
     if (mounted && isForbidden) {

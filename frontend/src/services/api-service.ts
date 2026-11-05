@@ -18,7 +18,7 @@ export const handleError = (error: AxiosError) => {
   if (error?.response?.status === 401 && typeof window !== 'undefined' && !window.location.pathname.includes('login')) {
     const query = new URLSearchParams({
       path: window.location.pathname,
-      failMessage: error.message,
+      failMessage: 'NOT_AUTHORIZED',
     });
     navigate?.(`/login?${query.toString()}`);
   }

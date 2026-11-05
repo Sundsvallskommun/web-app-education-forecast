@@ -1,0 +1,11 @@
+{
+  "description": "Prognoser över elever - För lärare, mentorer, rektorer och elevhälsa",
+  "errors": {
+    "NOT_AUTHORIZED": "Inte inloggad",
+    "SAML_MISSING_PROFILE": "Användarprofil saknas",
+    "SAML_MISSING_GROUP": "Användaren saknar rätt grupper",
+    "SAML_MISSING_ATTRIBUTES": "Användaren saknar rätt attribut",
+    "SAML_MISSING_PERMISSIONS": "Användaren saknar rättigheter",
+    "SAML_UNKNOWN_ERROR": "Ett okänt fel uppstod vid inloggning"
+  }
+}
