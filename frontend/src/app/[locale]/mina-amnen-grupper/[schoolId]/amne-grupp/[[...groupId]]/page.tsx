@@ -129,7 +129,7 @@ export default function Page() {
       });
     });
 
-    setRiffleSubjects(riffleArray.toSorted((a, b) => a.title.localeCompare(b.title)));
+    setRiffleSubjects([...riffleArray].sort((a, b) => a.title.localeCompare(b.title)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allSubjects]);
 
