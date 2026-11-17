@@ -80,7 +80,7 @@ export default function Page() {
       });
     });
 
-    setRiffleClasses(riffleArray.toSorted((a, b) => a.title.localeCompare(b.title)));
+    setRiffleClasses([...riffleArray].sort((a, b) => a.title.localeCompare(b.title)));
   }, [classes, selectedPeriod.periodId]);
 
   const breadcrumbLinks = [
